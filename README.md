@@ -26,6 +26,7 @@ Entries are saved in your browser on this device only.
 
 - Open the **Add** tab and tap **Download backup file** every few weeks, and always before you change phone or clear browser data.
 - Safari can clear saved data if you do not open the site for several weeks, so back up regularly.
+- Save each backup file to your phone's **Files** app, or to iCloud Drive, Google Drive or Dropbox. That way the file is kept safe even if the phone is lost or reset.
 - To move to a new phone, choose **Restore from file** on the setup screen.
 
 ## Host your own copy (free)
