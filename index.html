@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gaadi Khata</title>
+<style>
+
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f5f5f7; --card:#ffffff; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#a1a1a6;
+  --line:rgba(0,0,0,.08); --glass:rgba(245,245,247,.88); --track:rgba(120,120,128,.14);
+  --blue:#0071e3; --green:#248a3d; --orange:#d97706; --red:#e5342b; --purple:#a248d8; --teal:#1c8fc4; --pink:#ff375f; --gray:#8e8e93;
+  --ntorq:#f26b1d; --scr:#0a9396; --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 30px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#000; --card:#1c1c1e; --ink:#f5f5f7; --ink2:#a1a1a6; --ink3:#6e6e73;
+    --line:rgba(255,255,255,.1); --glass:rgba(0,0,0,.8); --track:rgba(120,120,128,.28);
+    --blue:#2997ff; --green:#32d74b; --orange:#ff9f0a; --red:#ff453a; --purple:#bf5af2; --teal:#32ade6; --ntorq:#ff8a3d; --scr:#2ec4b6; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000; --card:#1c1c1e; --ink:#f5f5f7; --ink2:#a1a1a6; --ink3:#6e6e73;
+  --line:rgba(255,255,255,.1); --glass:rgba(0,0,0,.8); --track:rgba(120,120,128,.28);
+  --blue:#2997ff; --green:#32d74b; --orange:#ff9f0a; --red:#ff453a; --purple:#bf5af2; --teal:#32ade6; --ntorq:#ff8a3d; --scr:#2ec4b6; --shadow:none;
+}
+html{height:auto;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:400 17px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 80px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:10px}
+button{font:inherit;color:inherit}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;margin:0 -20px;padding:10px 20px;
+  background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid transparent;transition:border-color .25s;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar.scrolled{border-bottom-color:var(--line)}
+.bar b{font-weight:600;font-size:17px;letter-spacing:-.01em}
+.nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{color:var(--ink2);text-decoration:none;font-size:14px;font-weight:500;padding:6px 12px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--track);color:var(--ink)}
+
+/* hero */
+.hero{padding:44px 0 8px}
+.hero h1{margin:0;font-weight:700;font-size:clamp(40px,9vw,72px);line-height:1.02;letter-spacing:-.035em}
+.hero p{margin:10px 0 0;color:var(--ink2);font-size:clamp(17px,2.4vw,21px);letter-spacing:-.01em;max-width:34ch}
+.total{margin-top:34px;font-weight:700;letter-spacing:-.045em;line-height:1;font-size:clamp(52px,14vw,112px);font-variant-numeric:tabular-nums}
+.total span{font-weight:600;color:var(--ink3);font-size:.5em;margin-right:.08em;letter-spacing:-.02em}
+.sub{margin-top:10px;color:var(--ink2);font-size:15px}
+.chartbox{margin:26px -4px 0;position:relative}
+.chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--card);border-radius:12px;padding:8px 12px;font-size:13px;
+  box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;transition:opacity .15s;white-space:nowrap;transform:translate(-50%,-110%);z-index:3}
+.tip b{display:block;font-size:15px;letter-spacing:-.01em}
+.tip span{color:var(--ink2)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:34px}
+.stat{background:var(--card);border-radius:22px;padding:18px 18px 20px;box-shadow:var(--shadow)}
+.stat .n{font-size:clamp(24px,5.4vw,40px);font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.stat .l{color:var(--ink2);font-size:13px;margin-top:6px;line-height:1.3}
+
+section{margin-top:72px}
+h2{margin:0 0 6px;font-size:clamp(26px,5vw,36px);font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.lede{margin:0 0 22px;color:var(--ink2);font-size:17px;max-width:48ch}
+.card{background:var(--card);border-radius:26px;padding:22px;box-shadow:var(--shadow)}
+
+/* years */
+.years{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;height:220px;padding-top:6px}
+.yr{display:flex;flex-direction:column;justify-content:flex-end;height:100%;align-items:stretch;text-align:center;border:0;background:none;padding:0;cursor:pointer}
+.yr .bw{flex:1;display:flex;align-items:flex-end}
+.yr .b{display:flex;flex-direction:column-reverse;overflow:hidden;width:100%;border-radius:12px 12px 6px 6px;background:var(--track);height:0;transition:height .9s cubic-bezier(.2,.8,.2,1),background .25s}
+.yr.on .b,.yr:hover .b{background:var(--acc,var(--blue))}
+.yr .v{font-size:13px;font-weight:600;margin-bottom:6px}
+.yr .y{font-size:13px;color:var(--ink2);margin-top:8px}
+.yr.on .y{color:var(--ink);font-weight:600}
+
+/* categories */
+.cat{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 0;border-top:1px solid var(--line)}
+.cat:first-child{border-top:0;padding-top:0}
+.cat .nm{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.cat .am{font-weight:600;text-align:right}
+.cat .tr{grid-column:1/-1;height:8px;border-radius:99px;background:var(--track);margin-top:8px;overflow:hidden}
+.cat .tr i{display:block;height:100%;border-radius:99px;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.cat .pc{grid-column:1/-1;color:var(--ink2);font-size:13px}
+
+/* segmented control */
+.seg{display:flex;gap:4px;background:var(--track);padding:3px;border-radius:12px;overflow-x:auto;margin-bottom:16px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1 0 auto;border:0;background:none;padding:7px 14px;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;transition:background .2s;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--card);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+
+/* repeats */
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.sum3 .stat .n{font-size:clamp(22px,5vw,34px)}
+.sum3 .stat i{display:block;width:28px;height:4px;border-radius:4px;margin-bottom:12px}
+.rp{background:var(--card);border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-top:12px}
+.rp-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rp-h b{display:block;font-size:19px;letter-spacing:-.02em;line-height:1.2}
+.rp-h small{color:var(--ink2);font-size:14px}
+.pill{flex:none;font-size:12px;font-weight:600;color:#fff;background:var(--vc);padding:4px 11px;border-radius:99px;white-space:nowrap}
+.strip{position:relative;height:22px;margin:18px 6px 0}
+.strip::before{content:'';position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:var(--track);border-radius:2px}
+.strip i{position:absolute;top:50%;width:var(--ds,12px);height:var(--ds,12px);margin:calc(var(--ds,12px)/-2) 0 0 calc(var(--ds,12px)/-2);border-radius:50%;background:var(--vc);box-shadow:0 0 0 3px var(--card)}
+.yrs{position:relative;height:18px;margin:2px 6px 0;font-size:11px;color:var(--ink3)}
+.yrs span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.yrs span:first-child{transform:none}
+.say{margin:10px 0 0;font-size:15px;line-height:1.45}
+.guide{margin:6px 0 0;font-size:14px;color:var(--ink2);line-height:1.45}
+.guide b{color:var(--vc);font-weight:600}
+.rchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.rchips span{font-size:12px;font-weight:600;color:#fff;background:var(--vc);padding:3px 10px;border-radius:99px}
+
+/* compare */
+.cmp-top{background:var(--card);border-radius:28px;padding:26px 22px;box-shadow:var(--shadow)}
+.cmp-top .k{color:var(--ink2);font-size:15px}
+.cmp-top .big2{font-size:clamp(44px,11vw,84px);font-weight:700;letter-spacing:-.045em;line-height:1;margin:8px 0 6px;font-variant-numeric:tabular-nums}
+.good{color:var(--green)}
+.bad{color:var(--orange)}
+.cmp-top .alt{font-size:15px;color:var(--ink2);margin:0}
+.bars{margin-top:22px;display:grid;gap:12px}
+.bl{display:grid;grid-template-columns:96px 1fr auto;gap:12px;align-items:center;font-size:14px}
+.bl .tr{height:12px;border-radius:99px;background:var(--track);overflow:hidden}
+.bl .tr i{display:block;height:100%;border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.bl b{font-variant-numeric:tabular-nums;font-weight:600}
+.cmp-ctl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 0}
+.cmp-ctl .seg{margin:0}
+.cmp-ctl small{display:block;color:var(--ink2);font-size:12px;margin:0 4px 6px}
+.list{background:var(--card);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
+.row{border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.rh{width:100%;display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;padding:16px 18px;border:0;background:none;text-align:left;cursor:pointer}
+.rh:hover{background:var(--track)}
+.ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+.rt b{display:block;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.rt span{color:var(--ink2);font-size:13px}
+.ra{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.chev{width:10px;height:10px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(45deg);transition:transform .25s;margin-right:4px}
+.row.open .chev{transform:rotate(225deg)}
+.rb{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.2,.8,.2,1)}
+.row.open .rb{grid-template-rows:1fr}
+.rb>div{overflow:hidden}
+.rbi{padding:2px 18px 20px 72px}
+.cmp .rh{grid-template-columns:1fr auto auto}
+.cmp .rbi{padding:2px 18px 20px}
+.flds{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink2)}
+.fld input{font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:10px 12px;width:100%;font-variant-numeric:tabular-nums}
+.basis{margin:12px 0 0;font-size:14px;color:var(--ink2);line-height:1.45}
+.cf{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--track);color:var(--ink);margin-right:6px;vertical-align:1px}
+.caveat{margin-top:12px;background:var(--card);border-radius:24px;padding:20px 22px;box-shadow:var(--shadow)}
+.caveat h3{margin:0 0 8px;font-size:19px;letter-spacing:-.02em}
+.caveat p{margin:8px 0 0;font-size:15px;color:var(--ink2);line-height:1.45}
+.caveat p b{color:var(--ink);font-weight:600}
+
+/* bills */
+.stack{display:flex;height:10px;border-radius:99px;overflow:hidden;gap:2px}
+.stack i{display:block;height:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:13px;color:var(--ink2)}
+.chips span{display:inline-flex;align-items:center;gap:6px}
+.chips .dot{width:8px;height:8px}
+.chips b{color:var(--ink);font-weight:600}
+.note{margin-top:12px;font-size:14px;color:var(--ink);background:var(--track);border-radius:12px;padding:10px 12px;line-height:1.4}
+
+footer{margin-top:56px;color:var(--ink3);font-size:13px;line-height:1.5;max-width:62ch}
+@media (max-width:560px){
+  .wrap{padding:0 16px 70px}.bar{margin:0 -16px;padding:10px 16px}
+  .stats,.sum3{gap:8px}.stat{padding:14px;border-radius:18px}
+  .rh{grid-template-columns:auto 1fr auto;gap:12px;padding:14px}
+  .cmp .rh{grid-template-columns:1fr auto}
+  .rh .chev{display:none}
+  .rbi{padding:2px 14px 18px 14px}.cmp .rbi{padding:2px 14px 18px}
+  .card{padding:18px;border-radius:22px}
+  .bl{grid-template-columns:70px 1fr auto;gap:10px}
+  .cmp-ctl{grid-template-columns:1fr}
+  .bar b{display:none}.nav{margin:0 -4px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* vehicle switcher */
+.vseg{margin:0;flex:1 1 auto;max-width:340px}
+.vseg button{padding:6px 12px}
+#view{--acc:var(--blue)}
+.stk .yr .b,.stk .yr.on .b,.stk .yr:hover .b{background:none}
+.stk .yr .b i{display:block;width:100%}
+.stk .yr .b i{opacity:.55;transition:opacity .25s}
+.stk .yr.on .b i,.stk .yr:hover .b i{opacity:1}
+.legend{display:flex;gap:16px;margin-top:14px;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.fn{margin:12px 2px 0;font-size:13px;color:var(--ink3)}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.vcard{text-align:left;border:0;cursor:pointer;background:var(--card);border-radius:26px;padding:20px;box-shadow:var(--shadow);display:block;width:100%}
+.vcard:hover{background:var(--track)}
+.vcard b{display:block;font-size:19px;letter-spacing:-.02em}
+.vcard small{color:var(--ink2);font-size:13px}
+.vcard .vn{margin-top:14px;font-size:clamp(28px,6vw,38px);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.05}
+.vcard .vb{height:8px;border-radius:99px;background:var(--track);margin-top:14px;overflow:hidden}
+.vcard .vb i{display:block;height:100%;border-radius:99px;background:var(--vc)}
+.vcard .vp{margin-top:8px;color:var(--ink2);font-size:13px}
+.vtag{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--ink)}
+.vtag i{width:8px;height:8px;border-radius:50%;background:var(--vc);display:inline-block}
+.est .ra{color:var(--ink2)}
+@media (max-width:560px){.nav{display:none}.vseg{max-width:none}}
+
+
+.jump{display:inline-block;margin-top:16px;padding:9px 18px;border-radius:99px;background:var(--card);box-shadow:var(--shadow);font-size:15px;font-weight:600;color:var(--ink);text-decoration:none}
+.kd{background:var(--card);border-radius:22px;box-shadow:var(--shadow);margin-top:12px;overflow:hidden}
+.kd summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px}
+.kd summary::-webkit-details-marker{display:none}
+.kd summary b{display:block;font-size:17px;letter-spacing:-.01em}
+.kd summary small{color:var(--ink2);font-size:13px}
+.kd[open] .chev{transform:rotate(225deg)}
+.kdb{padding:0 18px 18px}
+.kv{margin:0}
+.kv>div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line);font-size:15px;line-height:1.35}
+.kv dt{color:var(--ink2);flex:0 1 42%}
+.kv dd{margin:0;text-align:right;flex:1 1 auto;word-break:break-word;font-variant-numeric:tabular-nums}
+.kv .when{color:var(--ink2);font-size:13px}
+.kv .past dd>.when:first-of-type{color:var(--orange);font-weight:600}
+.kl{margin:12px 0 0;padding-left:18px;font-size:15px;line-height:1.45}
+.kl li{margin:6px 0}
+.kn{margin:12px 0 0;font-size:14px;color:var(--ink2)}
+.tel{color:var(--blue);font-weight:600;text-decoration:none}
+
+.pkbig{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:22px}
+.pkbig .big{font-size:clamp(46px,13vw,76px);font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.pkbig .big small{margin-left:8px}
+.pkbig .big small,.pk .pkn small{font-size:15px;color:var(--ink2);font-weight:600;letter-spacing:0}
+.pkt{color:var(--ink2);font-size:14px}
+.pkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.pk{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:18px}
+.pk b{display:flex;align-items:center;gap:8px;font-size:17px;letter-spacing:-.01em}
+.pk .dot{width:10px;height:10px}
+.pk .pkn{font-size:34px;font-weight:700;letter-spacing:-.03em;margin-top:8px;font-variant-numeric:tabular-nums;line-height:1.1}
+.pk p{margin:10px 0 0;font-size:14px;color:var(--ink2);line-height:1.4}
+.ptab{padding:12px 14px;overflow-x:auto}
+.ptab table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.ptab th{font-weight:500;color:var(--ink2);text-align:right;padding:6px 4px;font-size:12px}
+.ptab td{text-align:right;padding:12px 4px;border-top:1px solid var(--line)}
+.ptab td:first-child,.ptab th:first-child{text-align:left}
+.years.dense{gap:4px}.years.dense .v{font-size:10px;letter-spacing:-.02em}.years.dense .y{font-size:11px}
+
+.btn{border:0;border-radius:12px;background:var(--acc,var(--blue));color:#fff;font-weight:600;padding:12px 20px;font-size:16px;cursor:pointer}
+.btn.alt{background:var(--track);color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:13px}
+.chk{display:flex;gap:10px;align-items:center;margin-top:14px;font-size:15px}
+.chk input{width:20px;height:20px}
+.fmsg{font-size:14px;font-weight:600}
+.frow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.frow:first-child{border-top:0}
+.frow b{display:block;font-weight:600}
+.frow small{color:var(--ink2);font-size:13px}
+.fk{font-size:20px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;text-align:right}
+.fk small{font-size:12px;font-weight:500;color:var(--ink2)}
+textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var(--track);color:var(--ink);border:0;border-radius:12px;padding:10px 12px;resize:vertical}
+.fld input[type=date]{min-height:44px}
+
+.fld select{font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:11px 12px;width:100%;-webkit-appearance:none;appearance:none}
+.fld input[type=search]{-webkit-appearance:none;appearance:none;min-height:44px}
+.fld input[type=text]{font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:10px 12px;width:100%}
+.btnrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+[hidden]{display:none!important}
+.vseg button{padding:6px 10px}.vseg button[data-v=add]{font-weight:700;color:var(--acc,var(--blue))}
+.frow{grid-template-columns:1fr auto auto}
+
+/* Intelligence */
+.ii{background:var(--card);border-radius:22px;padding:4px 18px;box-shadow:var(--shadow)}
+.ii-r{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:12px;align-items:start;padding:15px 0;border-top:1px solid var(--line)}
+.ii-r:first-child{border-top:0}
+.ii-r .sv{align-self:stretch;border-radius:2px;min-height:34px;background:var(--green)}
+.ii-r.bad .sv{background:var(--red)} .ii-r.warn .sv{background:var(--orange)}
+.ii-r b{display:block;font-weight:600;font-size:16px}
+.ii-r p{margin:3px 0 0;color:var(--ink2);font-size:14px}
+.ii-r small{display:block;margin-top:4px;color:var(--ink3);font-size:12.5px}
+.ii-p{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;background:var(--track);color:var(--ink2)}
+.ii-r.bad .ii-p{background:rgba(229,52,43,.14);color:var(--red)} .ii-r.warn .ii-p{background:rgba(217,119,6,.15);color:var(--orange)} .ii-r.ok .ii-p{background:rgba(36,138,61,.14);color:var(--green)}
+.ii-tot{font-size:clamp(34px,7vw,52px);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.ii-f{display:grid;gap:14px;margin-top:18px}
+.ii-f>div{display:grid;grid-template-columns:84px minmax(0,1fr) 88px;gap:10px;align-items:center;font-size:14px}
+.ii-t{height:12px;background:var(--track);border-radius:6px;overflow:hidden;display:flex}
+.ii-t i{display:block;height:100%}
+.ii-a{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.ii-lg{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-top:16px}
+.ii-lg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--blue)}
+.ii-lg span+span::before{background:var(--orange)}
+.ii-note{background:var(--track);border-radius:16px;padding:14px 16px;margin-top:16px;font-size:14px;color:var(--ink2)}
+.ii-note b{color:var(--ink)}
+.ii-empty{padding:18px 0;color:var(--ink2);font-size:14px}
+
+/* Questions */
+.qq{background:var(--card);border-radius:22px;padding:4px 18px;box-shadow:var(--shadow)}
+.q-i{padding:16px 0;border-top:1px solid var(--line)}
+.q-i:first-child{border-top:0}
+.q-t{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.q-t b{font-weight:600;font-size:16px}
+.q-v{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--track);color:var(--ink2);white-space:nowrap}
+.q-i p{margin:4px 0 10px;color:var(--ink2);font-size:14px}
+.q-i textarea,.q-add textarea,.q-add select{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.q-i textarea{min-height:64px;resize:vertical}
+.q-row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.q-ans{background:var(--track);border-radius:12px;padding:10px 12px;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.q-dt{font-size:12.5px;color:var(--ink3)}
+.q-ban{display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--card);border-radius:16px;padding:12px 16px;margin-top:14px;box-shadow:var(--shadow);font-size:14px}
+.q-ban button{font:inherit;font-weight:600;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.q-add{display:grid;gap:10px;margin-top:4px}
+.q-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap" id="top">
+  <div class="bar" id="bar">
+    <div class="seg vseg" id="vseg" role="group" aria-label="Choose vehicle">
+      <button data-v="both" aria-pressed="true">All</button>
+      <button data-v="intel" aria-pressed="false">Intelligence</button>
+      <button data-v="q" aria-pressed="false" id="qbtn">Questions</button>
+      <button data-v="opp" aria-pressed="false">What if</button>
+      <button data-v="add" aria-pressed="false">Add</button>
+    </div>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+  </div>
+  <div id="view"></div>
+  <footer id="foot"></footer>
+</div>
+<script>
+(function(){
+
+const CFG_KEY='vehicleLedger.family.cfg';
+let CFG=null;
+try{CFG=JSON.parse(localStorage.getItem(CFG_KEY)||'null')}catch(e){}
+if(CFG&&!(CFG.vehicles&&CFG.vehicles.length))CFG=null;
+if(!CFG||location.hash==='#setup'){setupScreen(CFG);return}
+function setupScreen(old){
+  const SL=['altis','ntorq','scr'];
+  const ev=old?old.vehicles:[];
+  const today=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+  const esc=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  const block=i=>{
+    const c=ev[i]||{},first=!old;
+    return '<div class="card" style="margin-top:14px"><h3 style="margin:0 0 4px;font-size:19px">Vehicle '+(i+1)+(i===0?'':' (optional)')+'</h3><p class="pkt" style="margin:0 0 12px">'+(i===0?'Fill this in to get started.':'Leave the name empty to skip this one.')+'</p>'
+     +'<div class="flds"><label class="fld">Name<input type="text" id="s'+i+'_name" placeholder="Vehicle name" value="'+esc(c.name)+'"></label>'
+     +'<label class="fld">Type<select id="s'+i+'_type"><option value="car"'+(c.type==='car'?' selected':'')+'>Car</option><option value="bike"'+(c.type==='bike'?' selected':'')+'>Bike or scooter</option></select></label>'
+     +'<label class="fld">Registration (optional)<input type="text" id="s'+i+'_reg" value="'+esc(c.reg)+'"></label>'
+     +'<label class="fld">Purchase date<input type="date" id="s'+i+'_date" value="'+esc(c.date)+'"></label>'
+     +'<label class="fld">Purchase price (₹)<input type="number" inputmode="decimal" id="s'+i+'_price" value="'+esc(c.price)+'"></label>'
+     +'<label class="fld">Odometer at purchase (km)<input type="number" inputmode="numeric" id="s'+i+'_km0" placeholder="0 if new" value="'+esc(c.km0)+'"></label>'
+     +'<label class="fld">Service every (months)<input type="number" inputmode="numeric" id="s'+i+'_sm" value="'+esc(c.sm||12)+'"></label><label class="fld">Service every (km)<input type="number" inputmode="numeric" id="s'+i+'_sk" value="'+esc(c.sk||(c.type==='bike'?5000:10000))+'"></label><label class="fld">Tyre life (km)<input type="number" inputmode="numeric" id="s'+i+'_ty" value="'+esc(c.tyre||(c.type==='bike'?20000:50000))+'"></label>'
+     +(first?'<label class="fld">Odometer today (km)<input type="number" inputmode="numeric" id="s'+i+'_km1" placeholder="Now"></label>'
+     +'<label class="fld">Past fuel price (₹ a litre, optional)<input type="number" inputmode="decimal" id="s'+i+'_rate" placeholder="e.g. 100"></label>'
+     +'<label class="fld">Past mileage (km a litre, optional)<input type="number" inputmode="decimal" id="s'+i+'_kmpl" placeholder="e.g. 15"></label>':'')
+     +'</div><p class="pkt" style="margin:10px 0 0">Service and tyre figures start with typical values. Change them to match your owner’s manual or your mechanic.</p>'+(first?'<p class="pkt" style="margin:10px 0 0">The last two are optional. If you give both, the ledger estimates the fuel you used between purchase and today. Leave them empty to count only fuel you log yourself.</p>':'')+'</div>';
+  };
+  document.body.innerHTML='<div class="wrap" id="top"><header class="hero" style="padding-bottom:0"><h1>'+(old?'Change vehicle details.':'Set up your ledger.')+'</h1><p>Add your vehicles to start. Everything you enter stays on this device. Nothing is sent anywhere.</p></header>'
+   +[0,1,2].map(block).join('')
+   +(old?'':'<div class="card" style="margin-top:14px"><h3 style="margin:0 0 4px;font-size:19px">Already have a backup file?</h3><p class="pkt" style="margin:0 0 10px">Choose it to restore your vehicles and entries, for example on a new phone.</p><input type="file" accept=".json,application/json" id="s_file" style="font-size:16px;max-width:100%"><div class="btnrow" style="margin-top:10px"><button class="btn alt" id="s_restore">Restore from file</button></div></div>')
+   +'<div class="btnrow" style="margin:20px 0 6px"><button class="btn" id="s_go">'+(old?'Save changes':'Start my ledger')+'</button>'+(old?'<button class="btn alt" id="s_cancel">Cancel</button>':'')+'<span class="fmsg" id="s_msg"></span></div></div>';
+  const $=id=>document.getElementById(id);
+  const bad=t=>{const m=$('s_msg');m.textContent=t;m.style.color='var(--red)'};
+  [0,1,2].forEach(i=>{const t=$('s'+i+'_type');t.addEventListener('change',()=>{const car=t.value==='car',sk=$('s'+i+'_sk'),ty=$('s'+i+'_ty');if(['10000','5000'].includes(sk.value))sk.value=car?10000:5000;if(['50000','20000'].includes(ty.value))ty.value=car?50000:20000})});
+  if($('s_cancel'))$('s_cancel').addEventListener('click',()=>{location.hash='';location.reload()});
+  if($('s_restore'))$('s_restore').addEventListener('click',()=>{
+    const f=$('s_file').files&&$('s_file').files[0];if(!f)return bad('Choose a backup file first.');
+    const r=new FileReader();
+    r.onload=()=>{try{
+      const p=JSON.parse(r.result);
+      if(!p||p.app!=='vehicle-ledger-family'||!p.cfg||!p.store)throw new Error('x');
+      localStorage.setItem(CFG_KEY,JSON.stringify(p.cfg));localStorage.setItem('vehicleLedger.family.v1',JSON.stringify(p.store));
+      location.hash='';location.reload();
+    }catch(e){bad('That file isn’t a backup from this app.')}};
+    r.readAsText(f);
+  });
+  $('s_go').addEventListener('click',()=>{
+    const out=[];
+    for(let i=0;i<3;i++){
+      const name=$('s'+i+'_name').value.trim();
+      if(!name){if(i===0)return bad('Give vehicle 1 a name.');continue}
+      const date=$('s'+i+'_date').value,price=parseFloat($('s'+i+'_price').value),km0=parseFloat($('s'+i+'_km0').value)||0;
+      if(!date)return bad('Pick the purchase date for '+name+'.');
+      if(!(price>0))return bad('Enter the purchase price for '+name+'. A rough figure is fine.');
+      const o=ev[i];
+      const c={slot:SL[i],name:name.slice(0,30),type:$('s'+i+'_type').value,reg:$('s'+i+'_reg').value.trim().toUpperCase().slice(0,20),date,price,km0,sm:parseFloat($('s'+i+'_sm').value)||12,sk:parseFloat($('s'+i+'_sk').value)||10000,tyre:parseFloat($('s'+i+'_ty').value)||50000};
+      if(o){c.km1=o.km1;c.d1=o.d1;c.rate=o.rate;c.kmpl=o.kmpl}
+      else{
+        const km1=parseFloat($('s'+i+'_km1').value)||km0;
+        if(km1<km0)return bad('The odometer today for '+name+' is lower than at purchase.');
+        c.km1=km1;c.d1=today>date?today:date;c.rate=parseFloat($('s'+i+'_rate').value)||0;c.kmpl=parseFloat($('s'+i+'_kmpl').value)||0;
+      }
+      out.push(c);
+    }
+    try{localStorage.setItem(CFG_KEY,JSON.stringify({v:1,vehicles:out}))}catch(e){return bad('This browser is blocking saved data. Open the file in Chrome, Safari or Edge normally, not in a private window.')}
+    location.hash='';location.reload();
+  });
+}
+const CATS={
+  service:{n:'Routine service',c:'var(--green)'},
+  engine:{n:'Engine & transmission',c:'var(--orange)'},
+  susp:{n:'Suspension & steering',c:'var(--purple)'},
+  brakes:{n:'Brakes',c:'var(--red)'},
+  ac:{n:'Air conditioning',c:'var(--teal)'},
+  body:{n:'Body & cosmetic',c:'var(--pink)'},
+  clutch:{n:'Clutch & drive',c:'#2aa198'},
+  labour:{n:'Labour & service charge',c:'var(--gray)'},
+  other:{n:'Other',c:'#c7c7cc'},
+  wash:{n:'Washing',c:'#5e5ce6'},
+  battery:{n:'Battery',c:'#c8a400'},
+  nobill:{n:'Paid, no bill',c:'#b08968'},
+  acc:{n:'Accessories & fitting',c:'#e0a526'},
+  chain:{n:'Chain & sprocket',c:'#4f7cac'},
+  ins:{n:'Insurance',c:'#6f7fb8'},
+  warr:{n:'Warranty & roadside',c:'#b5838d'},
+  buy:{n:'Purchase price',c:'#6b8f71'},
+  fuel:{n:'Fuel',c:'#e07a5f'},
+  toll:{n:'Toll (FASTag)',c:'#3d8a9a'},
+  puc:{n:'Pollution check (PUC)',c:'#7a9a3d'}
+};
+
+
+/* ================= VEHICLES, BUILT FROM YOUR SETUP ================= */
+const SLOTS=['altis','ntorq','scr'],SLOTCOL={altis:'var(--blue)',ntorq:'var(--ntorq)',scr:'var(--scr)'};
+const kv=rows=>'<dl class="kv">'+rows.map(r=>'<div><dt>'+r[0]+'</dt><dd>'+r[1]+'</dd></div>').join('')+'</dl>';
+const kl=a=>'<ul class="kl">'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+const BF={};
+const VEH={};
+CFG.vehicles.forEach(c=>{
+  const k=c.slot,price=+c.price||0,km0=+c.km0||0,km1=Math.max(+c.km1||0,km0);
+  const B=price>0?[{d:c.date,noText:'Entered in setup',t:price,title:'Purchase',c:{buy:price},note:'The purchase price you entered when you set up this vehicle. Replace it with the exact figure if you like, in Change vehicle details.'}]:[];
+  VEH[k]={key:k,name:c.name,type:c.type,reg:c.reg||'',acc:SLOTCOL[k],B:B,W:null,G:[],E:[],
+    win:{from:c.date,to:c.d1||c.date,km0:km0,km1:km1,mstart:c.date,get startText(){return 'purchase ('+fmt(c.date)+', '+km0.toLocaleString('en-IN')+' km)'},get endText(){return this.km1.toLocaleString('en-IN')+' km on '+fmt(this.to)},excl:null,nopurchase:null},
+    h1:'Every rupee your '+c.name+' has cost.',
+    get intro(){return 'The purchase plus every fuel fill-up and expense you add, from '+fmt(c.date)+'.'},
+    yearLede:'Spending by year. Tap a year to filter the entries below.',
+    catLede:'Each expense by category.',
+    get period(){const d=allBills(this).map(b=>b.d).sort();return d.length?MON[+d[0].slice(5,7)-1]+' '+d[0].slice(0,4)+' to '+MON[+d[d.length-1].slice(5,7)-1]+' '+d[d.length-1].slice(0,4):''},
+    get count(){return allBills(this).length+' entries'},
+    foot:'Amounts are what you entered. Cost per km counts every cost from purchase to your latest odometer reading.'};
+  if(c.rate>0&&c.kmpl>0&&c.d1&&km1>km0)BF[k]={k0:km0,k1:km1,d0:c.date,d1:c.d1,rate:+c.rate,kmpl:+c.kmpl};
+  else if(c.d1&&km1>km0)BF[k]={k0:km0,k1:km1,d0:c.date,d1:c.d1,rate:0,kmpl:1};
+});
+Object.keys(VEH).forEach(k=>VEH[k].B.forEach(b=>{b.veh=k}));
+
+let YEARS=['2022','2023','2024','2025','2026'];
+const yearsOf=keys=>{let mn=9999,mx=0;keys.forEach(k=>{const v=VEH[k];allBills(v).concat(v.W||[],getFuel(v),bfMonths(v)).forEach(x=>{const y=+x.d.slice(0,4);if(y<mn)mn=y;if(y>mx)mx=y})});const out=[];for(let y=mn;y<=mx;y++)out.push(String(y));return out};
+const inr=n=>Math.round(n).toLocaleString('en-IN');
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmt=s=>{const d=new Date(s+'T00:00:00');return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()};
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const sumT=a=>a.reduce((x,y)=>x+y.t,0);
+const billsTotal=v=>sumT(allBills(v));
+const washTotal=v=>v.W?sumT(v.W):0;
+
+/* ================= SAVED ENTRIES (fuel log, odometer) ================= */
+const STORE_KEY='vehicleLedger.family.v1';
+const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[]});
+function normalise(p){
+  const s=EMPTY();if(!p||typeof p!=='object')return s;
+  for(const k of ['altis','ntorq','scr']){s.fuel[k]=((p.fuel||{})[k]||[]).slice();s.exp[k]=((p.exp||{})[k]||[]).slice()}
+  s.odo=Object.assign({},p.odo||{});
+  Object.keys(s.odo).forEach(k=>{const o=s.odo[k];if(!o||!o.km){delete s.odo[k];return}if(!o.id)o.id='o'+o.d+'-'+o.km});
+  s.gone=Array.isArray(p.gone)?p.gone.map(String):[];
+  if(p.qa&&typeof p.qa==='object')Object.keys(p.qa).forEach(k=>{const o=p.qa[k];if(o&&typeof o==='object')s.qa[k]={a:o.a==null?null:String(o.a),at:+o.at||0}});
+  if(Array.isArray(p.qx))s.qx=p.qx.filter(x=>x&&x.id&&x.q).map(x=>({id:String(x.id),v:x.v||'all',q:String(x.q),at:+x.at||0}));
+  if(p.opp&&typeof p.opp==='object'){s.opp=p.opp;s.oppAt=+p.oppAt||1}
+  return s;
+}
+let STORE=EMPTY();
+let storeOK=true;
+try{const raw=localStorage.getItem(STORE_KEY);if(raw)STORE=normalise(JSON.parse(raw))}catch(e){storeOK=false}
+function saveLocal(){try{localStorage.setItem(STORE_KEY,JSON.stringify(STORE));return true}catch(e){storeOK=false;return false}}
+function saveStore(){const ok=saveLocal();scheduleBackup(1500);return ok}
+const getFuel=v=>(STORE.fuel[v.key]||[]).map(f=>({id:f.id,d:f.d,km:f.km,l:f.l,t:f.amt||0,full:f.full!==false}));
+function bfMonths(v){
+  const b=BF[v.key];if(!b)return [];
+  const T=d=>new Date(d+'T00:00:00').getTime();
+  let pts=[{d:b.d0,km:b.k0}];
+  v.B.filter(x=>x.km&&x.d>b.d0&&x.d<b.d1).sort((x,y)=>x.d.localeCompare(y.d)||x.km-y.km).forEach(x=>{const l=pts[pts.length-1];if(x.km>l.km&&x.km<b.k1&&x.d>l.d)pts.push({d:x.d,km:x.km})});
+  pts.push({d:b.d1,km:b.k1});
+  const kmAt=t=>{if(t<=T(pts[0].d))return pts[0].km;for(let i=1;i<pts.length;i++){const a=pts[i-1],c=pts[i];if(t<=T(c.d))return a.km+(c.km-a.km)*(t-T(a.d))/(T(c.d)-T(a.d))}return b.k1};
+  const out=[];let y=+b.d0.slice(0,4),m=+b.d0.slice(5,7),prev=b.k0,pT=T(b.d0);
+  for(;;){
+    const nx=m===12?[y+1,1]:[y,m+1];
+    const ns=nx[0]+'-'+String(nx[1]).padStart(2,'0')+'-01';
+    const last=T(ns)>T(b.d1);
+    const t=last?T(b.d1):T(ns);
+    const km=last?b.k1:Math.round(kmAt(t));
+    const mk=y+'-'+String(m).padStart(2,'0');
+    const dd=last?b.d1:new Date(T(ns)-86400000).toISOString().slice(0,10);
+    out.push({d:dd,month:mk,km:km-prev,l:(km-prev)/b.kmpl,t:Math.round((km-prev)/b.kmpl*b.rate),k0:prev,k1:km,title:'Fuel (estimated)'});
+    prev=km;if(last)break;y=nx[0];m=nx[1];
+  }
+  const tot=Math.round((b.k1-b.k0)/b.kmpl*b.rate),diff=tot-out.reduce((a,x)=>a+x.t,0);out[out.length-1].t+=diff;
+  return out;
+}
+function bfEst(v){const b=BF[v.key];if(!b||!(b.rate>0))return null;const km=b.k1-b.k0,l=km/b.kmpl;return Object.assign({km,l,t:Math.round(l*b.rate)},b)}
+const fuelTotal=v=>getFuel(v).reduce((a,f)=>a+f.t,0)+(bfEst(v)||{t:0}).t;
+const getExp=v=>(STORE.exp[v.key]||[]).map(e=>({id:e.id,d:e.d,t:e.t,title:e.title,c:{[e.cat]:e.t},km:e.km||undefined,note:e.note||'',noText:'Added by you'+(e.src==='claude'?', read by Claude':e.src==='free'?', read from a document':''),user:true,cat:e.cat}));
+const allBills=v=>v.B.concat(getExp(v));
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function mileageSegs(list){
+  const e=list.slice().sort((a,b)=>a.km-b.km||a.d.localeCompare(b.d));
+  const segs=[];let base=null,lit=0,amt=0;
+  e.forEach(x=>{
+    if(base===null){if(x.full){base=x.km;lit=0;amt=0}return}
+    lit+=x.l;amt+=x.t;
+    if(x.full){const dist=x.km-base;if(dist>0&&lit>0)segs.push({id:x.id,d:x.d,dist,l:lit,amt,kmpl:dist/lit});base=x.km;lit=0;amt=0}
+  });
+  return segs;
+}
+function sinceFull(list){
+  const e=list.slice().sort((a,b)=>a.km-b.km||a.d.localeCompare(b.d)),m={};let base=null;
+  e.forEach(x=>{if(base!==null&&x.km>base)m[x.id]=x.km-base;if(x.full)base=x.km});
+  return m;
+}
+function mileageStats(list){
+  const s=mileageSegs(list);
+  if(!s.length)return {n:0};
+  const D=s.reduce((a,x)=>a+x.dist,0),L=s.reduce((a,x)=>a+x.l,0),A=s.reduce((a,x)=>a+x.amt,0);
+  return {n:s.length,latest:s[s.length-1].kmpl,avg:D/L,best:Math.max(...s.map(x=>x.kmpl)),worst:Math.min(...s.map(x=>x.kmpl)),cpk:A/D,dist:D,segs:s};
+}
+const totalOf=v=>billsTotal(v)+washTotal(v)+fuelTotal(v);
+
+const VT={often:{l:'Too often',c:'var(--orange)',o:0},redo:{l:'Repeat repair',c:'var(--red)',o:1},optional:{l:'Optional',c:'var(--blue)',o:2},ask:{l:'Ask the shop',c:'var(--purple)',o:2.5},ok:{l:'On schedule',c:'var(--green)',o:3},info:{l:'Pattern',c:'var(--gray)',o:4}};
+Object.values(VEH).forEach(v=>{
+  v.G.forEach(g=>{
+    g.n=g.occ.length;
+    const priced=g.occ.filter(o=>o[1]!=null);
+    g.total=priced.reduce((a,o)=>a+o[1],0);
+    const avg=priced.length?g.total/priced.length:0;
+    g.avoidAmt=g.avoid!=null?g.avoid:(g.exp!=null?Math.max(0,g.n-g.exp)*avg:0);
+  });
+});
+
+
+/* ================= COST PER KM ================= */
+const GROUPS={buy:'purchase',acc:'purchase',ins:'running',warr:'running',wash:'running',fuel:'running',toll:'running',puc:'running'};
+const grpOf=k=>GROUPS[k]||'maint';
+function costs(v,win,ignorePk){
+  const g={purchase:0,running:0,maint:0,fuel:0};
+  const ok=(d,pk)=>!win||(!ignorePk&&pk!==undefined?pk:(d>=win.from&&d<=win.to));
+  allBills(v).forEach(b=>{if(!ok(b.d,b.pk))return;for(const k in b.c){g[grpOf(k)]+=b.c[k];if(k==='fuel')g.fuel+=b.c[k]}});
+  (v.W||[]).forEach(w=>{if(ok(w.d,undefined))g.running+=w.t});
+  getFuel(v).forEach(f=>{if(ok(f.d,undefined)){g.running+=f.t;g.fuel+=f.t}});
+  const be=bfEst(v);if(be)bfMonths(v).forEach(m=>{if(ok(m.d,undefined)){g.running+=m.t;g.fuel+=m.t}})
+  g.total=g.purchase+g.running+g.maint;return g;
+}
+const pkf=n=>!isFinite(n)?'—':'₹'+(n>=10?n.toFixed(1):n.toFixed(2));
+const GCOL={purchase:'#6b8f71',maint:'var(--orange)',running:'#6f7fb8'};
+function effWin(v){
+  const w=Object.assign({},v.win);let moved=false;
+  const reads=getFuel(v).map(f=>({d:f.d,km:f.km}));
+  const o=STORE.odo[v.key];if(o)reads.push({d:o.d,km:o.km});
+  getExp(v).forEach(e=>{if(e.km)reads.push({d:e.d,km:e.km})});
+  reads.forEach(r=>{if(r.km>w.km1){w.km1=r.km;if(r.d>w.to)w.to=r.d;moved=true}else if(r.km===w.km1&&r.d>w.to){w.to=r.d;moved=true}});
+  if(moved)w.endText=inr(w.km1)+' km on '+fmt(w.to);
+  return w;
+}
+function winStats(v){
+  const w=effWin(v),c=costs(v,w),km=w.km1-w.km0;
+  const months=Math.max(1,(new Date(w.to+'T00:00:00')-new Date(w.mstart+'T00:00:00'))/86400000/30.44);
+  return {w,c,km,months};
+}
+function groupSub(v){
+  const c=costs(v);
+  return [c.purchase>0?'₹'+inr(c.purchase)+' purchase and accessories':null,'₹'+inr(c.maint)+' maintenance','₹'+inr(c.running)+' running'].filter(Boolean).join(' + ');
+}
+function perKmSection(v){
+  const {w,c,km}=winStats(v),all=costs(v),out=all.total-c.total;
+  const aft=costs(v,{from:w.to+'~',to:'9999-12-31'},true).total,bef=out-aft;
+  const card=(key,title,desc,amt,extra)=>{
+    const has=amt>0;
+    return '<div class="pk" style="--vc:'+GCOL[key]+'"><b><i class="dot" style="background:'+GCOL[key]+'"></i>'+title+'</b>'
+      +(has?'<div class="pkn">'+pkf(amt/km)+'<small> per km</small></div><div class="pkt">₹'+inr(amt)+' in total · '+Math.round(amt/c.total*100)+'% of all costs</div>':'<div class="pkn">None yet</div><div class="pkt">'+(extra||'Not recorded')+'</div>')
+      +'<p>'+desc+'</p></div>';
+  };
+  const stack=['purchase','maint','running'].filter(k=>c[k]>0).map(k=>'<i style="width:'+(c[k]/c.total*100)+'%;background:'+GCOL[k]+'"></i>').join('');
+  const be=bfEst(v);const fuelLine=c.fuel>0?'Fuel so far: ₹'+inr(c.fuel)+(be?' (includes an estimated ₹'+inr(be.t)+' for the first '+inr(be.km)+' km: '+inr(be.l)+' L at ₹'+be.rate+' a litre and '+be.kmpl+' km per litre)':'')+'. ':'No fuel recorded yet. ';
+  return '<section id="perkm"><h2>Cost per km</h2><p class="lede">Every cost from '+w.startText+' to '+w.endText+', divided by the '+inr(km)+' km covered.</p>'
+   +'<div class="pkbig"><div class="big">'+pkf(c.total/km)+'<small>per km, all costs</small></div><div class="pkt" style="margin-top:8px">₹'+inr(c.total)+' over '+inr(km)+' km</div><div class="stack" style="margin-top:16px">'+stack+'</div></div>'
+   +'<div class="pkgrid">'
+   +card('purchase','Purchase cost','The bike and the extras bought with it. It falls with every km you ride.',c.purchase,v.win.nopurchase)
+   +card('maint','Maintenance cost','Servicing, repairs, parts, tyres, battery and other workshop bills.',c.maint)
+   +card('running','Running cost','Insurance, warranty and roadside cover, car washing, toll, pollution check and fuel.',c.running)
+   +'</div>'
+   +'<p class="fn">'+fuelLine+'Add fill-ups in the Add tab and they count here.'+(out>0&&w.excl?' '+w.excl(bef,aft,w):'')+'</p>'+perKmTrend(v)+'</section>';
+}
+
+function trendPts(v){
+  const w=effWin(v),T=d=>new Date(d+'T00:00:00').getTime();
+  let pts=[{d:w.from,km:w.km0}];
+  v.B.filter(x=>x.km&&x.d>w.from&&x.d<w.to).sort((a,b)=>a.d.localeCompare(b.d)||a.km-b.km).forEach(x=>{const l=pts[pts.length-1];if(x.km>l.km&&x.km<w.km1&&x.d>l.d)pts.push({d:x.d,km:x.km})});
+  pts.push({d:w.to,km:w.km1});
+  const kmAt=d=>{const t=T(d);if(t<=T(pts[0].d))return pts[0].km;for(let i=1;i<pts.length;i++){const a=pts[i-1],c=pts[i];if(t<=T(c.d))return a.km+(c.km-a.km)*(t-T(a.d))/Math.max(1,T(c.d)-T(a.d))}return w.km1};
+  const y0=+w.from.slice(0,4),y1=+w.to.slice(0,4),rows=[];
+  for(let y=y0;y<=y1;y++){
+    const a=y===y0?w.from:y+'-01-01',b=y===y1?w.to:y+'-12-31';
+    const km=Math.round(kmAt(b)-kmAt(a));
+    const cum=costs(v,{from:'1900-01-01',to:b},true),yr=costs(v,{from:a,to:b},true);
+    const kc=kmAt(b)-w.km0,own=yr.maint+yr.running;
+    rows.push({y,part:y===y1||y===y0,km,own,ownPk:km>=800?own/km:null,cumPk:kc>=800?cum.total/kc:null,cumTotal:cum.total});
+  }
+  return rows.filter(r=>r.cumTotal>0);
+}
+function lineChart(rows,key,color,title){
+  const P=rows.filter(r=>r[key]!=null);
+  if(P.length<2)return '';
+  const W=340,H=150,l=44,r=14,t=14,b=24,mx=Math.max(...P.map(p=>p[key]))*1.12,mn=0;
+  const X=i=>l+(W-l-r)*(P.length===1?0:i/(P.length-1)),Y=v=>t+(H-t-b)*(1-(v-mn)/(mx-mn));
+  const f=n=>n>=10?n.toFixed(0):n.toFixed(1);
+  let g='';for(let i=0;i<=3;i++){const v=mx*i/3;g+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line,#8883)" stroke-width="1"/><text x="'+(l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="10" fill="var(--ink3)">₹'+f(v)+'</text>'}
+  const d=P.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p[key]).toFixed(1)).join(' ');
+  const dots=P.map((p,i)=>'<circle cx="'+X(i)+'" cy="'+Y(p[key])+'" r="3.5" fill="'+color+'"/><text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--ink3)">'+(p.part&&i===P.length-1?"'"+String(p.y).slice(2)+'*':"'"+String(p.y).slice(2))+'</text>').join('');
+  const last=P[P.length-1],first=P[0];
+  return '<div class="card" style="margin-top:12px"><b>'+title+'</b><svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+title+'" style="margin-top:6px">'+g+'<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round"/>'+dots
+    +'<text x="'+X(P.length-1)+'" y="'+(Y(last[key])-9)+'" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink)">'+pkf(last[key])+'</text></svg></div>';
+}
+function perKmTrend(v){
+  const rows=trendPts(v);
+  const cum=rows.filter(r=>r.cumPk!=null),own=rows.filter(r=>r.ownPk!=null);
+  if(cum.length<2&&own.length<2)return '';
+  const chg=(a,b)=>{const p=(b-a)/a*100;return (p<=0?'down ':'up ')+Math.abs(Math.round(p))+'%'};
+  let say='';
+  if(cum.length>1)say+='All-in cost per km has gone from '+pkf(cum[0].cumPk)+' (end of '+cum[0].y+') to '+pkf(cum[cum.length-1].cumPk)+' now, '+chg(cum[0].cumPk,cum[cum.length-1].cumPk)+', as the purchase price spreads over more km. ';
+  if(own.length>1){const a=own[own.length-2],b=own[own.length-1];say+='Leaving out the purchase, '+(b.part?'the latest part year ('+b.y+')':b.y)+' is '+pkf(b.ownPk)+' a km against '+pkf(a.ownPk)+' in '+a.y+', '+chg(a.ownPk,b.ownPk)+'.'}
+  const tr=rows.map(r=>'<tr><td>'+r.y+(r.part?'*':'')+'</td><td>'+inr(r.km)+'</td><td>'+(r.ownPk!=null?pkf(r.ownPk):'—')+'</td><td>'+(r.cumPk!=null?pkf(r.cumPk):'—')+'</td></tr>').join('');
+  return '<div style="margin-top:20px"><h3 style="font-size:19px;letter-spacing:-.02em;margin:0 0 4px">Trend over the years</h3><p class="pkt" style="margin:0">'+say+'</p></div>'
+    +lineChart(rows,'cumPk','#6f7fb8','All-in cost per km, building up year by year')
+    +lineChart(rows,'ownPk','var(--orange)','Each year’s own cost per km, without the purchase')
+    +'<div class="card ptab" style="margin-top:12px"><table><thead><tr><th>Year</th><th>Km</th><th>Own ₹/km</th><th>All-in ₹/km</th></tr></thead><tbody>'+tr+'</tbody></table></div>'
+    +'<p class="fn">* Part year. Km in each year come from the odometer on your bills and fills, spread evenly between readings. Years under 800 km are left out of the lines. Own cost is maintenance plus running (fuel, insurance, toll, washing) for that year. Insurance and big repairs land in the year they were paid, so single years can jump.</p>';
+}
+function perKmTable(){
+  const vs=Object.values(VEH);
+  const rows=vs.map(v=>{const {c,km}=winStats(v);const f=x=>x>0?pkf(x/km):'—';
+    return '<tr><td><span class="vtag" style="--vc:'+v.acc+'"><i></i>'+v.name+'</span></td><td>'+f(c.purchase)+'</td><td>'+f(c.maint)+'</td><td>'+f(c.running)+'</td><td><b>'+pkf(c.total/km)+'</b></td></tr>'}).join('');
+  return '<section id="perkm"><h2>Cost per km</h2><p class="lede">Per km for each vehicle, over the km it has covered. Log fill-ups in the Add tab to keep it current.</p>'
+   +'<div class="card ptab"><table><thead><tr><th></th><th>Purchase</th><th>Maint.</th><th>Running</th><th>All</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
+}
+
+
+/* ================= FUEL & MILEAGE (report only) ================= */
+function fuelReport(v){
+  const list=getFuel(v),m=mileageStats(list);
+  const f1=n=>n.toFixed(1);
+  const stats=[[m.n?f1(m.latest):'—','km per litre, latest'],[m.n?f1(m.avg):'—','km per litre, average'],[m.n?'₹'+m.cpk.toFixed(2):'—','fuel cost per km']];
+  const sf=sinceFull(list);
+  const segById={};(m.segs||[]).forEach(s=>{segById[s.id]=s});
+  const rows=list.slice().sort((a,b)=>b.d.localeCompare(a.d)||b.km-a.km).slice(0,6).map(f=>
+    '<div class="frow"><div><b>'+fmt(f.d)+'</b><small>'+inr(f.km)+' km · '+f.l+' L · ₹'+inr(f.t)+(f.full?'':' · part fill')+(sf[f.id]?' · '+inr(sf[f.id])+' km since last full tank':'')+'</small></div><div class="fk">'+(segById[f.id]?f1(segById[f.id].kmpl)+'<small> km/l</small>':'')+'</div></div>').join('');
+  const hint=m.n?'':'<p class="fn" style="margin-top:12px">Log two full-tank fill-ups in the Add tab to see your mileage. The first one sets the starting point.</p>';
+  return '<section id="fuel"><h2>Fuel &amp; mileage</h2><p class="lede">Kilometres per litre from your fill-ups, and what fuel costs per km.</p>'
+   +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'+hint
+   +(bfEst(v)?(b=>'<div class="card" style="margin-top:12px"><b>Estimated fuel, '+fmt(b.d0)+' to '+fmt(b.d1)+'</b><p class="pkt" style="margin:6px 0 0">'+inr(b.km)+' km ('+inr(b.k0)+' to '+inr(b.k1)+') at '+b.kmpl+' km per litre is about '+inr(b.l)+' L. At ₹'+b.rate+' a litre that is ₹'+inr(b.t)+'. This is an estimate, counted in the cost per km, and kept out of the real mileage figures above. Each month\u2019s share follows the odometer readings on your bills, assuming steady riding between them.</p><details style="margin-top:10px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="ptab"><table><thead><tr><th>Month</th><th>km</th><th>Litres</th><th>Fuel \u20b9</th></tr></thead><tbody>'+bfMonths(v).map(m=>'<tr><td>'+m.month+'</td><td>'+inr(m.km)+'</td><td>'+Math.round(m.l)+'</td><td>'+inr(m.t)+'</td></tr>').join('')+'</tbody></table></div></details></div>')(bfEst(v)):'')
+   +(rows?'<div class="list" style="margin-top:12px;padding:6px 16px">'+rows+'</div>':'')
+   +'<div class="btnrow"><button class="btn" data-goadd="'+v.key+'">Add a fill-up or expense</button></div></section>';
+}
+function refresh(){const y=scrollY;NOANIM=true;if(state.veh==='add')renderAdd();else if(state.veh==='opp')renderOpp();else if(state.veh==='intel')renderIntel();else if(state.veh==='q')renderQ();else if(state.veh==='both')renderBoth();else renderVeh(VEH[state.veh]);NOANIM=false;qBanner();qBadge();scrollTo(0,y)}
+let FLASH=null;
+const flash=(id,text,bad)=>{FLASH={id,text,bad:!!bad}};
+function fuelFormCard(v){
+  const w=effWin(v);
+  return '<div class="card"><div class="flds">'
+   +'<label class="fld">Date<input type="date" id="f_d" value="'+todayStr()+'"></label>'
+   +'<label class="fld">Odometer (km)<input type="number" inputmode="numeric" id="f_km" placeholder="e.g. '+inr(w.km1)+'"></label>'
+   +'<label class="fld">Litres<input type="number" inputmode="decimal" step="0.01" id="f_l" placeholder="e.g. 5.2"></label>'
+   +'<label class="fld">Amount paid (₹)<input type="number" inputmode="decimal" step="0.01" id="f_a" placeholder="e.g. 550"></label></div>'
+   +'<label class="chk"><input type="checkbox" id="f_full" checked> I filled the tank to the top</label>'
+   +'<div class="btnrow" style="margin-top:14px"><button class="btn" id="f_save">Save fill-up</button><span class="fmsg" id="f_msg"></span></div></div>';
+}
+function odoCard(v){
+  const w=effWin(v);
+  return '<div class="card"><p class="pkt" style="margin:0 0 12px">Latest on file: '+inr(w.km1)+' km, '+fmt(w.to)+'. A newer reading brings your latest spending into the cost per km.</p>'
+   +'<div class="flds"><label class="fld">Odometer (km)<input type="number" inputmode="numeric" id="o_km"></label><label class="fld">Date<input type="date" id="o_d" value="'+todayStr()+'"></label></div>'
+   +'<div class="btnrow" style="margin-top:14px"><button class="btn" id="o_save">Save odometer</button><span class="fmsg" id="o_msg"></span></div></div>';
+}
+function recentList(v){
+  const items=[];
+  const sf=sinceFull(getFuel(v));
+  getFuel(v).forEach(f=>items.push({d:f.d,id:'f:'+f.id,t:'Fuel · '+f.l+' L',s:inr(f.km)+' km · ₹'+inr(f.t)+(sf[f.id]?' · '+inr(sf[f.id])+' km since last full tank':'')}));
+  (STORE.exp[v.key]||[]).forEach(e=>items.push({d:e.d,id:'x:'+e.id,t:e.title,s:'₹'+inr(e.t)+' · '+CATS[e.cat].n+(e.km?' · '+inr(e.km)+' km':'')}));
+  items.sort((a,b)=>b.d.localeCompare(a.d));
+  const od=STORE.odo[v.key];
+  if(!items.length&&!od)return '<div class="card"><p class="pkt" style="margin:0">Nothing added yet for the '+v.name+'. What you add shows up here, and you can remove it.</p></div>';
+  return '<div class="list" style="padding:6px 16px">'
+   +(od?'<div class="frow"><div><b>Odometer reading</b><small>'+fmt(od.d)+' · '+inr(od.km)+' km</small></div><div class="fk"></div><button class="btn alt sm" data-del="o:'+v.key+'">Remove</button></div>':'')
+   +items.slice(0,40).map(x=>'<div class="frow"><div><b>'+x.t+'</b><small>'+fmt(x.d)+' · '+x.s+'</small></div><div class="fk"></div><button class="btn alt sm" data-del="'+x.id+'">Remove</button></div>').join('')+'</div>';
+}
+function bkText(){
+  return {t:'Your entries are saved on this device only. Download a backup file now and then, and always before you clear your browser data or change phone.',c:'var(--ink2)'};
+}
+function backupCard(){
+  const st=bkText();
+  return '<div class="card"><p class="fmsg" id="bk_status" style="color:'+st.c+';margin:0 0 12px;display:block">'+st.t+'</p>'
+   +'<div class="btnrow" style="margin:0 0 14px"><button class="btn" id="bk_now">Download backup file</button><span class="fmsg" id="bk_nowmsg"></span></div>'
+   +'<p class="pkt" style="margin:0 0 8px">To restore, choose a backup file you downloaded earlier. This replaces what is on this device.</p>'
+   +'<input type="file" accept=".json,application/json" id="rs_file" style="font-size:16px;max-width:100%">'
+   +'<div class="btnrow" style="margin-top:10px"><button class="btn alt" id="rs_go">Restore from file</button><span class="fmsg" id="rs_msg"></span></div>'
+   +'<div class="btnrow" style="margin-top:22px;border-top:1px solid var(--line);padding-top:16px"><button class="btn alt" id="cfg_edit">Change vehicle details</button><button class="btn alt" id="cfg_wipe">Erase everything on this device</button></div>'
+   +(storeOK?'':'<p class="fn" style="color:var(--orange)">This browser is blocking saved entries, so anything you add will be lost when you close the page.</p>')+'</div>';
+}
+function initFuel(v){
+  const $=id=>document.getElementById(id);
+  const say=(id,t,bad)=>{const e=$(id);if(e){e.textContent=t;e.style.color=bad?'var(--red)':'var(--green)'}};
+  $('f_save').addEventListener('click',()=>{
+    const d=$('f_d').value,km=parseFloat($('f_km').value),l=parseFloat($('f_l').value),a=parseFloat($('f_a').value)||0;
+    if(!d)return say('f_msg','Pick a date.',true);
+    if(!(km>0))return say('f_msg','Enter the odometer reading.',true);
+    if(!(l>0))return say('f_msg','Enter the litres.',true);
+    if(km<=v.win.km0)return say('f_msg','That odometer is lower than where this record starts ('+inr(v.win.km0)+' km).',true);
+    if(a<0)return say('f_msg','The amount can’t be negative.',true);
+    STORE.fuel[v.key]=STORE.fuel[v.key]||[];
+    STORE.fuel[v.key].push({id:Date.now()+Math.floor(Math.random()*1000),d,km:Math.round(km),l:Math.round(l*100)/100,amt:Math.round(a*100)/100,full:$('f_full').checked});
+    const ok=saveStore();
+    const m=mileageStats(getFuel(v));
+    const _sf=sinceFull(getFuel(v)),_last=getFuel(v).slice().sort((a,b)=>b.km-a.km)[0];
+    flash('f_msg',ok?('Saved.'+(_last&&_sf[_last.id]?' '+inr(_sf[_last.id])+' km since the last full tank.':'')+(m.n?' Latest mileage: '+m.latest.toFixed(1)+' km per litre.':' Log one more full-tank fill-up to see mileage.')):'Could not save on this device.',!ok);
+    refresh();
+  });
+  $('o_save').addEventListener('click',()=>{
+    const km=parseFloat($('o_km').value),d=$('o_d').value;
+    if(!d||!(km>0))return say('o_msg','Enter the reading and the date.',true);
+    if(km<effWin(v).km1)return say('o_msg','That is lower than the latest reading on file ('+inr(effWin(v).km1)+' km).',true);
+    STORE.odo[v.key]={id:'o'+Date.now(),d,km:Math.round(km)};
+    const ok=saveStore();
+    flash('o_msg',ok?'Saved. Your latest spending now counts in the cost per km.':'Could not save on this device.',!ok);
+    refresh();
+  });
+}
+function initRecent(v){
+  view.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{
+    const [k,id]=b.dataset.del.split(':');
+    if(k==='o'){const o=STORE.odo[id];if(o&&o.id)STORE.gone.push(String(o.id));delete STORE.odo[id]}
+    else if(k==='f'){STORE.gone.push(String(id));STORE.fuel[v.key]=(STORE.fuel[v.key]||[]).filter(f=>String(f.id)!==id)}
+    else if(k==='x'){STORE.gone.push(String(id));STORE.exp[v.key]=(STORE.exp[v.key]||[]).filter(e=>String(e.id)!==id)}
+    saveStore();refresh();
+  }));
+}
+function initBackup(){
+  const $=id=>document.getElementById(id);
+  const out=()=>JSON.stringify({app:'vehicle-ledger-family',v:1,cfg:CFG,store:STORE});
+  $('bk_now').addEventListener('click',()=>{
+    const m=$('bk_nowmsg');
+    try{
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out()],{type:'application/json'}));
+      a.download='vehicle-ledger-backup-'+todayStr()+'.json';document.body.appendChild(a);a.click();a.remove();
+      localStorage.setItem('vehicleLedger.lastBackup',String(Date.now()));BK.lastManual=Date.now();
+      m.textContent='Downloaded. Keep the file somewhere safe.';m.style.color='var(--green)';
+    }catch(e){m.textContent='Could not download here.';m.style.color='var(--red)'}
+  });
+  $('rs_go').addEventListener('click',()=>{
+    const f=$('rs_file').files&&$('rs_file').files[0],m=$('rs_msg');
+    const bad=t=>{m.textContent=t;m.style.color='var(--red)'};
+    if(!f)return bad('Choose a backup file first.');
+    const r=new FileReader();
+    r.onload=()=>{try{
+      const p=JSON.parse(r.result);
+      if(!p||p.app!=='vehicle-ledger-family'||!p.cfg||!p.store)throw new Error('x');
+      if(!confirm('Replace everything on this device with this backup?'))return;
+      localStorage.setItem(CFG_KEY,JSON.stringify(p.cfg));
+      localStorage.setItem(STORE_KEY,JSON.stringify(normalise(p.store)));
+      location.hash='';location.reload();
+    }catch(e){bad('That file isn’t a backup from this app.')}};
+    r.readAsText(f);
+  });
+  $('cfg_edit').addEventListener('click',()=>{location.hash='#setup';location.reload()});
+  $('cfg_wipe').addEventListener('click',()=>{
+    if(!confirm('Erase all vehicles and entries from this device? Download a backup first if you want to keep them.'))return;
+    try{localStorage.removeItem(CFG_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem('vehicleLedger.lastBackup')}catch(e){}
+    location.hash='';location.reload();
+  });
+}
+const goAdd=k=>{state.addVeh=k;switchTo('add')};
+function renderAdd(){
+  const v=VEH[state.addVeh]||Object.values(VEH)[0];
+  view.style.setProperty('--acc',v.acc);
+  nav.innerHTML='<a href="#a_fuel">Fuel</a><a href="#a_odo">Odometer</a><a href="#add">Expense</a><a href="#a_rec">Entries</a><a href="#a_bk">Backup</a>';
+  view.innerHTML=
+   '<header class="hero" style="padding-bottom:0"><h1>Add data.</h1><p>Enter fuel, odometer readings and expenses here. Everything is saved on this device and shows up in the reports.</p></header>'
+   +'<div class="seg" id="avseg" role="group" aria-label="Choose vehicle" style="margin-top:22px">'+Object.values(VEH).map(x=>'<button data-av="'+x.key+'" aria-pressed="'+(x.key===v.key)+'">'+x.name+'</button>').join('')+'</div>'
+   +'<section id="a_fuel" style="margin-top:28px"><h2>Fuel fill-up</h2><p class="lede">For the '+v.name+'. Fill the tank to the top each time for an accurate mileage.</p>'+fuelFormCard(v)+'</section>'
+   +'<section id="a_odo"><h2>Current odometer</h2><p class="lede">Update this whenever you like, even without refuelling.</p>'+odoCard(v)+'</section>'
+   +expForm(v)
+   +'<section id="a_rec"><h2>Your entries</h2><p class="lede">What you’ve added for the '+v.name+'. Remove anything entered by mistake.</p>'+recentList(v)+'</section>'
+   +'<section id="a_bk"><h2>Backup and restore</h2>'+backupCard()+'</section>';
+  foot.textContent='Fuel, odometer and expense entries are saved in your browser on this device only.';
+  curKeys=[v.key];
+  view.querySelectorAll('[data-av]').forEach(b=>b.addEventListener('click',()=>{state.addVeh=b.dataset.av;renderAdd()}));
+  initFuel(v);initAdd(v);initRecent(v);initBackup();
+  if(FLASH){const e=document.getElementById(FLASH.id);if(e){e.textContent=FLASH.text;e.style.color=FLASH.bad?'var(--red)':'var(--green)'}FLASH=null}
+}
+function mileageTable(){
+  const vs=Object.values(VEH);
+  const rows=vs.map(v=>{const m=mileageStats(getFuel(v));
+    return '<tr><td><span class="vtag" style="--vc:'+v.acc+'"><i></i>'+v.name+'</span></td><td>'+(m.n?m.latest.toFixed(1):'—')+'</td><td>'+(m.n?m.avg.toFixed(1):'—')+'</td><td>'+(m.n?'₹'+m.cpk.toFixed(2):'—')+'</td></tr>'}).join('');
+  return '<section id="mileage"><h2>Mileage</h2><p class="lede">Kilometres per litre from your fill-ups. Log fill-ups in the Add tab.</p>'
+   +'<div class="card ptab"><table><thead><tr><th></th><th>Latest km/l</th><th>Average km/l</th><th>Fuel ₹/km</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
+}
+
+
+/* ================= ADD EXPENSES: TYPE IT,  ================= */
+const CAT_ORDER=['service','engine','brakes','susp','clutch','chain','battery','ac','body','labour','acc','ins','warr','buy','fuel','toll','puc','wash','nobill','other'];
+function dupOf(vk,d,t,no){
+  const v=VEH[vk];if(!v)return null;
+  return allBills(v).find(b=>(d&&b.d===d&&Math.abs(b.t-t)<1.5)||(no&&b.noText&&b.noText.indexOf(no)>=0&&Math.abs(b.t-t)<1.5))||null;
+}
+function expForm(v){
+  const opts=CAT_ORDER.map(k=>'<option value="'+k+'">'+CATS[k].n+'</option>').join('');
+  const vopts=Object.values(VEH).map(x=>'<option value="'+x.key+'"'+(x.key===v.key?' selected':'')+'>'+x.name+'</option>').join('');
+  return '<section id="add"><h2>Add an expense</h2><p class="lede">Type in what you paid. It counts in the reports straight away.</p>'
+   +'<div class="card" id="xform" style="margin-top:12px"><b style="font-size:17px">Expense details</b><div class="flds" style="margin-top:12px">'
+   +'<label class="fld">Vehicle<select id="x_v">'+vopts+'</select></label>'
+   +'<label class="fld">Date<input type="date" id="x_d" value="'+todayStr()+'"></label>'
+   +'<label class="fld">Amount (₹)<input type="number" inputmode="decimal" step="0.01" id="x_t"></label>'
+   +'<label class="fld">Odometer (km), if known<input type="number" inputmode="numeric" id="x_km"></label></div>'
+   +'<label class="fld" style="margin-top:12px">What was it<input type="text" id="x_title" placeholder="e.g. Service and brake pads"></label>'
+   +'<label class="fld" style="margin-top:12px">Category<select id="x_c">'+opts+'</select></label>'
+   +'<label class="fld" style="margin-top:12px">Note (optional)<input type="text" id="x_n"></label>'
+   +'<div class="btnrow" style="margin-top:14px"><button class="btn" id="x_save">Save expense</button><span class="fmsg" id="x_msg"></span></div></div></section>';
+}
+function initAdd(v){
+  const $=id=>document.getElementById(id);
+  let src='typed',dupAsked=false;
+  const say=(id,t,bad)=>{const e=$(id);if(e){e.textContent=t;e.style.color=bad?'var(--red)':'var(--green)'}};
+  $('x_save').addEventListener('click',()=>{
+    const vk=$('x_v').value,d=$('x_d').value,t=parseFloat($('x_t').value),km=parseFloat($('x_km').value)||null,cat=$('x_c').value;
+    let title=$('x_title').value.trim();
+    if(!d)return say('x_msg','Pick a date.',true);
+    if(!(t>0))return say('x_msg','Enter the amount.',true);
+    if(!title)title=CATS[cat].n;
+    const dup=dupOf(vk,d,t,null);
+    if(dup&&!dupAsked){dupAsked=true;return say('x_msg','This matches “'+dup.title+'” on '+fmt(dup.d)+'. Tap Save again to add it anyway.',true)}
+    STORE.exp[vk]=STORE.exp[vk]||[];
+    STORE.exp[vk].push({id:Date.now()+Math.floor(Math.random()*1000),d,t:Math.round(t*100)/100,title:title.slice(0,80),cat,km:km?Math.round(km):null,note:$('x_n').value.trim().slice(0,200),src});
+    flash('x_msg',saveStore()?'Saved to the '+VEH[vk].name+'. It now counts in the reports.':'Could not save on this device.');
+    refresh();
+  });
+}
+
+
+/* ================= BACKUP FILE ================= */
+const BK={state:'off',at:null,msg:'',ref:null,pushing:false,dirty:false,timer:null,force:false,lastSig:null,lastManual:0};
+try{BK.lastManual=+localStorage.getItem('vehicleLedger.lastBackup')||0}catch(e){}
+const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
+const hasData=s=>storeSig(Object.assign(EMPTY(),s,{gone:[]}))!=='#';
+function mergeStores(a,b){
+  const gone=new Set([...(a.gone||[]),...(b.gone||[])].map(String));
+  const out=EMPTY();out.gone=[...gone];
+  Object.keys(Object.assign({},a.qa,b.qa)).forEach(k=>{const x=(a.qa||{})[k],y=(b.qa||{})[k];out.qa[k]=!x?y:!y?x:(x.at>=y.at?x:y)});
+  const qm=new Map();[...(a.qx||[]),...(b.qx||[])].forEach(x=>{if(!gone.has(x.id))qm.set(x.id,x)});out.qx=[...qm.values()];
+  const oa=(a.oppAt||0)>=(b.oppAt||0)?a:b;if(oa.opp){out.opp=oa.opp;out.oppAt=oa.oppAt||1}
+  for(const k of ['altis','ntorq','scr']){
+    for(const part of ['fuel','exp']){
+      const m=new Map();
+      [...(a[part][k]||[]),...(b[part][k]||[])].forEach(e=>{if(!gone.has(String(e.id)))m.set(String(e.id),e)});
+      out[part][k]=[...m.values()];
+    }
+    const c=[a.odo[k],b.odo[k]].filter(o=>o&&!gone.has(String(o.id))).sort((x,y)=>y.km-x.km||String(y.d).localeCompare(String(x.d)));
+    if(c.length)out.odo[k]=c[0];
+  }
+  return out;
+}
+const formsDirty=()=>Array.from(document.querySelectorAll('#view input[type=number],#view input[type=text],#view textarea:not([readonly])')).some(e=>e.value);
+function bkRender(){
+  const e=document.getElementById('bk_status');if(e){const st=bkText();e.textContent=st.t;e.style.color=st.c}
+}
+function scheduleBackup(delay){
+  if(!BK.ref)return;
+  clearTimeout(BK.timer);BK.timer=setTimeout(()=>pushBackup(false),delay);
+}
+function bkBanner(){
+  if(BK.state==='on'||BK.state==='checking'||!hasData(STORE))return '';
+  const days=BK.lastManual?Math.floor((Date.now()-BK.lastManual)/86400000):null;
+  if(days!==null&&days<14)return '';
+  return '<div class="caveat" style="margin:14px 0 0"><p style="margin:0"><b>Back up your entries.</b> '+(days===null?'You haven’t made a backup yet.':'It’s been '+days+' days since your last backup.')+' <a href="#" data-gobk class="tel">Back up now</a></p></div>';
+}
+function wireBanner(){view.querySelectorAll('[data-gobk]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goAdd(VEH[state.veh]?state.veh:state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60)}))}
+
+/* ================= SHELL ================= */
+(function(){const sg=document.getElementById('vseg'),o=sg.querySelector('[data-v=opp]');Object.values(VEH).forEach(v=>{const b=document.createElement('button');b.dataset.v=v.key;b.setAttribute('aria-pressed','false');b.textContent=v.name;sg.insertBefore(b,o)})})();
+const view=document.getElementById('view'),nav=document.getElementById('nav'),foot=document.getElementById('foot'),bar=document.getElementById('bar');
+const state={veh:'both',filter:'all',rf:'look',addVeh:Object.keys(VEH)[0]};
+addEventListener('scroll',()=>bar.classList.toggle('scrolled',scrollY>8),{passive:true});
+let ioCats=null;
+let NOANIM=false;
+
+function countUp(total){
+  const el=document.getElementById('total');
+  const set=v=>{el.innerHTML='<span>₹</span>'+inr(v)};
+  if(reduce||NOANIM){set(total);return}
+  let t0=null;const f=ts=>{if(!t0)t0=ts;const p=Math.min((ts-t0)/1400,1);set(total*(1-Math.pow(1-p,4)));if(p<1&&document.body.contains(el))requestAnimationFrame(f)};requestAnimationFrame(f);
+}
+
+/* ---------- cumulative chart ---------- */
+function heroChart(ev,TOTAL){
+  const CW=800,H=260,pl=8,pr=8,pt=16,pb=30;
+  ev=ev.slice().sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
+  const pts=[];let run=0;
+  ev.forEach(b=>{run+=b.t;pts.push({t:new Date(b.d+'T00:00:00').getTime(),y:run,b})});
+  const t0=pts[0].t-86400000*20,t1=pts[pts.length-1].t+86400000*20;
+  const X=t=>pl+(t-t0)/(t1-t0)*(CW-pl-pr);
+  const Y=v=>H-pb-(v/TOTAL)*(H-pb-pt);
+  let d='M'+X(t0)+' '+Y(0),prevY=0;
+  pts.forEach(p=>{d+=' L'+X(p.t)+' '+Y(prevY)+' L'+X(p.t)+' '+Y(p.y);prevY=p.y});
+  d+=' L'+X(t1)+' '+Y(TOTAL);
+  const area=d+' L'+X(t1)+' '+Y(0)+' Z';
+  let s='<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".28"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></linearGradient></defs>';
+  [0.25,0.5,0.75,1].forEach(f=>{const y=Y(TOTAL*f);s+='<line x1="'+pl+'" x2="'+(CW-pr)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"/>'});
+  s+='<path d="'+area+'" fill="url(#g)"/>';
+  s+='<path id="ln" d="'+d+'" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  const y0=new Date(t0).getFullYear(),y1=new Date(t1).getFullYear();
+  for(let yr=y0+1;yr<=y1;yr++){const x=X(new Date(yr+'-01-01').getTime());s+='<text x="'+x+'" y="'+(H-8)+'" fill="var(--ink3)" font-size="12" text-anchor="middle">'+yr+'</text>'}
+  s+='<text x="'+pl+'" y="'+(H-8)+'" fill="var(--ink3)" font-size="12">'+y0+'</text>';
+  s+='<circle id="dot" r="6" fill="var(--acc)" stroke="var(--card)" stroke-width="3" cx="'+X(pts[pts.length-1].t)+'" cy="'+Y(TOTAL)+'"/>';
+  s+='<rect id="hit" x="0" y="0" width="'+CW+'" height="'+H+'" fill="transparent" style="cursor:crosshair;touch-action:pan-y"/>';
+  const svg=document.getElementById('hero');svg.innerHTML=s;
+  const ln=document.getElementById('ln');
+  if(!reduce&&!NOANIM){const L=ln.getTotalLength();ln.style.strokeDasharray=L;ln.style.strokeDashoffset=L;ln.getBoundingClientRect();ln.style.transition='stroke-dashoffset 1.6s cubic-bezier(.3,.7,.2,1)';requestAnimationFrame(()=>{ln.style.strokeDashoffset=0})}
+  const tip=document.getElementById('tip'),dot=document.getElementById('dot');
+  function move(e){
+    const r=svg.getBoundingClientRect();const cx=(e.touches?e.touches[0].clientX:e.clientX);
+    const vx=(cx-r.left)/r.width*CW;let best=pts[0];
+    pts.forEach(p=>{if(Math.abs(X(p.t)-vx)<Math.abs(X(best.t)-vx))best=p});
+    dot.setAttribute('cx',X(best.t));dot.setAttribute('cy',Y(best.y));
+    const k=r.width/CW;
+    tip.style.left=Math.max(70,Math.min(r.width-70,X(best.t)*k))+'px';
+    tip.style.top=(Y(best.y)*k)+'px';
+    tip.innerHTML='<b>₹'+inr(best.y)+'</b><span>'+(best.b.dt||fmt(best.b.d))+' · '+best.b.title+'</span>';
+    tip.style.opacity=1;
+  }
+  const hit=document.getElementById('hit');
+  hit.addEventListener('mousemove',move);hit.addEventListener('touchstart',move,{passive:true});hit.addEventListener('touchmove',move,{passive:true});
+  hit.addEventListener('mouseleave',()=>{tip.style.opacity=0});
+  hit.addEventListener('touchend',()=>{setTimeout(()=>{tip.style.opacity=0},1400)});
+}
+const eventsOf=(v,prefix)=>allBills(v).map(b=>({d:b.d,dt:b.dateText,t:b.t,title:(prefix?v.name+' · ':'')+b.title}))
+  .concat((v.W||[]).map(w=>({d:w.d,t:w.t,title:(prefix?v.name+' · ':'')+'Car washing ('+w.who+')'})))
+  .concat(getFuel(v).map(f=>({d:f.d,t:f.t,title:(prefix?v.name+' · ':'')+'Fuel'})))
+  .concat(bfMonths(v).map(f=>({d:f.d,dt:f.month,t:f.t,title:(prefix?v.name+' · ':'')+'Fuel, estimated ('+inr(f.km)+' km)'})));
+
+/* ---------- years ---------- */
+function yearsBlock(series,stacked){
+  const ysum={};YEARS.forEach(y=>{ysum[y]=0});
+  const per=series.map(s=>{const o={};YEARS.forEach(y=>{o[y]=0});s.items.forEach(b=>{o[b.d.slice(0,4)]+=b.t});YEARS.forEach(y=>{ysum[y]+=o[y]});return o});
+  const ymax=Math.max(...YEARS.map(y=>ysum[y]));
+  const yEl=document.getElementById('years');
+  if(stacked)yEl.parentNode.classList.add('stk');
+  yEl.classList.toggle('dense',YEARS.length>6);
+  yEl.style.gridTemplateColumns='repeat('+YEARS.length+',1fr)';
+  yEl.innerHTML=YEARS.map(y=>{
+    const tot=ysum[y];
+    const inner=stacked?series.map((s,i)=>'<i style="height:'+(tot?per[i][y]/tot*100:0)+'%;background:'+s.color+'"></i>').join(''):'';
+    return '<button class="yr" data-y="'+y+'" aria-label="'+y+', ₹'+inr(tot)+'"><div class="v">₹'+(tot===0?'0':tot>=100000?(tot/100000).toFixed(2)+'L':tot>=10000?(tot/1000).toFixed(0)+'k':(tot/1000).toFixed(1)+'k')+'</div><div class="bw"><div class="b" data-h="'+(tot/ymax*100)+'">'+inner+'</div></div><div class="y">'+y+(y==='2026'?'*':'')+'</div></button>';
+  }).join('');
+  requestAnimationFrame(()=>{setTimeout(()=>{yEl.querySelectorAll('.b').forEach(b=>{b.style.height=b.dataset.h+'%'})},reduce?0:300)});
+  yEl.querySelectorAll('.yr').forEach(b=>b.addEventListener('click',()=>{setFilter(b.dataset.y);document.getElementById('seg').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})}));
+}
+
+/* ---------- categories ---------- */
+function catsBlock(v,TOTAL){
+  const csum={};allBills(v).forEach(b=>{for(const k in b.c)csum[k]=(csum[k]||0)+b.c[k]});
+  if(v.W)csum.wash=washTotal(v);
+  const fsum=fuelTotal(v);if(fsum>0)csum.fuel=(csum.fuel||0)+fsum;
+  const order=Object.keys(csum).sort((a,b)=>csum[b]-csum[a]);
+  const cEl=document.getElementById('cats'),cmax=csum[order[0]];
+  cEl.innerHTML=order.map(k=>{
+    const p=csum[k]/TOTAL*100;
+    return '<div class="cat"><div class="nm"><span class="dot" style="background:'+CATS[k].c+'"></span>'+CATS[k].n+'</div><div class="am">₹'+inr(csum[k])+'</div><div class="tr"><i data-w="'+(csum[k]/cmax*100)+'" style="background:'+CATS[k].c+'"></i></div><div class="pc">'+(p<1?'Under 1':p.toFixed(0)+'%')+' of all spending</div></div>';
+  }).join('');
+  if(ioCats)ioCats.disconnect();
+  ioCats=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('i[data-w]').forEach(i=>{i.style.width=i.dataset.w+'%'});ioCats.unobserve(e.target)}})},{threshold:.2});
+  ioCats.observe(cEl);
+}
+function washBlock(v){
+  const W=v.W;
+  const wr=W.filter(w=>w.who==='Rahul'),wp=W.filter(w=>w.who==='Puspendra');
+  const t0=new Date('2023-12-02T00:00:00').getTime(),t1=new Date('2026-10-07T00:00:00').getTime();
+  const pos=d=>(new Date(d+'T00:00:00').getTime()-t0)/(t1-t0)*100;
+  const seg=(name,sub,list,col)=>'<div style="margin-top:16px;--vc:'+col+'"><div style="display:flex;justify-content:space-between;gap:12px;font-size:15px"><span><b style="font-weight:600">'+name+'</b> <span style="color:var(--ink2)">'+sub+'</span></span><b style="font-weight:600">₹'+inr(sumT(list))+'</b></div><div class="strip" style="margin-top:12px;--ds:7px">'+list.map(w=>'<i style="left:'+pos(w.d)+'%"></i>').join('')+'</div></div>';
+  const yl='<span>Dec 2023</span><span style="left:'+pos('2025-01-01')+'%">2025</span><span style="left:'+pos('2026-01-01')+'%">2026</span><span style="left:100%;transform:translateX(-100%)">Oct 2026</span>';
+  document.getElementById('wash').innerHTML='<div class="rp-h"><div><b style="display:block;font-size:19px;letter-spacing:-.02em">Car washing</b><small style="color:var(--ink2);font-size:14px">Two washers, paid monthly since Dec 2023</small></div><span class="pill" style="--vc:#5e5ce6">'+W.length+' payments</span></div>'
+    +seg('Rahul','₹650 · Dec 2023 to Mar 2025',wr,'#5e5ce6')
+    +seg('Puspendra','₹600 · Apr 2025 onwards',wp,'var(--blue)')
+    +'<div class="yrs" style="margin-top:6px">'+yl+'</div><p class="say">₹'+inr(washTotal(v))+' so far. The current washer adds ₹7,200 a year.</p>';
+}
+
+/* ---------- repeated work ---------- */
+function repeatsBlock(v){
+  const G=v.G,B=v.B;
+  const T0=new Date(B[0].d+'T00:00:00').getTime(),T1=new Date(B[B.length-1].d+'T00:00:00').getTime();
+  const pos=s=>((new Date(s+'T00:00:00').getTime()-T0)/(T1-T0)*100);
+  const avoidable=G.filter(g=>g.v==='often').reduce((a,g)=>a+g.avoidAmt,0);
+  const optional=G.filter(g=>g.v==='optional').reduce((a,g)=>a+g.total,0);
+  const redo=G.filter(g=>g.v==='redo').reduce((a,g)=>a+g.redo,0);
+  const cards=[['Likely avoidable',avoidable,'var(--orange)','Jobs done far more often than usual'],
+   ['Repeat repairs',redo,'var(--red)','Second go at the same fix'],
+   ['Optional extras',optional,'var(--blue)','Not part of a scheduled service']];
+  document.getElementById('sum3').innerHTML=cards.map(a=>'<div class="stat"><i style="background:'+a[2]+'"></i><div class="n">'+(a[1]>0?'₹'+inr(a[1]):'None')+'</div><div class="l">'+a[0]+'. '+a[3]+'.</div></div>').join('');
+  const rseg=document.getElementById('rseg'),rlist=document.getElementById('rlist');
+  const RF=[['look','Needs a look'],['ok','On schedule'],['all','All']];
+  const y0=new Date(T0).getFullYear(),y1=new Date(T1).getFullYear();
+  let yl='';for(let y=y0+1;y<=y1;y++)yl+='<span style="left:'+pos(y+'-01-01')+'%">'+y+'</span>';
+  function rRender(){
+    rseg.innerHTML=RF.map(f=>'<button aria-pressed="'+(state.rf===f[0])+'" data-f="'+f[0]+'">'+f[1]+'</button>').join('');
+    rseg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.rf=b.dataset.f;rRender()}));
+    const items=G.filter(g=>state.rf==='all'||(state.rf==='look'?['often','redo','optional','ask'].includes(g.v):['ok','info'].includes(g.v)))
+      .sort((a,b)=>VT[a.v].o-VT[b.v].o||b.total-a.total);
+    rlist.innerHTML=items.map(g=>{
+      const dots=g.occ.map(o=>'<i style="left:'+pos(B[o[0]].d)+'%"></i>').join('');
+      let extra='';
+      if(g.v==='often'&&g.avoidAmt>0)extra=' <b>Likely avoidable: ₹'+inr(g.avoidAmt)+'.</b>';
+      if(g.v==='redo'&&g.redo>0)extra=' <b>Second job: ₹'+inr(g.redo)+'.</b>';
+      if(g.v==='optional')extra=' <b>Optional: ₹'+inr(g.total)+'.</b>';
+      const sub=g.n+'× · ₹'+inr(g.total)+(g.occ.some(o=>o[1]==null)?' + unpriced':'');
+      return '<div class="rp" style="--vc:'+VT[g.v].c+'"><div class="rp-h"><div><b>'+g.name+'</b><small>'+sub+'</small></div><span class="pill">'+(g.pill||VT[g.v].l)+'</span></div><div class="strip">'+dots+'</div><div class="yrs"><span style="visibility:hidden">.</span>'+yl+'</div><p class="say">'+g.say+'</p><p class="guide">'+g.guide+extra+'</p></div>';
+    }).join('');
+  }
+  rRender();
+}
+
+/* ---------- bills ---------- */
+const ICON={battery:'BAT',service:'SVC',engine:'ENG',susp:'SUS',brakes:'BRK',ac:'A/C',body:'BDY',labour:'LAB',other:'—',wash:'WSH',clutch:'CLT',nobill:'—',acc:'ACC',chain:'CHN',ins:'INS',warr:'WAR',buy:'BUY',fuel:'FUEL',toll:'TOL',puc:'PUC'};
+const mainCat=b=>{let m=-1,r;for(const k in b.c){if(b.c[k]>m&&k!=='labour'){m=b.c[k];r=k}}return r||'labour'};
+let curKeys=Object.keys(VEH).slice(0,1);
+function billItems(keys){
+  const out=[];
+  keys.forEach(k=>{const v=VEH[k];v.B.forEach((b,i)=>out.push({b,i,k,d:b.d}));getExp(v).forEach(b=>out.push({b,i:null,k,d:b.d,user:true}));v.E.forEach((e,i)=>out.push({e,i,k,d:e.d}))});
+  out.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
+  return out.reverse();
+}
+function renderBills(){
+  const list=document.getElementById('list');
+  const items=billItems(curKeys).filter(o=>state.filter==='all'||o.d.slice(0,4)===state.filter);
+  renderRows(list,items,curKeys.length>1,'','No bills in this year.');
+}
+function renderRows(list,items,showVeh,pre,emptyMsg){
+  if(!items.length){list.innerHTML='<div class="row"><div class="rt" style="padding:18px">'+emptyMsg+'</div></div>';return}
+  list.innerHTML=items.map(o=>{
+    const v=VEH[o.k],rid=pre+'r'+o.k+(o.e?'e':o.user?'u':'b')+(o.user?o.b.id:o.i);
+    const vt=showVeh?'<span class="vtag" style="--vc:'+v.acc+'"><i></i>'+v.name+'</span> · ':'';
+    if(o.e){
+      const e=o.e;
+      return '<div class="row est" id="'+rid+'"><button class="rh" aria-expanded="false"><span class="ic" style="background:var(--gray)">EST</span><span class="rt"><b>'+e.title+'</b><span>'+vt+fmt(e.d)+' · Estimate, not counted</span></span><span class="ra">≈ ₹'+inr(e.amt)+'</span><span class="chev"></span></button><div class="rb"><div><div class="rbi"><div class="note">'+e.note+'</div></div></div></div></div>';
+    }
+    const b=o.b,k=mainCat(b);
+    const keys=Object.keys(b.c).sort((x,y)=>b.c[y]-b.c[x]);
+    const stack=keys.map(c=>'<i style="width:'+(b.c[c]/b.t*100)+'%;background:'+CATS[c].c+'"></i>').join('');
+    const chips=keys.map(c=>'<span><span class="dot" style="background:'+CATS[c].c+'"></span>'+CATS[c].n+' <b>₹'+inr(b.c[c])+'</b></span>').join('');
+    const reps=o.user?[]:v.G.filter(g=>['often','redo','optional','ask'].includes(g.v)&&g.occ.some(x=>x[0]===o.i));
+    const rchips=reps.length?'<div class="rchips">'+reps.map(g=>'<span style="--vc:'+VT[g.v].c+'">'+g.name+' · '+g.n+'×</span>').join('')+'</div>':'';
+    const meta=vt+(b.dateText||fmt(b.d))+(b.noBill?' · No bill':b.approx?' · '+(b.approxText||'Shop diary, approximate'):b.noText?' · '+b.noText:b.no?' · Bill #'+b.no:'')+(b.vendor?' · '+b.vendor:'')+(b.km?' · '+inr(b.km)+' km':'');
+    return '<div class="row" id="'+rid+'"><button class="rh" aria-expanded="false"><span class="ic" style="background:'+CATS[k].c+'">'+ICON[k]+'</span><span class="rt"><b>'+b.title+'</b><span>'+meta+'</span></span><span class="ra">'+(b.approx?'≈ ':'')+'₹'+inr(b.t)+'</span><span class="chev"></span></button><div class="rb"><div><div class="rbi"><div class="stack">'+stack+'</div><div class="chips">'+chips+'</div>'+(b.note?'<div class="note">'+b.note+'</div>':'')+rchips+'</div></div></div></div>';
+  }).join('');
+  list.querySelectorAll('.rh').forEach(h=>h.addEventListener('click',()=>{const o=h.parentNode.classList.toggle('open');h.setAttribute('aria-expanded',o)}));
+}
+function buildSeg(){
+  const seg=document.getElementById('seg');
+  const all=['all'].concat(YEARS);
+  seg.innerHTML=all.map(y=>'<button aria-pressed="'+(state.filter===y)+'" data-y="'+y+'">'+(y==='all'?'All years':y)+'</button>').join('');
+  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setFilter(b.dataset.y)));
+  document.querySelectorAll('#years .yr').forEach(b=>b.classList.toggle('on',b.dataset.y===state.filter));
+}
+function setFilter(y){state.filter=(state.filter===y&&y!=='all')?'all':y;buildSeg();renderBills()}
+function hayOf(o){
+  const v=VEH[o.k],x=o.b||o.e||{};
+  const t=x.t!=null?x.t:x.amt;
+  const cats=x.c?Object.keys(x.c).map(c=>(CATS[c]||{}).n+' '+x.c[c]+' '+inr(x.c[c])).join(' '):'';
+  return [v.name,x.title,x.note,x.no,x.noText,x.vendor,x.dateText,x.d,fmt(x.d),MON[+x.d.slice(5,7)-1],x.d.slice(0,4),t,inr(t),x.km,x.km?inr(x.km):'',cats,x.noBill?'no bill':'',x.approx?'approximate estimate':''].filter(z=>z!=null&&z!=='').join(' ').toLowerCase();
+}
+function runSearch(){
+  const q=document.getElementById('q'),res=document.getElementById('qres'),n=document.getElementById('qn');
+  if(!q)return;
+  const terms=q.value.toLowerCase().replace(/₹/g,' ').replace(/(\d),(?=\d)/g,'$1').split(/\s+/).filter(Boolean);
+  if(!terms.length){res.hidden=true;res.innerHTML='';n.textContent='Looks through every bill and payment: names, items, notes, amounts, bill numbers, months and years.';return}
+  const hits=billItems(Object.keys(VEH)).filter(o=>{const h=hayOf(o).replace(/(\d),(?=\d)/g,'$1');const w=h.split(/[^a-z0-9]+/);return terms.every(t=>/^\d+$/.test(t)?w.includes(t):h.includes(t))});
+  const sum=hits.reduce((a,o)=>a+((o.b?o.b.t:0)),0);
+  n.textContent=hits.length?hits.length+' found, ₹'+inr(sum)+' in all':'Nothing found. Try fewer or shorter words.';
+  res.hidden=false;
+  renderRows(res,hits,true,'s','No matches.');
+}
+const billsSection='<section id="bills"><h2>All bills</h2><p class="lede">Tap any bill to see what it covered.</p><div class="seg" id="seg" role="group" aria-label="Filter by year"></div><div class="list" id="list"></div></section>';
+
+/* ================= VIEWS ================= */
+function initWhen(){
+  const today=new Date();today.setHours(0,0,0,0);
+  document.querySelectorAll('#keydates [data-date]').forEach(r=>{
+    const d=Math.round((new Date(r.dataset.date+'T00:00:00')-today)/86400000);
+    const w=d===0?'Today':d>0?(d>=90?'In about '+Math.round(d/30.4)+' months':'In '+d+' days'):(Math.abs(d)>=90?Math.round(Math.abs(d)/30.4)+' months ago':Math.abs(d)+' days ago');
+    r.querySelector('.when').textContent=w;
+    if(d<0)r.classList.add('past');
+  });
+}
+function renderVeh(v){
+  const TOTAL=totalOf(v);
+  view.style.setProperty('--acc',v.acc);
+  nav.innerHTML='<a href="#top">Overview</a><a href="#perkm">Cost per km</a><a href="#fuel">Fuel</a><a href="#repeats">Repeated work</a>'+(v.cover?'<a href="#cover">Cover &amp; details</a>':'')+'<a href="#bills">All bills</a>';
+  const sub=groupSub(v);
+  const ws=winStats(v);
+  const stats=[[pkf(ws.c.total/ws.km),'per km, all costs included'],[inr(ws.km),'km covered so far'],['₹'+inr(ws.c.total/ws.months),'per month, all costs included']];
+  view.innerHTML=bkBanner()+
+   '<header class="hero"><h1>'+v.h1+'</h1><p>'+v.intro+'</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+sub+'</div>'+(v.cover?'<a class="jump" href="#cover">Cover &amp; key details</a>':'')+'<div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
+   +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'
+   +perKmSection(v)
+   +fuelReport(v)
+   +'<section><h2>Year by year</h2><p class="lede">'+v.yearLede+'</p><div class="card"><div class="years" id="years"></div></div><p class="fn">* Year to date</p></section>'
+   +'<section><h2>Where it went</h2><p class="lede">'+v.catLede+'</p><div class="card" id="cats"></div>'+(v.W?'<div class="card" id="wash" style="margin-top:12px"></div>':'')+'</section>'
+   +'<section id="repeats"><h2>Repeated work</h2><p class="lede">The same job showing up again and again. Each dot is a bill where it appeared.</p>'+(v.callout?'<div class="caveat" style="margin:0 0 14px">'+v.callout+'</div>':'')+'<div class="sum3" id="sum3"></div><div class="seg" id="rseg" role="group" aria-label="Filter repeated work"></div><div id="rlist"></div></section>'
+   +(v.cover?'<section id="cover"><h2>Cover &amp; key details</h2><p class="lede">Policy numbers, dates and phone numbers for a claim or a breakdown. This page holds personal details, so don’t share the link.</p>'+v.cover()+'</section>':'')
+   +billsSection;
+  foot.textContent=v.foot+' Fuel, odometer and expense entries you add in the Add tab are saved in your browser on this device only.';
+  curKeys=[v.key];YEARS=yearsOf(curKeys);
+  countUp(TOTAL);
+  heroChart(eventsOf(v,false),TOTAL);
+  yearsBlock([{items:allBills(v).concat(v.W||[],getFuel(v),bfMonths(v)),color:v.acc}],false);
+  catsBlock(v,TOTAL);
+  if(v.W)washBlock(v);
+  repeatsBlock(v);
+  buildSeg();renderBills();
+  initWhen();
+  view.querySelectorAll('[data-goadd]').forEach(b=>b.addEventListener('click',()=>goAdd(b.dataset.goadd)));
+  wireBanner();
+}
+
+function renderBoth(){
+  const vs=Object.values(VEH);
+  const totals=vs.map(totalOf),TOTAL=totals.reduce((x,y)=>x+y,0);
+  view.style.setProperty('--acc','var(--blue)');
+  nav.innerHTML='<a href="#top">Overview</a><a href="#find">Search</a><a href="#split">By vehicle</a><a href="#perkm">Cost per km</a><a href="#bills">All bills</a>';
+  const nBills=vs.reduce((a,v)=>a+v.B.length,0);
+  const allDates=vs.flatMap(v=>v.B.map(b=>b.d)).sort();
+  const mm=s=>MON[+s.slice(5,7)-1]+' '+s.slice(0,4);
+  const card=(v,T)=>'<button class="vcard" data-v="'+v.key+'" style="--vc:'+v.acc+'"><b>'+v.name+'</b><small>'+v.count+' · '+v.period+'</small><div class="vn">₹'+inr(T)+'</div><div class="vb"><i style="width:'+(T/TOTAL*100)+'%"></i></div><div class="vp">'+Math.round(T/TOTAL*100)+'% of all spending. Tap to open.</div></button>';
+  const shares=vs.map((v,i)=>v.name+' '+Math.round(totals[i]/TOTAL*100)+'%').join(', ');
+  const legend=vs.map(v=>'<span><span class="dot" style="background:'+v.acc+';width:8px;height:8px"></span>'+v.name+'</span>').join('');
+  view.innerHTML=bkBanner()+
+   '<header class="hero"><h1>Every rupee across all your vehicles.</h1><p>'+nBills+' entries, '+allDates[0].slice(0,4)+' to '+mm(allDates[allDates.length-1])+'.</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+vs.map((v,i)=>'₹'+inr(totals[i])+' '+v.name).join(' + ')+'</div><div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
+   +'<section id="find"><h2>Search</h2><div class="card"><label class="fld"><span>Find a bill or payment</span><input type="search" id="q" placeholder="e.g. tyre, 4000, service, 2025" autocomplete="off" enterkeyhint="search"></label><p class="fn" id="qn" style="margin:10px 0 0"></p></div><div class="list" id="qres" hidden style="margin-top:12px"></div></section>'
+   +'<section id="split"><h2>By vehicle</h2><p class="lede">Share of the total: '+shares+'. All include their purchase price. Tap a vehicle to open it.</p><div class="split">'+vs.map((v,i)=>card(v,totals[i])).join('')+'</div></section>'
+   +perKmTable()
+   +mileageTable()
+   +'<section><h2>Year by year</h2><p class="lede">All vehicles together. Tap a year to filter the bills below.</p><div class="card"><div class="years" id="years"></div><div class="legend">'+legend+'</div></div><p class="fn">* Year to date</p></section>'
+   +billsSection;
+  foot.textContent='Amounts are what you entered. Cost per km counts every cost from purchase to your latest odometer reading.';
+  curKeys=vs.map(v=>v.key);YEARS=yearsOf(curKeys);
+  countUp(TOTAL);
+  heroChart(vs.flatMap(v=>eventsOf(v,true)),TOTAL);
+  yearsBlock(vs.map(v=>({items:allBills(v).concat(v.W||[],getFuel(v),bfMonths(v)),color:v.acc})),true);
+  view.querySelectorAll('.vcard').forEach(c=>c.addEventListener('click',()=>switchTo(c.dataset.v)));
+  buildSeg();renderBills();
+  const qi=document.getElementById('q');if(qi){qi.addEventListener('input',runSearch);runSearch()}
+  wireBanner();
+}
+
+/* ================= WHAT IF (opportunity cost) ================= */
+const RET_SRC={2019:13.5,2020:16.1,2021:25.6,2022:5.7,2023:21.3,2024:10.1};
+const OPP_DEF={ret:Object.assign({},RET_SRC,{2025:7,2026:7}),pt:2,cab:22.7,bike:10.3,inf:4,resale:{altis:0,ntorq:0,scr:0}};
+const getOpp=()=>{const o=STORE.opp||{};return {ret:Object.assign({},OPP_DEF.ret,o.ret||{}),pt:o.pt!=null?o.pt:OPP_DEF.pt,cab:o.cab!=null?o.cab:OPP_DEF.cab,bike:o.bike!=null?o.bike:OPP_DEF.bike,inf:o.inf!=null?o.inf:OPP_DEF.inf,resale:Object.assign({},OPP_DEF.resale,o.resale||{})}};
+function setOpp(patch){const o=getOpp();STORE.opp=Object.assign(o,patch);STORE.oppAt=Date.now();saveStore()}
+const DAY=86400000,T0=d=>new Date(d+'T00:00:00').getTime();
+/* growth of 1 rupee from date d to now, using each calendar year's return for the part of the year it was invested */
+function growth(d,ret,now){
+  let t=T0(d),f=1;if(t>=now)return 1;
+  while(t<now){
+    const y=new Date(t).getFullYear(),end=Math.min(now,new Date(y+1,0,1).getTime()),len=new Date(y+1,0,1).getTime()-new Date(y,0,1).getTime();
+    const r=(ret[y]!=null?ret[y]:7)/100;f*=Math.pow(1+r,(end-t)/len);t=end;
+  }
+  return f;
+}
+function oppCalc(v,o){
+  const now=Date.now();
+  const out=allBills(v).concat(v.W||[],getFuel(v),bfMonths(v)).filter(x=>x.d&&x.t>0&&T0(x.d)<=now);
+  const spent=out.reduce((a,x)=>a+x.t,0);
+  const fv=out.reduce((a,x)=>a+x.t*growth(x.d,o.ret,now),0);
+  const w=effWin(v),months=bfMonths(v);
+  const km=months.reduce((a,m)=>a+m.km,0)||Math.max(0,w.km1-w.km0);
+  const uRate=v.type==='car'?o.cab:o.bike;
+  const fare=(r,m)=>r/Math.pow(1+o.inf/100,Math.max(0,(now-T0(m.d))/(365.25*DAY)));
+  const alt=r=>({nom:months.reduce((a,m)=>a+m.km*fare(r,m),0),fv:months.reduce((a,m)=>a+m.km*fare(r,m)*growth(m.d,o.ret,now),0)});
+  const resale=+o.resale[v.key]||0;
+  return {v,spent,fv,lost:fv-spent,km,resale,netNow:spent-resale,ownFv:fv-resale,pt:alt(o.pt),ub:alt(uRate),uRate,flat:{pt:km*o.pt,ub:km*uRate}};
+}
+const cr=n=>'₹'+inr(n);
+function oppCard(c,o){
+  const v=c.v,uName=v.type==='car'?'Uber or Ola cab':'Uber Moto or bike taxi';
+  const verdict=(own,alt,lbl)=>{const d=alt-own;return d>=0?'Owning cost <b>'+cr(d)+' less</b> than '+lbl:'Owning cost <b>'+cr(-d)+' more</b> than '+lbl};
+  const rows=[['Spent so far',cr(c.spent)],['Resale value (your estimate)','− '+cr(c.resale)],['<b>Net cost of owning</b>','<b>'+cr(c.netNow)+'</b>'],['Same money, invested instead',cr(c.fv)+' today'],['Lost investment returns','<b>'+cr(c.lost)+'</b>'],['<b>Cost of owning, with lost returns</b>','<b>'+cr(c.ownFv)+'</b>']];
+  return '<div class="card" style="margin-bottom:14px"><h3 style="margin:0 0 4px;display:flex;gap:8px;align-items:center"><i class="dot" style="background:'+v.acc+';width:10px;height:10px;border-radius:50%;display:inline-block"></i>'+v.name+'</h3>'
+   +'<p class="pkt" style="margin:0 0 10px">'+inr(c.km)+' km covered.'+(c.km>0?' Owning, net of resale, works out at '+pkf(c.netNow/c.km)+' per km, or '+pkf(c.ownFv/c.km)+' with lost returns.':'')+'</p>'
+   +kv(rows)
+   +'<h4 style="margin:18px 0 6px;font-size:15px">The same km without the '+v.name+'</h4>'
+   +kv([['By public transport, fares of the day',cr(c.pt.nom)],['By '+uName+', fares of the day',cr(c.ub.nom)],['Public transport, in today’s money',cr(c.pt.fv)],[uName+', in today’s money',cr(c.ub.fv)]])
+   +'<p class="pkt" style="margin:12px 0 0">'+verdict(c.ownFv,c.pt.fv,'public transport')+'. '+verdict(c.ownFv,c.ub.fv,'Uber')+'. Both sides are in today’s money.</p></div>';
+}
+function oppResults(){
+  const o=getOpp();const cs=Object.values(VEH).map(v=>oppCalc(v,o));
+  const T=k=>cs.reduce((a,c)=>a+c[k],0);
+  const tot={lost:T('lost'),netNow:T('netNow'),ownFv:T('ownFv'),pt:cs.reduce((a,c)=>a+c.pt.fv,0),ub:cs.reduce((a,c)=>a+c.ub.fv,0)};
+  const stat=(n,l)=>'<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
+  const head='<div class="stats" style="margin-top:0;grid-template-columns:1fr">'+stat(cr(tot.lost),'lost investment returns, all vehicles')+stat(cr(tot.netNow),'net cost after resale')+stat(cr(tot.ownFv),'total cost, with lost returns')+'</div>';
+  const cmp='<div class="card ptab" style="margin:14px 0"><table><thead><tr><th></th><th>Owning</th><th>Public transport</th><th>Uber</th></tr></thead><tbody>'
+   +cs.map(c=>'<tr><td><span class="vtag" style="--vc:'+c.v.acc+'"><i></i>'+c.v.name+'</span></td><td>'+cr(c.ownFv)+'</td><td>'+cr(c.pt.fv)+'</td><td>'+cr(c.ub.fv)+'</td></tr>').join('')
+   +'<tr><td><b>All vehicles</b></td><td><b>'+cr(tot.ownFv)+'</b></td><td><b>'+cr(tot.pt)+'</b></td><td><b>'+cr(tot.ub)+'</b></td></tr></tbody></table></div>'
+   +'<p class="fn">All in today’s money. Owning is what you spent, minus resale, plus what that money would have earned. Public transport and Uber use each month’s km at that month’s fare, with the same market returns applied to the fare you would have saved.</p>';
+  return head+cmp+cs.map(c=>oppCard(c,o)).join('');
+}
+function kmTables(){
+  const vs=Object.values(VEH);const by={};
+  vs.forEach(v=>bfMonths(v).forEach(m=>{(by[m.month]=by[m.month]||{})[v.key]=m.km}));
+  const months=Object.keys(by).sort();
+  const yr={};months.forEach(m=>{const y=m.slice(0,4);yr[y]=yr[y]||{};vs.forEach(v=>{yr[y][v.key]=(yr[y][v.key]||0)+(by[m][v.key]||0)})});
+  const row=(l,r)=>'<tr><td>'+l+'</td>'+vs.map(v=>'<td>'+(r[v.key]?inr(r[v.key]):'—')+'</td>').join('')+'<td><b>'+inr(vs.reduce((a,v)=>a+(r[v.key]||0),0))+'</b></td></tr>';
+  const head='<thead><tr><th></th>'+vs.map(v=>'<th>'+v.name+'</th>').join('')+'<th>All</th></tr></thead>';
+  return '<div class="card ptab"><table>'+head+'<tbody>'+Object.keys(yr).map(y=>row(y,yr[y])).join('')+'</tbody></table></div>'
+   +'<details style="margin-top:12px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="card ptab" style="margin-top:8px"><table>'+head+'<tbody>'+months.map(m=>row(m,by[m])).join('')+'</tbody></table></div></details>';
+}
+const SRC=[
+ ['Mumbai cab fare: ₹20.66 per km non-AC, ₹22.72 AC; apps told to follow it (MMRTA letter, 16 Sep 2025)','https://www.businesstoday.in/amp/india/story/ola-uber-rapido-app-based-cabs-asked-to-follow-base-fare-of-black-yellow-taxis-in-mumbai-494713-2025-09-19','Business Today'],
+ ['Bike taxi: ₹15 for the first 1.5 km, then ₹10.27 per km (Maharashtra, Sep 2025)','https://www.businesstoday.in/amp/india/story/maharashtra-sta-approves-bike-taxi-services-for-ola-uber-rapido-under-new-rules-494199-2025-09-16','Business Today'],
+ ['BEST bus fares from May 2025: ₹10 up to 5 km, ₹20 for 10 km, ₹30 for 15 km, ₹35 for 20 km (non-AC)','https://www.theweek.in/wire-updates/national/2025/05/08/bes25-mh-ld-best-fare.html','The Week'],
+ ['Nifty 50 total return by year, 2019 to 2024 (NSE Nifty 50 whitepaper, March 2026)','https://www.bajajamc.com/knowledge-centre/nifty-50-historical-returns','Bajaj AMC']
+];
+
+/* ================= INTELLIGENCE ================= */
+const IV={};Object.values(VEH).forEach(v=>{const c=CFG.vehicles.find(x=>x.slot===v.key)||{},car=v.type==='car';IV[v.key]={sm:+c.sm||12,sk:+c.sk||(car?10000:5000),puc:0,tyre:+c.tyre||(car?50000:20000)}});
+const INS_END={};
+const dPad=n=>String(n).padStart(2,'0');
+const dAdd=(s,m)=>{const d=new Date(s+'T00:00:00');const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+m);const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return d.getFullYear()+'-'+dPad(d.getMonth()+1)+'-'+dPad(d.getDate())};
+const dFmt=s=>{const p=s.split('-');return (+p[2])+' '+MON[+p[1]-1]+' '+p[0]};
+const dMon=s=>{const p=s.split('-');return MON[+p[1]-1]+' '+p[0]};
+const dDiff=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
+function odoNow(v){let k=(BF[v.key]||{}).k1||0;allBills(v).concat(getFuel(v)).forEach(e=>{if(e.km&&e.km>k)k=e.km});const o=(STORE.odo||{})[v.key];if(o&&o.km>k)k=o.km;return k}
+function intelFor(v){
+  const t=todayStr(),cfg=IV[v.key],odo=odoNow(v),bills=allBills(v).filter(b=>b.d&&b.c&&!b.pk);
+  const cat=(c,min)=>bills.filter(b=>(b.c[c]||0)>(min||0)).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
+  const last=a=>a[a.length-1];
+  const attn=[],soon=[];let renew=0;
+  const km=n=>inr(Math.round(n/100)*100);
+  /* service */
+  const sv=last(cat('service',499).filter(b=>!b.approx));
+  if(sv){
+    const mo=dDiff(sv.d,t)/30.44,ks=sv.km?odo-sv.km:null,due=dAdd(sv.d,cfg.sm);
+    const ratio=Math.max(mo/cfg.sm,ks!=null?ks/cfg.sk:0);
+    const base='Last service '+dFmt(sv.d)+(sv.km?' at '+inr(sv.km)+' km':'')+'. ';
+    if(ratio>=1)attn.push({v,sev:ratio>=1.25?'bad':'warn',title:v.name+' service '+(ratio>=1.25?'is overdue':'is due'),text:base+(ks!=null?'About '+km(ks)+' km and ':'')+Math.round(mo)+' months since then. Your usual gap is '+cfg.sm+' months or '+inr(cfg.sk)+' km.',why:'Based on your last real service bill and the latest odometer',pill:ratio>=1.25?'Overdue':'Due'});
+    else soon.push({v,date:due,title:v.name+' next service',text:base+'Next by '+dFmt(due)+(sv.km?' or '+inr(sv.km+cfg.sk)+' km, whichever comes first.':'.'),pill:dMon(due)});
+  }
+  /* insurance */
+  const ins=cat('ins',0),li=last(ins);
+  if(!ins.length)attn.push({v,sev:'warn',title:v.name+' has no insurance on record',text:'Nothing in the ledger. Add the policy in the Add tab.',why:'Based on all entries',pill:'Check now'});
+  else{
+    const end=INS_END[li.d]||dAdd(li.d,12),dl=dDiff(t,end);
+    if(dl<0)attn.push({v,sev:'bad',title:v.name+' has no insurance on record since '+dFmt(end),text:'Your last policy on file ran to '+dFmt(end)+'. Nothing is recorded after that. If it was renewed, add it in the Add tab. If not, the vehicle is uninsured.',why:'Based on the policy dated '+dFmt(li.d),pill:'Check now'});
+    else if(dl<=45)attn.push({v,sev:'warn',title:v.name+' insurance renewal is close',text:'Cover runs to '+dFmt(end)+'. Last premium ₹'+inr(li.t)+'.',why:'Based on the policy dated '+dFmt(li.d),pill:'In '+dl+' days'});
+    else soon.push({v,date:end,title:v.name+' insurance renewal',text:'Last premium ₹'+inr(li.t)+'. Cover runs to '+dFmt(end)+'.',pill:dMon(end)});
+    if(dl>=0&&dl<=365)renew+=li.t;
+  }
+  /* pollution certificate */
+  const pc=last(cat('puc',0));
+  if(pc){let nx=dAdd(pc.d,6);while(nx<t)nx=dAdd(nx,6);soon.push({v,date:nx,title:v.name+' pollution certificate',text:'Every 6 months. Last on file '+dMon(pc.d)+(pc.approx?' (estimated)':'')+'.',pill:dMon(nx)});}
+  /* tyres */
+  const ty=last(bills.filter(b=>/tyre|tire/i.test(b.title||'')).sort((a,b)=>a.d<b.d?-1:1));
+  const noChg=false;
+  if(ty){const ks=ty.km?odo-ty.km:null;if(ks!=null&&ks>=cfg.tyre&&noChg)attn.push({v,sev:'bad',title:'Tyres are about '+km(ks)+' km old',text:'You confirmed they have not been changed since '+dMon(ty.d)+' (at '+inr(ty.km)+' km). A typical tyre life is about '+inr(cfg.tyre)+' km, so these are well past it. Plan a replacement.',why:'Based on your answer in the Questions tab',pill:'Replace soon'});else if(ks!=null&&ks>=cfg.tyre)attn.push({v,sev:'warn',title:'No newer '+v.name+' tyre bill',text:'The last tyre entry is '+dFmt(ty.d)+(ty.approx?' (an estimate)':'')+' at '+inr(ty.km)+' km. That is about '+km(ks)+' km ago, past a typical tyre life of about '+inr(cfg.tyre)+' km. If you changed them since, add the bill.',why:'Based on tyre entries and the latest odometer',pill:'Missing?'})}
+  else if(odo>=12000)attn.push({v,sev:'warn',title:'No '+v.name+' tyre bill on record',text:'Nothing in the ledger mentions tyres, and you are at about '+km(odo)+' km. Add the bill if you have changed them.',why:'Based on all entries and the latest odometer',pill:'Check'});
+  /* battery */
+  const bt=last(cat('battery',699));
+  if(bt){const due=dAdd(bt.d,42),dl=dDiff(t,due);
+    if(dl<0)attn.push({v,sev:'warn',title:v.name+' battery is ageing',text:'Last changed '+dMon(bt.d)+'. Batteries here last about 3 to 4 years.',why:'Based on the battery entry',pill:'Check'});
+    else if(dl<=450)soon.push({v,date:due,title:v.name+' battery',text:'Last changed '+dMon(bt.d)+'. Batteries here last about 3 to 4 years.',pill:dMon(due)});}
+  /* repeat costs */
+  const cy=+t.slice(0,4),fy=+(bills.map(b=>b.d).sort()[0]||t).slice(0,4);
+  const ys=[];for(let y=Math.max(fy,cy-6);y<=cy-1;y++)ys.push(y);
+  let best=null;
+  if(ys.length>=3)[['susp','Suspension and steering'],['brakes','Brakes']].forEach(([c,nmx])=>{
+    const per=ys.map(y=>bills.filter(b=>b.d.slice(0,4)==y).reduce((a,b)=>a+(b.c[c]||0),0));
+    const hit=per.filter(x=>x>0).length,tot=per.reduce((a,b)=>a+b,0),avg=tot/ys.length;
+    if(hit>=Math.min(4,ys.length)&&(!best||avg>best.avg))best={nm:nmx,hit,avg,max:Math.max(...per),n:ys.length};
+  });
+  if(best)attn.push({v,sev:'warn',title:best.nm+' keeps coming back on the '+v.name,text:'Spent in '+best.hit+' of the last '+best.n+' years, about ₹'+inr(best.avg)+' a year on average and ₹'+inr(best.max)+' in the worst year. Keep about ₹'+inr(Math.round(best.avg/500)*500)+' aside each year.',why:'Based on '+best.n+' years of entries',pill:'Pattern'});
+  /* forecast */
+  const d0=+((BF[v.key]||{}).d0||t).slice(0,4),yrs=[];for(let y=cy-3;y<=cy-1;y++)if(y>=d0)yrs.push(y);
+  const X={buy:1,acc:1,fuel:1,toll:1,wash:1,ins:1,puc:1};
+  const rep=yrs.length?yrs.reduce((a,y)=>a+bills.filter(b=>b.d.slice(0,4)==y).reduce((q,b)=>q+Object.entries(b.c).filter(([k])=>!X[k]).reduce((r,[,x])=>r+x,0),0),0)/yrs.length:0;
+  const ren=renew+2*(pc?pc.t:0);
+  return {v,attn,soon,rep,ren,yrs,unins:attn.some(a=>/insurance on record/.test(a.title))};
+}
+function renderIntel(){
+  const sel=state.iv||'all';
+  view.style.setProperty('--acc','var(--blue)');
+  nav.innerHTML='<a href="#i_att">Needs attention</a><a href="#i_soon">Coming up</a><a href="#i_fc">Next 12 months</a><a href="#i_how">How it decides</a>';
+  const vs=Object.values(VEH).filter(v=>sel==='all'||v.key===sel),all=vs.map(intelFor);
+  const rank={bad:0,warn:1,ok:2};
+  const att=all.flatMap(x=>x.attn).sort((a,b)=>rank[a.sev]-rank[b.sev]);
+  const soon=all.flatMap(x=>x.soon).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  const row=(r,sev)=>'<div class="ii-r '+sev+'"><span class="sv"></span><div><b>'+r.title+'</b><p>'+r.text+'</p>'+(r.why?'<small>'+r.why+'</small>':'')+'</div><span class="ii-p">'+r.pill+'</span></div>';
+  const tot=all.reduce((a,x)=>a+x.rep+x.ren,0),mx=Math.max(1,...all.map(x=>x.rep+x.ren));
+  const est=Object.values(VEH).reduce((a,v)=>a+allBills(v).filter(b=>b.approx&&!b.pk&&!(b.c&&(b.c.acc||b.c.wash||b.c.buy))).length,0);
+  const noIns=all.filter(x=>x.unins).map(x=>x.v.name);
+  view.innerHTML=
+   '<header class="hero"><h1>Intelligence.</h1><p>What needs attention, what is coming up and what the next year will cost, worked out from your own bills.</p></header>'
+   +'<div class="seg" id="ivseg" role="group" aria-label="Choose vehicle" style="margin-top:22px"><button data-iv="all" aria-pressed="'+(sel==='all')+'">All vehicles</button>'+Object.values(VEH).map(v=>'<button data-iv="'+v.key+'" aria-pressed="'+(sel===v.key)+'">'+v.name+'</button>').join('')+'</div>'
+   +'<section id="i_att" style="margin-top:28px"><h2>Needs attention</h2><p class="lede">Gaps and patterns the ledger noticed. Each one says which entries it used, so you can correct it by fixing or adding an entry.</p><div class="ii">'+(att.length?att.map(r=>row(r,r.sev)).join(''):'<div class="ii-empty">Nothing needs attention right now.</div>')+'</div></section>'
+   +'<section id="i_soon"><h2>Coming up</h2><p class="lede">In date order.</p><div class="ii">'+(soon.length?soon.map(r=>row(r,'ok')).join(''):'<div class="ii-empty">Nothing due soon.</div>')+'</div></section>'
+   +'<section id="i_fc"><h2>Next 12 months</h2><p class="lede">Your usual yearly repair and service spend, plus renewals that fall due.</p><div class="card"><div class="tag" style="font-size:13px;color:var(--ink2)">Expected spend</div><div class="ii-tot">about ₹'+inr(Math.round(tot/500)*500)+'</div><div class="ii-f">'
+   +all.map(x=>{const T=x.rep+x.ren;return '<div><span>'+x.v.name+'</span><span class="ii-t"><i style="width:'+(x.rep/mx*100)+'%;background:var(--blue)"></i><i style="width:'+(x.ren/mx*100)+'%;background:var(--orange)"></i></span><span class="ii-a">₹'+inr(Math.round(T/100)*100)+'</span></div>'}).join('')
+   +'</div><div class="ii-lg"><span>Repairs and service, yearly average of the last '+(all[0]?Math.max(1,all[0].yrs.length):3)+' full years</span><span>Insurance and pollution certificates</span></div></div>'
+   +(noIns.length?'<div class="ii-note"><b>Not included:</b> a new '+noIns.join(' and ')+' policy, because there is no recent premium on record to base it on.</div>':'')
+   +'<div class="ii-note"><b>'+est+' entries are still estimates.</b> Each real bill you add makes these figures more accurate.</div></section>'
+   +'<section id="i_how"><h2>How it decides</h2><div class="ii"><div class="ii-r ok"><span class="sv"></span><div><b>Your history, not a generic table</b><p>Service gaps and tyre life are the ones you set for each vehicle, starting from typical figures. Check your owner’s manual or ask your mechanic, then change them in Change vehicle details. Yearly costs come from your own entries, and insurance and pollution certificates follow their renewal dates.</p></div><span></span></div><div class="ii-r ok"><span class="sv"></span><div><b>Private and offline</b><p>It runs on this device from the entries you see in the other tabs. Nothing is sent anywhere, and it updates by itself when you add a bill.</p></div><span></span></div></div></section>';
+  foot.textContent='Intelligence is a guide built from your entries and typical intervals. Check your owner’s manual for the exact schedule.';
+  curKeys=Object.keys(VEH);
+  view.querySelectorAll('#ivseg button').forEach(b=>b.addEventListener('click',()=>{state.iv=b.dataset.iv;const y=scrollY;renderIntel();scrollTo(0,y)}));
+}
+
+
+/* ================= QUESTIONS ================= */
+const QSEED=[];
+const QV={all:'All vehicles'};Object.values(VEH).forEach(v=>{QV[v.key]=v.name});
+const qOpts=()=>Object.values(VEH).reduce((a,v)=>a+'<option value="'+v.key+'">'+qEsc(v.name)+'</option>','<option value="all">All vehicles</option>');
+const qEsc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const QO={altis:0,ntorq:1,scr:2,all:3};
+const qList=()=>QSEED.map(x=>({id:x.id,v:x.v,q:x.q,h:x.h||''})).sort((a,b)=>(QO[a.v]||0)-(QO[b.v]||0)).concat((STORE.qx||[]).map(x=>({id:x.id,v:x.v,q:x.q,h:'Added by you',at:x.at})));
+const qIsOpen=x=>{const a=(STORE.qa||{})[x.id];return !(a&&a.a)};
+const qOpenCount=()=>qList().filter(qIsOpen).length;
+function qBadge(){const b=document.getElementById('qbtn');if(!b)return;const n=qOpenCount();b.innerHTML='Questions'+(n?'<span class="q-badge">'+n+'</span>':'')}
+function qBanner(){
+  if(state.veh==='q'||state.veh==='add')return;
+  const n=qOpenCount();if(!n)return;
+  view.insertAdjacentHTML('afterbegin','<div class="q-ban" id="qban"><span><b>'+n+' open question'+(n>1?'s':'')+'</b> waiting for your answer</span><button type="button" id="qgo">Answer</button></div>');
+  document.getElementById('qgo').addEventListener('click',()=>switchTo('q'));
+}
+function renderQ(){
+  view.style.setProperty('--acc','var(--blue)');
+  nav.innerHTML='<a href="#q_open">Open</a><a href="#q_done">Answered</a><a href="#q_add">Add a question</a>';
+  const all=qList(),open=all.filter(qIsOpen),done=all.filter(x=>!qIsOpen(x)).sort((a,b)=>(STORE.qa[b.id].at||0)-(STORE.qa[a.id].at||0));
+  const when=at=>{const d=new Date(at);return isFinite(d)&&at?d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear():''};
+  const openRow=x=>'<div class="q-i" data-q="'+qEsc(x.id)+'"><div class="q-t"><b>'+qEsc(x.q)+'</b><span class="q-v">'+qEsc(QV[x.v]||'All vehicles')+'</span></div>'+(x.h?'<p>'+qEsc(x.h)+'</p>':'<p></p>')+'<textarea id="qa_'+qEsc(x.id)+'" placeholder="Type your answer" aria-label="Answer"></textarea><div class="q-row"><button class="btn sm" type="button" data-save="'+qEsc(x.id)+'">Save answer</button></div></div>';
+  const doneRow=x=>{const a=STORE.qa[x.id];return '<div class="q-i" data-q="'+qEsc(x.id)+'"><div class="q-t"><b>'+qEsc(x.q)+'</b><span class="q-v">'+qEsc(QV[x.v]||'All vehicles')+'</span></div><div class="q-ans" style="margin-top:8px">'+qEsc(a.a)+'</div><div class="q-row"><span class="q-dt">Answered '+when(a.at)+'</span><button class="btn alt sm" type="button" data-reopen="'+qEsc(x.id)+'">Reopen</button></div></div>'};
+  view.innerHTML=
+   '<header class="hero"><h1>Questions.</h1><p>Things you still need to find out or do. Each one stays here until you answer it, and your answers are kept as a record.</p></header>'
+   +'<section id="q_open" style="margin-top:28px"><h2>Open ('+open.length+')</h2><p class="lede">Answer in your own words. A date, an amount or just “don’t know” is fine.</p><div class="qq">'+(open.length?open.map(openRow).join(''):'<div class="ii-empty">No open questions. Add one below to keep track of something you need to look up or ask.</div>')+'</div></section>'
+   +'<section id="q_done"><h2>Answered ('+done.length+')</h2><p class="lede">Your record of answers. Reopen one if something changes.</p><div class="qq">'+(done.length?done.map(doneRow).join(''):'<div class="ii-empty">Answers will appear here.</div>')+'</div></section>'
+   +'<section id="q_add"><h2>Add a question</h2><p class="lede">Anything you want to remember to look up or ask later.</p><div class="card"><div class="q-add"><select id="qn_v" aria-label="Vehicle">'+qOpts()+'</select><textarea id="qn_q" placeholder="e.g. Did the bike get a new chain in 2022?" style="min-height:64px"></textarea><div class="q-row" style="margin-top:0"><button class="btn sm" type="button" id="qn_go">Add question</button></div></div></div></section>';
+  foot.textContent='Questions and answers are saved on this device and in your automatic backup.';
+  curKeys=Object.keys(VEH);
+  view.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.save,v=document.getElementById('qa_'+id).value.trim();if(!v)return;
+    STORE.qa=STORE.qa||{};STORE.qa[id]={a:v.slice(0,500),at:Date.now()};saveStore();const y=scrollY;renderQ();qBadge();scrollTo(0,y)}));
+  view.querySelectorAll('[data-reopen]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.reopen;STORE.qa[id]={a:null,at:Date.now()};saveStore();const y=scrollY;renderQ();qBadge();scrollTo(0,y);
+    const t=document.getElementById('qa_'+id);if(t)t.focus()}));
+  document.getElementById('qn_go').addEventListener('click',()=>{
+    const q=document.getElementById('qn_q').value.trim();if(!q)return;
+    STORE.qx=STORE.qx||[];STORE.qx.push({id:'qx'+Date.now(),v:document.getElementById('qn_v').value,q:q.slice(0,200),at:Date.now()});
+    saveStore();renderQ();qBadge();window.scrollTo(0,0)});
+}
+
+function renderOpp(){
+  const o=getOpp();
+  view.style.setProperty('--acc','var(--blue)');
+  nav.innerHTML='<a href="#o_set">Assumptions</a><a href="#o_res">Results</a><a href="#o_km">Km travelled</a><a href="#o_src">Sources</a>';
+  const num=(id,label,val,step)=>'<label class="fld">'+label+'<input type="number" inputmode="decimal" id="'+id+'" step="'+step+'" value="'+val+'"></label>';
+  const yrs=Object.keys(OPP_DEF.ret);
+  view.innerHTML=
+   '<header class="hero" style="padding-bottom:0"><h1>What if.</h1><p>What your vehicles cost once you count the money they tied up, what you could sell them for, and what the same km would have cost by public transport or Uber. None of this changes your real costs on the other pages.</p></header>'
+   +'<section id="o_set" style="margin-top:28px"><h2>Assumptions</h2><p class="lede">Starting numbers came from the sources at the bottom (October 2026). The fares are Mumbai’s, so change them to your city. Resale starts at 0 because it depends on your vehicle: enter what you could sell it for today.</p><div class="card">'
+   +'<h4 style="margin:0 0 8px;font-size:15px">What the invested money earned each year (%)</h4><p class="pkt" style="margin:0 0 10px">2019 to 2024 are the actual Nifty 50 returns with dividends. I found no source I trust for 2025 and 2026 so far, so those two start at 7% and are yours to set.</p>'
+   +'<div class="flds" style="grid-template-columns:1fr 1fr 1fr">'+yrs.map(y=>num('o_y'+y,y,o.ret[y],'0.1')).join('')+'</div>'
+   +'<div class="btnrow" style="margin:12px 0 0"><button class="btn alt sm" data-ret="nifty">Nifty 50 (actual)</button><button class="btn alt sm" data-ret="fd">Fixed deposit, 6.5% every year</button></div>'
+   +'<h4 style="margin:20px 0 8px;font-size:15px">Cost of getting around, per km</h4>'
+   +'<div class="flds">'+num('o_pt','Public transport (₹)',o.pt,'0.1')+num('o_cab','Uber or Ola cab (₹)',o.cab,'0.1')+num('o_bike','Bike taxi (₹)',o.bike,'0.1')+num('o_inf','Fares rise a year (%)',o.inf,'0.5')+'</div>'
+   +'<p class="pkt" style="margin:10px 0 0">These are today’s rates. Older km are costed at lower fares, using the yearly rise above (my assumption, close to normal inflation).</p>'
+   +'<h4 style="margin:20px 0 8px;font-size:15px">Approximate resale value today</h4><p class="pkt" style="margin:0 0 10px">Look up the same model, year and city on a used-vehicle site, and take off about 12%, because buyers offer less than the asking price. A real offer is better.</p>'
+   +'<div class="flds">'+Object.values(VEH).map(v=>num('o_rs_'+v.key,v.name+' (₹)',o.resale[v.key],'5000')).join('')+'</div></div></section>'
+   +'<section id="o_res"><h2>Results</h2><p class="lede">Each payment grows from the day you made it, to today.</p><div id="oppres">'+oppResults()+'</div></section>'
+   +'<section id="o_km"><h2>Km travelled</h2><p class="lede">Worked out from the odometer readings you entered, assuming steady use between them. It needs an odometer reading for today in your setup, or fill-ups and expenses with the odometer filled in.</p>'+kmTables()+'<p class="fn">Km after your last odometer reading are not counted. A car carries several people and one trip by cab is not always one trip you would have made, so read the public transport and Uber figures as a rough guide.</p></section>'
+   +'<section id="o_src"><h2>Sources</h2><p class="lede">Where the starting numbers came from.</p><div class="card">'+kl(SRC.map(s=>s[0]+' <a href="'+s[1]+'" target="_blank" rel="noopener">'+s[2]+'</a>'))+'</div></section>';
+  foot.textContent='Rates and resale values are assumptions you can edit. They are saved on this device.';
+  curKeys=Object.keys(VEH);
+  const upd=()=>{document.getElementById('oppres').innerHTML=oppResults()};
+  const rd=id=>{const x=parseFloat(document.getElementById(id).value);return isFinite(x)?x:null};
+  [['o_pt','pt'],['o_cab','cab'],['o_bike','bike'],['o_inf','inf']].forEach(([id,k])=>document.getElementById(id).addEventListener('input',()=>{const x=rd(id);if(x==null||x<0)return;setOpp({[k]:x});upd()}));
+  yrs.forEach(y=>document.getElementById('o_y'+y).addEventListener('input',()=>{const x=rd('o_y'+y);if(x==null)return;const r=getOpp().ret;r[y]=x;setOpp({ret:r});upd()}));
+  Object.keys(VEH).forEach(k=>document.getElementById('o_rs_'+k).addEventListener('input',()=>{const x=rd('o_rs_'+k);if(x==null||x<0)return;const r=getOpp().resale;r[k]=x;setOpp({resale:r});upd()}));
+  view.querySelectorAll('[data-ret]').forEach(b=>b.addEventListener('click',()=>{const r={};yrs.forEach(y=>{r[y]=b.dataset.ret==='fd'?6.5:OPP_DEF.ret[y]});setOpp({ret:r});yrs.forEach(y=>document.getElementById('o_y'+y).value=r[y]);upd()}));
+}
+
+function switchTo(key,keepScroll){
+  const prev=state.veh;
+  state.veh=key;state.filter='all';state.rf='look';
+  document.querySelectorAll('#vseg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===key));
+  if(key==='add'){if(VEH[prev])state.addVeh=prev;renderAdd()}else if(key==='opp')renderOpp();else if(key==='intel')renderIntel();else if(key==='q')renderQ();else if(key==='both')renderBoth();else renderVeh(VEH[key]);
+  qBanner();qBadge();
+  if(!keepScroll)window.scrollTo(0,0);
+}
+document.querySelectorAll('#vseg button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.v!==state.veh)switchTo(b.dataset.v)}));
+state.veh='';switchTo('both',true);
+})();
+
+</script>
+<!-- answers v31 -->
+</body>
+</html>
