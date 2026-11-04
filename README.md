@@ -2,7 +2,7 @@
 
 A free ledger for your cars and bikes. See every rupee your vehicle has cost, what needs attention, and what is coming up.
 
-Your data stays on your own phone. Nothing is uploaded anywhere.
+Your data stays on your own phone. Nothing is uploaded anywhere. The PDF reader loads a small reader program from the internet the first time you use it, but your PDF itself never leaves the phone.
 
 ## What it does
 
@@ -11,7 +11,12 @@ Your data stays on your own phone. Nothing is uploaded anywhere.
 - See cost per km, year by year and by category
 - **Intelligence:** service and tyre reminders, renewals coming up, and a 12-month cost forecast
 - **Questions:** keep track of things you still need to look up, and keep your answers as a record
-- **What if:** compare the cost with public transport or a cab
+- **What if:** what your kilometres cost, by year or month, with and without the purchase price, plus a cab or public transport comparison and a new-car calculator
+- **Keep or replace:** repairs per km over the years, against a new car, in rupees
+- **Monthly budget:** what is left this month, and a warning before a big bill
+- **Mileage warning:** flags a fill-up that is well below your usual
+- **Edit** any entry you added, instead of removing it and starting again
+- **Bills from PDFs:** choose a PDF or paste its text. The first time you add a bill from a shop, fill it in once and the app learns that shop's layout, so the next bill fills in by itself
 
 ## Start using it
 

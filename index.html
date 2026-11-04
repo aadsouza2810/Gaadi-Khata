@@ -266,6 +266,16 @@ textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var
 .fld select{font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:11px 12px;width:100%;-webkit-appearance:none;appearance:none}
 .fld input[type=search]{-webkit-appearance:none;appearance:none;min-height:44px}
 .fld input[type=text]{font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:10px 12px;width:100%}
+.cpk-ins{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:2px 14px;margin:0 0 16px}
+.cpk-ins div{padding:11px 0;font-size:14px;line-height:1.4;border-top:1px solid var(--line)}
+.cpk-ins div:first-child{border-top:0}
+.cpk-ins b{font-weight:600}
+.cpk-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--ink2);background:var(--track);border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.cpk-seg button{padding:7px 8px;font-size:13px}
+.cpk-st .stat .n{font-size:clamp(17px,5vw,26px);white-space:nowrap}
+.cpk-up{color:var(--red)}.cpk-dn{color:var(--green)}
+.cpk-res{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:15px}
+.cpk-res b{font-size:20px;white-space:nowrap;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .btnrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 [hidden]{display:none!important}
 .vseg button{padding:6px 10px}.vseg button[data-v=add]{font-weight:700;color:var(--acc,var(--blue))}
@@ -467,6 +477,7 @@ function normalise(p){
   if(p.qa&&typeof p.qa==='object')Object.keys(p.qa).forEach(k=>{const o=p.qa[k];if(o&&typeof o==='object')s.qa[k]={a:o.a==null?null:String(o.a),at:+o.at||0}});
   if(Array.isArray(p.qx))s.qx=p.qx.filter(x=>x&&x.id&&x.q).map(x=>({id:String(x.id),v:x.v||'all',q:String(x.q),at:+x.at||0}));
   if(p.opp&&typeof p.opp==='object'){s.opp=p.opp;s.oppAt=+p.oppAt||1}
+  if(p.set&&typeof p.set==='object'){s.set=p.set;s.setAt=+p.setAt||1}
   return s;
 }
 let STORE=EMPTY();
@@ -687,11 +698,11 @@ function recentList(v){
   const od=STORE.odo[v.key];
   if(!items.length&&!od)return '<div class="card"><p class="pkt" style="margin:0">Nothing added yet for the '+v.name+'. What you add shows up here, and you can remove it.</p></div>';
   return '<div class="list" style="padding:6px 16px">'
-   +(od?'<div class="frow"><div><b>Odometer reading</b><small>'+fmt(od.d)+' · '+inr(od.km)+' km</small></div><div class="fk"></div><button class="btn alt sm" data-del="o:'+v.key+'">Remove</button></div>':'')
-   +items.slice(0,40).map(x=>'<div class="frow"><div><b>'+x.t+'</b><small>'+fmt(x.d)+' · '+x.s+'</small></div><div class="fk"></div><button class="btn alt sm" data-del="'+x.id+'">Remove</button></div>').join('')+'</div>';
+   +(od?'<div class="frow"><div><b>Odometer reading</b><small>'+fmt(od.d)+' · '+inr(od.km)+' km</small></div><div class="fk"></div><button class="btn alt sm" data-edit="o:'+v.key+'">Edit</button><button class="btn alt sm" data-del="o:'+v.key+'">Remove</button></div>':'')
+   +items.slice(0,40).map(x=>'<div class="frow"><div><b>'+x.t+'</b><small>'+fmt(x.d)+' · '+x.s+'</small></div><div class="fk"></div><button class="btn alt sm" data-edit="'+x.id+'">Edit</button><button class="btn alt sm" data-del="'+x.id+'">Remove</button></div>').join('')+'</div>';
 }
 function bkText(){
-  return {t:'Your entries are saved on this device only. Download a backup file now and then, and always before you clear your browser data or change phone. Save each backup file to your phone’s Files app or to iCloud Drive, Google Drive or Dropbox, so it is kept even if the phone is lost.',c:'var(--ink2)'};
+  return {t:'Your entries are saved on this device only. Download a backup file now and then, and always before you clear your browser data or change phone.',c:'var(--ink2)'};
 }
 function backupCard(){
   const st=bkText();
@@ -714,24 +725,40 @@ function initFuel(v){
     if(km<=v.win.km0)return say('f_msg','That odometer is lower than where this record starts ('+inr(v.win.km0)+' km).',true);
     if(a<0)return say('f_msg','The amount can’t be negative.',true);
     STORE.fuel[v.key]=STORE.fuel[v.key]||[];
-    STORE.fuel[v.key].push({id:Date.now()+Math.floor(Math.random()*1000),d,km:Math.round(km),l:Math.round(l*100)/100,amt:Math.round(a*100)/100,full:$('f_full').checked});
+    if(EDIT&&EDIT.k==='f'){STORE.gone.push(String(EDIT.id));STORE.fuel[v.key]=STORE.fuel[v.key].filter(f=>String(f.id)!==String(EDIT.id))}
+    const nid=Date.now()+Math.floor(Math.random()*1000);
+    STORE.fuel[v.key].push({id:nid,d,km:Math.round(km),l:Math.round(l*100)/100,amt:Math.round(a*100)/100,full:$('f_full').checked});
+    const wasEdit=EDIT&&EDIT.k==='f';EDIT=null;
     const ok=saveStore();
+    const ma=mileageAlert(v),warn=ma&&ma.drop>=0.15&&String(ma.last.id)===String(nid)?' That is '+Math.round(ma.drop*100)+'% below your usual '+ma.usual.toFixed(1)+'. Check the tyre pressure, and see if the next tank is back to normal.':'';
     const m=mileageStats(getFuel(v));
     const _sf=sinceFull(getFuel(v)),_last=getFuel(v).slice().sort((a,b)=>b.km-a.km)[0];
-    flash('f_msg',ok?('Saved.'+(_last&&_sf[_last.id]?' '+inr(_sf[_last.id])+' km since the last full tank.':'')+(m.n?' Latest mileage: '+m.latest.toFixed(1)+' km per litre.':' Log one more full-tank fill-up to see mileage.')):'Could not save on this device.',!ok);
+    flash('f_msg',ok?((wasEdit?'Changes saved.':'Saved.')+(_last&&_sf[_last.id]?' '+inr(_sf[_last.id])+' km since the last full tank.':'')+(m.n?' Latest mileage: '+m.latest.toFixed(1)+' km per litre.':' Log one more full-tank fill-up to see mileage.')+warn):'Could not save on this device.',!ok||!!warn);
     refresh();
   });
   $('o_save').addEventListener('click',()=>{
     const km=parseFloat($('o_km').value),d=$('o_d').value;
     if(!d||!(km>0))return say('o_msg','Enter the reading and the date.',true);
-    if(km<effWin(v).km1)return say('o_msg','That is lower than the latest reading on file ('+inr(effWin(v).km1)+' km).',true);
+    const editing=EDIT&&EDIT.k==='o';
+    if(!editing&&km<effWin(v).km1)return say('o_msg','That is lower than the latest reading on file ('+inr(effWin(v).km1)+' km).',true);
+    if(editing){const old=STORE.odo[v.key];if(old&&old.id)STORE.gone.push(String(old.id))}
+    EDIT=null;
     STORE.odo[v.key]={id:'o'+Date.now(),d,km:Math.round(km)};
     const ok=saveStore();
     flash('o_msg',ok?'Saved. Your latest spending now counts in the cost per km.':'Could not save on this device.',!ok);
     refresh();
   });
 }
+let EDIT=null;
 function initRecent(v){
+  const $=id=>document.getElementById(id);
+  const go=(sec,btn,label,msg,text)=>{const b=$(btn);if(b)b.textContent=label;const m=$(msg);if(m){m.textContent=text;m.style.color='var(--blue)'}const e=$(sec);if(e)e.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})};
+  view.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
+    const [k,id]=b.dataset.edit.split(':');
+    if(k==='o'){const o=STORE.odo[id];if(!o)return;EDIT={k:'o',id:o.id};$('o_km').value=o.km;$('o_d').value=o.d;go('a_odo','o_save','Save changes','o_msg','Editing the reading of '+fmt(o.d)+'.')}
+    else if(k==='f'){const f=(STORE.fuel[v.key]||[]).find(x=>String(x.id)===id);if(!f)return;EDIT={k:'f',id:f.id};$('f_d').value=f.d;$('f_km').value=f.km;$('f_l').value=f.l;$('f_a').value=f.amt||'';$('f_full').checked=f.full!==false;go('a_fuel','f_save','Save changes','f_msg','Editing the fill-up of '+fmt(f.d)+'.')}
+    else if(k==='x'){const e=(STORE.exp[v.key]||[]).find(x=>String(x.id)===id);if(!e)return;EDIT={k:'x',id:e.id,vk:v.key};$('x_v').value=v.key;$('x_d').value=e.d;$('x_t').value=e.t;$('x_km').value=e.km||'';$('x_title').value=e.title;$('x_c').value=e.cat;$('x_n').value=e.note||'';go('xform','x_save','Save changes','x_msg','Editing “'+e.title+'”.')}
+  }));
   view.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{
     const [k,id]=b.dataset.del.split(':');
     if(k==='o'){const o=STORE.odo[id];if(o&&o.id)STORE.gone.push(String(o.id));delete STORE.odo[id]}
@@ -789,7 +816,7 @@ function renderAdd(){
    +'<section id="a_bk"><h2>Backup and restore</h2>'+backupCard()+'</section>';
   foot.textContent='Fuel, odometer and expense entries are saved in your browser on this device only.';
   curKeys=[v.key];
-  view.querySelectorAll('[data-av]').forEach(b=>b.addEventListener('click',()=>{state.addVeh=b.dataset.av;renderAdd()}));
+  view.querySelectorAll('[data-av]').forEach(b=>b.addEventListener('click',()=>{state.addVeh=b.dataset.av;EDIT=null;renderAdd()}));
   initFuel(v);initAdd(v);initRecent(v);initBackup();
   if(FLASH){const e=document.getElementById(FLASH.id);if(e){e.textContent=FLASH.text;e.style.color=FLASH.bad?'var(--red)':'var(--green)'}FLASH=null}
 }
@@ -804,6 +831,143 @@ function mileageTable(){
 
 /* ================= ADD EXPENSES: TYPE IT,  ================= */
 const CAT_ORDER=['service','engine','brakes','susp','clutch','chain','battery','ac','body','labour','acc','ins','warr','buy','fuel','toll','puc','wash','nobill','other'];
+const REGS={};Object.values(VEH).forEach(v=>{if(v.reg)REGS[v.reg.replace(/\s+/g,'')]=v.key});
+const MONI={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+const pad2=n=>String(n).padStart(2,'0');
+const isoOf=(y,m,d)=>{y=+y;m=+m;d=+d;if(y<100)y+=2000;if(m<1||m>12||d<1||d>31||y<2015||y>2035)return null;return y+'-'+pad2(m)+'-'+pad2(d)};
+function findDates(s){
+  const out=[];let m;
+  const r1=/(?<!\d)(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4}|\d{2})(?!\d)/g;
+  while((m=r1.exec(s))){const x=isoOf(m[3],m[2],m[1]);if(x)out.push(x)}
+  const r2=/(?<!\d)(\d{1,2})(?:st|nd|rd|th)?[ \t\-]*([A-Za-z]{3})[a-z]*\.?[ \t\-,]*(\d{4}|\d{2})(?!\d)/g;
+  while((m=r2.exec(s))){const mo=MONI[m[2].toLowerCase()];if(mo){const x=isoOf(m[3],mo,m[1]);if(x)out.push(x)}}
+  return out;
+}
+const toNum=s=>{const n=parseFloat(String(s).replace(/[₹,\s]/g,''));return isNaN(n)?null:n};
+const cap=(t,re)=>{const m=re.exec(t);return m?m[1]:null};
+const regVeh=t=>{for(const r in REGS){if(t.indexOf(r)>=0)return REGS[r]}return null};
+const dayDiff=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);
+function gstTotal(t){
+  const toks=(t.match(/\d[\d,]*\.\d{2}|(?<![\d.])\d{3,6}(?![\d.])/g)||[]).map(toNum).filter(x=>x&&x>=50);
+  let best=null;
+  toks.forEach(a=>toks.forEach(x=>{if(x>a&&Math.abs(a*1.18-x)<=1.01&&(best===null||x>best))best=x}));
+  return best;
+}
+function wordsToNum(s){
+  if(!s)return null;
+  const U={ZERO:0,ONE:1,TWO:2,THREE:3,FOUR:4,FIVE:5,SIX:6,SEVEN:7,EIGHT:8,NINE:9,TEN:10,ELEVEN:11,TWELVE:12,THIRTEEN:13,FOURTEEN:14,FIFTEEN:15,SIXTEEN:16,SEVENTEEN:17,EIGHTEEN:18,NINETEEN:19,TWENTY:20,THIRTY:30,FORTY:40,FIFTY:50,SIXTY:60,SEVENTY:70,EIGHTY:80,NINETY:90};
+  let total=0,cur=0;
+  for(const w of s.toUpperCase().split(/\s+/).filter(Boolean)){
+    if(w in U)cur+=U[w];
+    else if(w==='HUNDRED')cur*=100;
+    else if(w==='THOUSAND'){total+=cur*1000;cur=0}
+    else if(w==='LAKH'||w==='LAKHS'){total+=cur*100000;cur=0}
+    else if(w==='AND')continue;
+    else return null;
+  }
+  return total+cur||null;
+}
+function periodStart(t){
+  const ds=[...new Set(findDates(t))].sort();
+  let best=null;
+  for(const s of ds)for(const e of ds){const n=dayDiff(s,e);if(n>=360&&n<=367&&(!best||s>best.s))best={s,e}}
+  return best?{s:best.s,e:best.e,all:ds}:{s:null,e:null,all:ds};
+}
+const PARSERS=[];
+let PDFJS=null;
+function loadPdfJs(){
+  if(PDFJS)return PDFJS;
+  const CDN='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/';
+  const umd=()=>new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=CDN+'3.11.174/pdf.min.js';
+    sc.onload=()=>{try{window.pdfjsLib.GlobalWorkerOptions.workerSrc=CDN+'3.11.174/pdf.worker.min.js';res(window.pdfjsLib)}catch(e){rej(new Error('load'))}};
+    sc.onerror=()=>rej(new Error('load'));document.head.appendChild(sc)});
+  PDFJS=import(CDN+'4.0.379/pdf.min.mjs').then(m=>{m.GlobalWorkerOptions.workerSrc=CDN+'4.0.379/pdf.worker.min.mjs';return m}).catch(umd).catch(e=>{PDFJS=null;throw new Error('load')});
+  return PDFJS;
+}
+async function pdfText(file){
+  const lib=await loadPdfJs();const buf=await file.arrayBuffer();
+  const doc=await lib.getDocument({data:new Uint8Array(buf),isEvalSupported:false}).promise;
+  const out=[];
+  for(let p=1;p<=Math.min(doc.numPages,6);p++){
+    const pg=await doc.getPage(p),tc=await pg.getTextContent(),rows=[];
+    tc.items.forEach(it=>{if(!it.str||!it.str.trim())return;const y=it.transform[5],x=it.transform[4];let r=rows.find(r=>Math.abs(r.y-y)<=3);if(!r){r={y,it:[]};rows.push(r)}r.it.push({x,s:it.str.trim()})});
+    rows.sort((a,b)=>b.y-a.y).forEach(r=>out.push(r.it.sort((a,b)=>a.x-b.x).map(i=>i.s).join(' ')));
+  }
+  return out.join('\n');
+}
+/* learned bill formats: the layout of a shop's bill, never your amounts */
+const getSet=()=>Object.assign({bud:{},lf:[]},STORE.set||{});
+function putSet(patch){STORE.set=Object.assign(getSet(),patch);STORE.setAt=Date.now();return saveStore()}
+const GSTRE=/\b\d{2}[A-Z]{5}\d{4}[A-Z][0-9A-Z]Z[0-9A-Z]\b/;
+function docSig(t){
+  const g=(t.toUpperCase().match(GSTRE)||[])[0]||'';
+  const h=(t.split('\n').map(x=>x.replace(/[^A-Za-z& ]/g,' ').replace(/\s+/g,' ').trim()).find(x=>x.replace(/[^A-Za-z]/g,'').length>=5&&!/^(TAX )?INVOICE|^BILL|^RECEIPT|^ORIGINAL|^DUPLICATE|^PAGE/i.test(x))||'').toUpperCase().slice(0,40);
+  return {g,h};
+}
+const sigSame=(a,b)=>(a.g&&b.g)?a.g===b.g:(!!a.h&&a.h===b.h);
+const lfNote=()=>{const n=getSet().lf.length;return n?'I’ve learned '+n+' bill format'+(n>1?'s':'')+' from you: '+getSet().lf.map(f=>f.name).slice(0,6).join(', ')+(n>6?' and more':'')+'.':'PDFs from garages and insurers read best, because the text is already inside them. When I don’t know a format, fill in the details once and I’ll learn it.'};
+function numHits(ln){const out=[],re=/\d[\d,]*(?:\.\d{1,2})?/g;let m;while((m=re.exec(ln)))out.push({i:m.index,len:m[0].length,n:toNum(m[0])});return out}
+function dateHits(ln){const out=[],re=/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|\d{1,2}(?:st|nd|rd|th)?[ \-]*[A-Za-z]{3}[a-z]*\.?[ \-,]*\d{2,4}/g;let m;while((m=re.exec(ln)))out.push({i:m.index,len:m[0].length,d:findDates(m[0])[0]});return out}
+function labelAt(ln,i,len){
+  const bef=ln.slice(0,i).replace(/(Rs\.?|INR|₹|[:\-=]|\s)+$/i,'');
+  const m=/([A-Za-z][A-Za-z.#\/]*(?:\s+[A-Za-z][A-Za-z.#\/]*){0,3})$/.exec(bef);
+  if(m&&m[1].replace(/[^A-Za-z]/g,'').length>=2)return {lab:m[1].trim(),after:false};
+  const a=/^\s*([A-Za-z]{2,12})/.exec(ln.slice(i+len));
+  return a?{lab:a[1],after:true}:null;
+}
+function anchorOf(t,val,kind){
+  if(val==null||val==='')return null;
+  const cands=[];
+  t.split('\n').forEach(ln=>{
+    const hits=kind==='d'?dateHits(ln).filter(h=>h.d===val):numHits(ln).filter(h=>h.n!=null&&Math.abs(h.n-val)<=(kind==='t'?1:0));
+    hits.forEach(h=>{const a=labelAt(ln,h.i,h.len);if(a)cands.push(a)});
+  });
+  if(!cands.length)return null;
+  if(kind==='t'){const pr=cands.filter(a=>/total|payable|net|amount|grand|premium/i.test(a.lab));return pr.length?pr[pr.length-1]:cands[cands.length-1]}
+  if(kind==='km'){const pr=cands.filter(a=>/km|odo|reading|kms/i.test(a.lab));return pr[0]||cands[0]}
+  const pr=cands.filter(a=>/date|dt|dated/i.test(a.lab));return pr[0]||cands[0];
+}
+function byAnchor(t,a,kind){
+  if(!a)return null;
+  const esc=a.lab.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+');
+  const lines=t.split('\n');
+  for(let k=lines.length-1,i0=0;i0<lines.length;i0++){
+    const i=kind==='t'?lines.length-1-i0:i0,ln=lines[i];
+    if(a.after){const m=new RegExp('(\\d[\\d,]*(?:\\.\\d{1,2})?)\\s*'+esc+'\\b','i').exec(ln);if(m)return toNum(m[1]);continue}
+    const re=new RegExp(esc,'i'),m=re.exec(ln);if(!m)continue;
+    const rest=ln.slice(m.index+m[0].length);
+    if(kind==='d'){const d=findDates(rest)[0];if(d)return d;continue}
+    const n=/^[^\d\n]{0,25}?(\d[\d,]*(?:\.\d{1,2})?)/.exec(rest);if(n)return toNum(n[1]);
+  }
+  return null;
+}
+const titleCase=s=>s.toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
+function learnFormat(t,x){
+  const sig=docSig(t);if(!sig.g&&!sig.h)return null;
+  const a={t:anchorOf(t,x.t,'t'),d:anchorOf(t,x.d,'d'),km:x.km?anchorOf(t,x.km,'km'):null};
+  if(!a.t&&!a.d)return null;
+  const S=getSet(),lf=S.lf.filter(f=>!sigSame(f,sig));
+  const old=S.lf.find(f=>sigSame(f,sig));
+  const f={g:sig.g,h:sig.h,name:old?old.name:(titleCase(sig.h)||'this shop'),veh:x.veh,cat:x.cat,title:x.title,a,n:(old?old.n:0)+1,at:Date.now()};
+  lf.unshift(f);putSet({lf:lf.slice(0,40)});
+  return f;
+}
+function readLearned(t){
+  const sig=docSig(t),f=getSet().lf.find(x=>sigSame(x,sig));if(!f)return null;
+  const tt=byAnchor(t,f.a.t,'t'),d=byAnchor(t,f.a.d,'d'),km=byAnchor(t,f.a.km,'km');
+  return {label:'a format you taught me ('+f.name+', '+f.n+' bill'+(f.n>1?'s':'')+')',veh:regVeh(t)||f.veh,d,t:tt,title:f.title,cat:f.cat,km:km&&km>100?km:null,no:null,note:'',learned:f};
+}
+function guessDoc(t){
+  const ds=findDates(t).filter(d=>d>='2015-01-01'&&d<=todayStr()).sort();
+  let tot=null;t.split('\n').forEach(ln=>{if(/total|payable|grand|net amount/i.test(ln)){const h=numHits(ln).filter(x=>x.n>=50);if(h.length)tot=h[h.length-1].n}});
+  const km=toNum(cap(t,/(?:KMS?|Odometer|KM Reading)\D{0,12}(\d[\d,]{2,9})/i));
+  return {d:ds[ds.length-1]||null,t:tot,km,veh:regVeh(t)};
+}
+function readDoc(raw){
+  const t=raw.replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ');
+  for(const p of PARSERS){try{const r=p(t);if(r)return r}catch(e){}}
+  return null;
+}
 function dupOf(vk,d,t,no){
   const v=VEH[vk];if(!v)return null;
   return allBills(v).find(b=>(d&&b.d===d&&Math.abs(b.t-t)<1.5)||(no&&b.noText&&b.noText.indexOf(no)>=0&&Math.abs(b.t-t)<1.5))||null;
@@ -811,7 +975,13 @@ function dupOf(vk,d,t,no){
 function expForm(v){
   const opts=CAT_ORDER.map(k=>'<option value="'+k+'">'+CATS[k].n+'</option>').join('');
   const vopts=Object.values(VEH).map(x=>'<option value="'+x.key+'"'+(x.key===v.key?' selected':'')+'>'+x.name+'</option>').join('');
-  return '<section id="add"><h2>Add an expense</h2><p class="lede">Type in what you paid. It counts in the reports straight away.</p>'
+  return '<section id="add"><h2>Add an expense</h2><p class="lede">Type it in, or choose a PDF or paste text from a bill.</p>'
+   +'<div class="card"><b style="font-size:17px">Read a bill</b>'
+   +'<p class="pkt" style="margin:6px 0 12px">Choose a PDF, or paste the text from an invoice, policy or receipt. The first time you add a bill from a shop, fill in the details yourself and I learn how that shop’s bill is laid out, so the next one fills in by itself.</p>'
+   +'<textarea class="bk" id="d_txt" rows="4" placeholder="Paste text here"></textarea>'
+   +'<div class="btnrow"><button class="btn" id="d_read">Read it</button><label class="btn alt" for="d_pdf" style="display:inline-block">Choose a PDF</label><input type="file" id="d_pdf" accept="application/pdf,.pdf" hidden><span class="fmsg" id="d_msg"></span></div>'
+   +'<p class="pkt" style="margin:10px 0 0" id="d_lf">'+lfNote()+'</p>'
+   +'<div id="d_unk" class="caveat" hidden style="margin-top:12px"><p style="margin:0">I don’t recognise this format yet. Fill in the details below and tap Save expense, and I’ll learn it, so the next bill from the same place fills in by itself.</p></div></div>'
    +'<div class="card" id="xform" style="margin-top:12px"><b style="font-size:17px">Expense details</b><div class="flds" style="margin-top:12px">'
    +'<label class="fld">Vehicle<select id="x_v">'+vopts+'</select></label>'
    +'<label class="fld">Date<input type="date" id="x_d" value="'+todayStr()+'"></label>'
@@ -824,19 +994,67 @@ function expForm(v){
 }
 function initAdd(v){
   const $=id=>document.getElementById(id);
-  let src='typed',dupAsked=false;
+  let src='typed',dupAsked=false,pending=null,lastDoc=null;
   const say=(id,t,bad)=>{const e=$(id);if(e){e.textContent=t;e.style.color=bad?'var(--red)':'var(--green)'}};
+  function fillDraft(r,how){
+    if(r.veh&&VEH[r.veh])$('x_v').value=r.veh;
+    $('x_d').value=r.d||'';
+    $('x_t').value=r.t!=null?r.t:'';
+    $('x_km').value=r.km||'';
+    $('x_title').value=r.title||'';
+    if(r.cat&&CATS[r.cat])$('x_c').value=r.cat;
+    $('x_n').value=(r.note||'').trim();
+    src=how;dupAsked=false;
+    const miss=[];if(!r.d)miss.push('the date');if(r.t==null)miss.push('the amount');
+    let m=(how==='claude'?'Read by Claude':'Recognised: '+r.label)+'. Check the details below, then tap Save expense.'+(r.learned?' If anything is wrong, correct it before saving and I’ll update what I learned.':'');
+    if(miss.length)m+=' I couldn’t find '+miss.join(' or ')+'.';
+    const dup=(r.d&&r.t!=null)?dupOf($('x_v').value,r.d,r.t,r.no):null;
+    if(dup)m+=' This looks like “'+dup.title+'” which you already have.';
+    say('d_msg',m,!!(miss.length||dup));
+    $('xform').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
+  }
+  function readNow(){
+    $('d_unk').hidden=true;if($('d_conf'))$('d_conf').hidden=true;lastDoc=null;
+    const txt=$('d_txt').value.trim();
+    if(!txt)return say('d_msg','Paste some text first.',true);
+    const r=readDoc(txt);
+    if(r){fillDraft(r,'free');return}
+    const l=readLearned(txt);
+    lastDoc=txt;
+    if(l){fillDraft(l,'free');return}
+    say('d_msg','',false);$('d_unk').hidden=false;
+    const g=guessDoc(txt);
+    if(g.d)$('x_d').value=g.d;if(g.t!=null)$('x_t').value=g.t;if(g.km)$('x_km').value=g.km;if(g.veh&&VEH[g.veh])$('x_v').value=g.veh;
+  }
+  $('d_read').addEventListener('click',readNow);
+  $('d_pdf').addEventListener('change',async()=>{
+    const f=$('d_pdf').files&&$('d_pdf').files[0];if(!f)return;
+    say('d_msg','Reading the PDF…',false);$('d_msg').style.color='var(--ink2)';
+    try{
+      const t=await pdfText(f);
+      if(!t||t.replace(/\s/g,'').length<20){say('d_msg','This PDF is a scanned picture with no text inside. Use a photo with Claude below, or type it in.',true);return}
+      $('d_txt').value=t;readNow();
+    }catch(e){say('d_msg',e&&e.message==='load'?'Couldn’t load the PDF reader. Check your internet connection and try again.':'Couldn’t read this PDF. Copy its text and paste it above instead.',true)}
+    finally{$('d_pdf').value=''}
+  });
   $('x_save').addEventListener('click',()=>{
     const vk=$('x_v').value,d=$('x_d').value,t=parseFloat($('x_t').value),km=parseFloat($('x_km').value)||null,cat=$('x_c').value;
     let title=$('x_title').value.trim();
     if(!d)return say('x_msg','Pick a date.',true);
     if(!(t>0))return say('x_msg','Enter the amount.',true);
     if(!title)title=CATS[cat].n;
-    const dup=dupOf(vk,d,t,null);
+    const editing=EDIT&&EDIT.k==='x';
+    const dup=editing?null:dupOf(vk,d,t,null);
     if(dup&&!dupAsked){dupAsked=true;return say('x_msg','This matches “'+dup.title+'” on '+fmt(dup.d)+'. Tap Save again to add it anyway.',true)}
+    let oldSrc=null;
+    if(editing){const ov=EDIT.vk;const old=(STORE.exp[ov]||[]).find(e=>String(e.id)===String(EDIT.id));if(old)oldSrc=old.src;STORE.gone.push(String(EDIT.id));STORE.exp[ov]=(STORE.exp[ov]||[]).filter(e=>String(e.id)!==String(EDIT.id))}
+    EDIT=null;
     STORE.exp[vk]=STORE.exp[vk]||[];
-    STORE.exp[vk].push({id:Date.now()+Math.floor(Math.random()*1000),d,t:Math.round(t*100)/100,title:title.slice(0,80),cat,km:km?Math.round(km):null,note:$('x_n').value.trim().slice(0,200),src});
-    flash('x_msg',saveStore()?'Saved to the '+VEH[vk].name+'. It now counts in the reports.':'Could not save on this device.');
+    STORE.exp[vk].push({id:Date.now()+Math.floor(Math.random()*1000),d,t:Math.round(t*100)/100,title:title.slice(0,80),cat,km:km?Math.round(km):null,note:$('x_n').value.trim().slice(0,200),src:editing&&oldSrc?oldSrc:src});
+    let learnt='';
+    if(lastDoc&&!editing){const f=learnFormat(lastDoc,{veh:vk,d,t,km,cat,title});if(f)learnt=' I’ve learned the '+f.name+' format, so the next bill like it fills in by itself.'}
+    lastDoc=null;
+    flash('x_msg',saveStore()?(editing?'Changes saved.':'Saved to the '+VEH[vk].name+'. It now counts in the reports.')+learnt:'Could not save on this device.');
     refresh();
   });
 }
@@ -845,7 +1063,7 @@ function initAdd(v){
 /* ================= BACKUP FILE ================= */
 const BK={state:'off',at:null,msg:'',ref:null,pushing:false,dirty:false,timer:null,force:false,lastSig:null,lastManual:0};
 try{BK.lastManual=+localStorage.getItem('vehicleLedger.lastBackup')||0}catch(e){}
-const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
+const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(s.setAt?'$'+s.setAt:'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
 const hasData=s=>storeSig(Object.assign(EMPTY(),s,{gone:[]}))!=='#';
 function mergeStores(a,b){
   const gone=new Set([...(a.gone||[]),...(b.gone||[])].map(String));
@@ -853,6 +1071,7 @@ function mergeStores(a,b){
   Object.keys(Object.assign({},a.qa,b.qa)).forEach(k=>{const x=(a.qa||{})[k],y=(b.qa||{})[k];out.qa[k]=!x?y:!y?x:(x.at>=y.at?x:y)});
   const qm=new Map();[...(a.qx||[]),...(b.qx||[])].forEach(x=>{if(!gone.has(x.id))qm.set(x.id,x)});out.qx=[...qm.values()];
   const oa=(a.oppAt||0)>=(b.oppAt||0)?a:b;if(oa.opp){out.opp=oa.opp;out.oppAt=oa.oppAt||1}
+  const sa=(a.setAt||0)>=(b.setAt||0)?a:b;if(sa.set){out.set=sa.set;out.setAt=sa.setAt||1}
   for(const k of ['altis','ntorq','scr']){
     for(const part of ['fuel','exp']){
       const m=new Map();
@@ -1129,7 +1348,7 @@ function renderBoth(){
   const vs=Object.values(VEH);
   const totals=vs.map(totalOf),TOTAL=totals.reduce((x,y)=>x+y,0);
   view.style.setProperty('--acc','var(--blue)');
-  nav.innerHTML='<a href="#top">Overview</a><a href="#find">Search</a><a href="#split">By vehicle</a><a href="#perkm">Cost per km</a><a href="#bills">All bills</a>';
+  nav.innerHTML='<a href="#top">Overview</a><a href="#budget">This month</a><a href="#find">Search</a><a href="#split">By vehicle</a><a href="#perkm">Cost per km</a><a href="#bills">All bills</a>';
   const nBills=vs.reduce((a,v)=>a+v.B.length,0);
   const allDates=vs.flatMap(v=>v.B.map(b=>b.d)).sort();
   const mm=s=>MON[+s.slice(5,7)-1]+' '+s.slice(0,4);
@@ -1138,6 +1357,7 @@ function renderBoth(){
   const legend=vs.map(v=>'<span><span class="dot" style="background:'+v.acc+';width:8px;height:8px"></span>'+v.name+'</span>').join('');
   view.innerHTML=bkBanner()+
    '<header class="hero"><h1>Every rupee across all your vehicles.</h1><p>'+nBills+' entries, '+allDates[0].slice(0,4)+' to '+mm(allDates[allDates.length-1])+'.</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+vs.map((v,i)=>'₹'+inr(totals[i])+' '+v.name).join(' + ')+'</div><div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
+   +budgetSection()
    +'<section id="find"><h2>Search</h2><div class="card"><label class="fld"><span>Find a bill or payment</span><input type="search" id="q" placeholder="e.g. tyre, 4000, service, 2025" autocomplete="off" enterkeyhint="search"></label><p class="fn" id="qn" style="margin:10px 0 0"></p></div><div class="list" id="qres" hidden style="margin-top:12px"></div></section>'
    +'<section id="split"><h2>By vehicle</h2><p class="lede">Share of the total: '+shares+'. All include their purchase price. Tap a vehicle to open it.</p><div class="split">'+vs.map((v,i)=>card(v,totals[i])).join('')+'</div></section>'
    +perKmTable()
@@ -1152,7 +1372,47 @@ function renderBoth(){
   view.querySelectorAll('.vcard').forEach(c=>c.addEventListener('click',()=>switchTo(c.dataset.v)));
   buildSeg();renderBills();
   const qi=document.getElementById('q');if(qi){qi.addEventListener('input',runSearch);runSearch()}
-  wireBanner();
+  wireBanner();initBudget();
+}
+
+/* ================= MONTHLY BUDGET ================= */
+function monthSpend(v,mk){
+  let s=0;const now=todayStr();
+  allBills(v).forEach(b=>{if(!b.d||b.d.slice(0,7)!==mk||b.d>now)return;s+=(b.t||0)-((b.c||{}).buy||0)});
+  (v.W||[]).concat(getFuel(v),bfMonths(v)).forEach(x=>{if(x.d&&x.d.slice(0,7)===mk&&x.d<=now)s+=x.t||0});
+  return s;
+}
+function budgetSection(){
+  const B=getSet().bud||{},vs=Object.values(VEH),mk=cpkMonthsBack(0),now=new Date();
+  const dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),day=now.getDate(),left=dim-day;
+  const sp={};vs.forEach(v=>sp[v.key]=monthSpend(v,mk));const tot=vs.reduce((a,v)=>a+sp[v.key],0);
+  const usual=(()=>{let a=0;for(let i=1;i<=12;i++){const m=cpkMonthsBack(i);vs.forEach(v=>a+=monthSpend(v,m))}return a/12})();
+  const ints=vs.map(intelFor),lim=dAdd(todayStr(),2);
+  const due=ints.flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date<=dAdd(todayStr(),2)).sort((a,b)=>a.date<b.date?-1:1);
+  const thisM=due.filter(r=>r.date.slice(0,7)===mk||r.date<todayStr());
+  const ahead=thisM.reduce((a,r)=>a+r.amt,0);
+  const bar=(spent,bud,col)=>{const w=bud?Math.min(100,spent/bud*100):0,over=bud&&spent>bud;return '<div style="height:8px;border-radius:99px;background:var(--track);overflow:hidden;margin-top:8px"><i style="display:block;height:100%;width:'+w+'%;background:'+(over?'var(--red)':col)+';border-radius:99px"></i></div>'};
+  const total=+B.all||0,mname=MON[now.getMonth()]+' '+now.getFullYear();
+  let head;
+  if(total){
+    const rem=total-tot,pace=day>=5?tot/day*dim:null;
+    let say=rem>=0?'<b>'+cr(rem)+' left</b> for the '+left+' days to go.':'<b class="cpk-up">'+cr(-rem)+' over</b> budget, with '+left+' days to go.';
+    if(rem>=0&&ahead&&ahead>rem)say+=' The bills due this month (about '+cr(ahead)+') would take you <b class="cpk-up">'+cr(ahead-rem)+' over</b>.';
+    else if(rem>=0&&pace&&pace>total*1.1)say+=' At this month’s pace you’d end near '+cr(pace)+'.';
+    head='<div class="cpk-res" style="border-top:0;margin:0;padding:0"><span>'+mname+': '+cr(tot)+' of '+cr(total)+'</span><b style="font-size:17px">'+Math.round(tot/total*100)+'%</b></div>'+bar(tot,total,'var(--blue)')+'<p class="pkt" style="margin:10px 0 0">'+say+'</p>';
+  }else head='<p class="pkt" style="margin:0">'+mname+' so far: <b>'+cr(tot)+'</b>. Your usual month over the last year is about '+cr(usual)+'. Set a budget and I’ll tell you how much is left and warn you before a big bill.</p>';
+  const per=vs.map(v=>{const b=+B[v.key]||0;return '<div style="margin-top:12px"><div class="cpk-res" style="border-top:0;margin:0;padding:0;font-size:14px"><span>'+v.name+'</span><span>'+cr(sp[v.key])+(b?' of '+cr(b):'')+'</span></div>'+(b?bar(sp[v.key],b,v.acc):'')+'</div>'}).join('');
+  const up=due.length?'<h4 style="margin:18px 0 6px;font-size:15px">Bills coming in the next two months</h4>'+kv(due.slice(0,6).map(r=>[r.title+' <small style="color:var(--ink2)">'+(r.date<=todayStr()?'now':dMon(r.date))+'</small>','about '+cr(r.amt)])):'';
+  const num=(id,l,v)=>'<label class="fld">'+l+'<input type="number" inputmode="numeric" id="'+id+'" step="500" value="'+(v||'')+'" placeholder="Not set"></label>';
+  return '<section id="budget"><h2>This month</h2><p class="lede">Everything you spend on the vehicles, except buying them: fuel, bills, accessories, insurance and washing.</p><div class="card">'+head+per+up
+   +'<details style="margin-top:16px"'+(total?'':' open')+'><summary class="pkt" style="cursor:pointer">'+(total?'Change the budget':'Set a monthly budget')+'</summary><div class="flds" style="margin-top:12px">'+num('bg_all','All vehicles (₹ a month)',total)+vs.map(v=>num('bg_'+v.key,v.name+' (optional)',B[v.key])).join('')+'</div>'
+   +'<div class="btnrow"><button class="btn" id="bg_save">Save budget</button>'+(total?'':'<button class="btn alt" id="bg_use" data-v="'+Math.round(usual/500)*500+'">Use '+cr(Math.round(usual/500)*500)+'</button>')+'<span class="fmsg" id="bg_msg"></span></div></details></div></section>';
+}
+function initBudget(){
+  const $=id=>document.getElementById(id);if(!$('bg_save'))return;
+  const save=()=>{const b={};['all'].concat(Object.keys(VEH)).forEach(k=>{const x=parseFloat($('bg_'+k).value);if(x>0)b[k]=Math.round(x)});putSet({bud:b});refresh()};
+  $('bg_save').addEventListener('click',save);
+  const u=$('bg_use');if(u)u.addEventListener('click',()=>{$('bg_all').value=u.dataset.v;save()});
 }
 
 /* ================= WHAT IF (opportunity cost) ================= */
@@ -1207,9 +1467,32 @@ function oppResults(){
    +'<p class="fn">All in today’s money. Owning is what you spent, minus resale, plus what that money would have earned. Public transport and Uber use each month’s km at that month’s fare, with the same market returns applied to the fare you would have saved.</p>';
   return head+cmp+cs.map(c=>oppCard(c,o)).join('');
 }
+function monthKm(v){
+  const b=BF[v.key];if(!b)return [];
+  const T=d=>new Date(d+'T00:00:00').getTime();
+  let pts=[{d:b.d0,km:b.k0}];
+  v.B.filter(x=>x.km&&x.d>b.d0&&x.d<b.d1).sort((x,y)=>x.d.localeCompare(y.d)||x.km-y.km).forEach(x=>{const l=pts[pts.length-1];if(x.km>l.km&&x.km<b.k1&&x.d>l.d)pts.push({d:x.d,km:x.km})});
+  pts.push({d:b.d1,km:b.k1});
+  const more=getFuel(v).filter(f=>f.km).map(f=>({d:f.d,km:f.km}));
+  const o=(STORE.odo||{})[v.key];if(o&&o.km)more.push({d:o.d,km:o.km});
+  getExp(v).filter(e=>e.km).forEach(e=>more.push({d:e.d,km:e.km}));
+  more.filter(x=>x.d>b.d1).sort((x,y)=>x.d.localeCompare(y.d)||x.km-y.km).forEach(x=>{const l=pts[pts.length-1];if(x.km>l.km&&x.d>l.d)pts.push(x)});
+  const e=pts[pts.length-1];
+  const kmAt=t=>{if(t<=T(pts[0].d))return pts[0].km;for(let i=1;i<pts.length;i++){const a=pts[i-1],c=pts[i];if(t<=T(c.d))return a.km+(c.km-a.km)*(t-T(a.d))/(T(c.d)-T(a.d))}return e.km};
+  const out=[];let y=+b.d0.slice(0,4),m=+b.d0.slice(5,7),prev=b.k0;
+  for(;;){
+    const nx=m===12?[y+1,1]:[y,m+1];
+    const ns=nx[0]+'-'+String(nx[1]).padStart(2,'0')+'-01';
+    const last=T(ns)>T(e.d);
+    const km=last?e.km:Math.round(kmAt(T(ns)));
+    out.push({month:y+'-'+String(m).padStart(2,'0'),km:km-prev});
+    prev=km;if(last)break;y=nx[0];m=nx[1];
+  }
+  return out;
+}
 function kmTables(){
   const vs=Object.values(VEH);const by={};
-  vs.forEach(v=>bfMonths(v).forEach(m=>{(by[m.month]=by[m.month]||{})[v.key]=m.km}));
+  vs.forEach(v=>monthKm(v).forEach(m=>{(by[m.month]=by[m.month]||{})[v.key]=m.km}));
   const months=Object.keys(by).sort();
   const yr={};months.forEach(m=>{const y=m.slice(0,4);yr[y]=yr[y]||{};vs.forEach(v=>{yr[y][v.key]=(yr[y][v.key]||0)+(by[m][v.key]||0)})});
   const row=(l,r)=>'<tr><td>'+l+'</td>'+vs.map(v=>'<td>'+(r[v.key]?inr(r[v.key]):'—')+'</td>').join('')+'<td><b>'+inr(vs.reduce((a,v)=>a+(r[v.key]||0),0))+'</b></td></tr>';
@@ -1233,6 +1516,13 @@ const dFmt=s=>{const p=s.split('-');return (+p[2])+' '+MON[+p[1]-1]+' '+p[0]};
 const dMon=s=>{const p=s.split('-');return MON[+p[1]-1]+' '+p[0]};
 const dDiff=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
 function odoNow(v){let k=(BF[v.key]||{}).k1||0;allBills(v).concat(getFuel(v)).forEach(e=>{if(e.km&&e.km>k)k=e.km});const o=(STORE.odo||{})[v.key];if(o&&o.km>k)k=o.km;return k}
+function mileageAlert(v){
+  const m=mileageStats(getFuel(v));if(!m.n)return null;
+  const last=m.segs[m.segs.length-1],prev=m.segs.slice(0,-1).map(x=>x.kmpl).sort((a,b)=>a-b);
+  if(prev.length<3)return null;
+  const usual=prev[Math.floor(prev.length/2)];
+  return {last,usual,n:prev.length,drop:(usual-last.kmpl)/usual};
+}
 function intelFor(v){
   const t=todayStr(),cfg=IV[v.key],odo=odoNow(v),bills=allBills(v).filter(b=>b.d&&b.c&&!b.pk);
   const cat=(c,min)=>bills.filter(b=>(b.c[c]||0)>(min||0)).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
@@ -1245,8 +1535,8 @@ function intelFor(v){
     const mo=dDiff(sv.d,t)/30.44,ks=sv.km?odo-sv.km:null,due=dAdd(sv.d,cfg.sm);
     const ratio=Math.max(mo/cfg.sm,ks!=null?ks/cfg.sk:0);
     const base='Last service '+dFmt(sv.d)+(sv.km?' at '+inr(sv.km)+' km':'')+'. ';
-    if(ratio>=1)attn.push({v,sev:ratio>=1.25?'bad':'warn',title:v.name+' service '+(ratio>=1.25?'is overdue':'is due'),text:base+(ks!=null?'About '+km(ks)+' km and ':'')+Math.round(mo)+' months since then. Your usual gap is '+cfg.sm+' months or '+inr(cfg.sk)+' km.',why:'Based on your last real service bill and the latest odometer',pill:ratio>=1.25?'Overdue':'Due'});
-    else soon.push({v,date:due,title:v.name+' next service',text:base+'Next by '+dFmt(due)+(sv.km?' or '+inr(sv.km+cfg.sk)+' km, whichever comes first.':'.'),pill:dMon(due)});
+    if(ratio>=1)attn.push({v,amt:sv.t,date:t,sev:ratio>=1.25?'bad':'warn',title:v.name+' service '+(ratio>=1.25?'is overdue':'is due'),text:base+(ks!=null?'About '+km(ks)+' km and ':'')+Math.round(mo)+' months since then. Your usual gap is '+cfg.sm+' months or '+inr(cfg.sk)+' km.',why:'Based on your last real service bill and the latest odometer',pill:ratio>=1.25?'Overdue':'Due'});
+    else soon.push({v,amt:sv.t,date:due,title:v.name+' next service',text:base+'Next by '+dFmt(due)+(sv.km?' or '+inr(sv.km+cfg.sk)+' km, whichever comes first.':'.'),pill:dMon(due)});
   }
   /* insurance */
   const ins=cat('ins',0),li=last(ins);
@@ -1254,23 +1544,23 @@ function intelFor(v){
   else{
     const end=INS_END[li.d]||dAdd(li.d,12),dl=dDiff(t,end);
     if(dl<0)attn.push({v,sev:'bad',title:v.name+' has no insurance on record since '+dFmt(end),text:'Your last policy on file ran to '+dFmt(end)+'. Nothing is recorded after that. If it was renewed, add it in the Add tab. If not, the vehicle is uninsured.',why:'Based on the policy dated '+dFmt(li.d),pill:'Check now'});
-    else if(dl<=45)attn.push({v,sev:'warn',title:v.name+' insurance renewal is close',text:'Cover runs to '+dFmt(end)+'. Last premium ₹'+inr(li.t)+'.',why:'Based on the policy dated '+dFmt(li.d),pill:'In '+dl+' days'});
-    else soon.push({v,date:end,title:v.name+' insurance renewal',text:'Last premium ₹'+inr(li.t)+'. Cover runs to '+dFmt(end)+'.',pill:dMon(end)});
+    else if(dl<=45)attn.push({v,amt:li.t,date:end,sev:'warn',title:v.name+' insurance renewal is close',text:'Cover runs to '+dFmt(end)+'. Last premium ₹'+inr(li.t)+'.',why:'Based on the policy dated '+dFmt(li.d),pill:'In '+dl+' days'});
+    else soon.push({v,amt:li.t,date:end,title:v.name+' insurance renewal',text:'Last premium ₹'+inr(li.t)+'. Cover runs to '+dFmt(end)+'.',pill:dMon(end)});
     if(dl>=0&&dl<=365)renew+=li.t;
   }
   /* pollution certificate */
   const pc=last(cat('puc',0));
-  if(pc){let nx=dAdd(pc.d,6);while(nx<t)nx=dAdd(nx,6);soon.push({v,date:nx,title:v.name+' pollution certificate',text:'Every 6 months. Last on file '+dMon(pc.d)+(pc.approx?' (estimated)':'')+'.',pill:dMon(nx)});}
+  if(pc){let nx=dAdd(pc.d,6);while(nx<t)nx=dAdd(nx,6);soon.push({v,amt:cfg.puc,date:nx,title:v.name+' pollution certificate',text:'Every 6 months. Last on file '+dMon(pc.d)+(pc.approx?' (estimated)':'')+'.',pill:dMon(nx)});}
   /* tyres */
   const ty=last(bills.filter(b=>/tyre|tire/i.test(b.title||'')).sort((a,b)=>a.d<b.d?-1:1));
   const noChg=false;
-  if(ty){const ks=ty.km?odo-ty.km:null;if(ks!=null&&ks>=cfg.tyre&&noChg)attn.push({v,sev:'bad',title:'Tyres are about '+km(ks)+' km old',text:'You confirmed they have not been changed since '+dMon(ty.d)+' (at '+inr(ty.km)+' km). A typical tyre life is about '+inr(cfg.tyre)+' km, so these are well past it. Plan a replacement.',why:'Based on your answer in the Questions tab',pill:'Replace soon'});else if(ks!=null&&ks>=cfg.tyre)attn.push({v,sev:'warn',title:'No newer '+v.name+' tyre bill',text:'The last tyre entry is '+dFmt(ty.d)+(ty.approx?' (an estimate)':'')+' at '+inr(ty.km)+' km. That is about '+km(ks)+' km ago, past a typical tyre life of about '+inr(cfg.tyre)+' km. If you changed them since, add the bill.',why:'Based on tyre entries and the latest odometer',pill:'Missing?'})}
+  if(ty){const ks=ty.km?odo-ty.km:null;if(ks!=null&&ks>=cfg.tyre&&noChg)attn.push({v,sev:'bad',title:'Altis tyres are about '+km(ks)+' km old',text:'You confirmed they have not been changed since '+dMon(ty.d)+' (at '+inr(ty.km)+' km). A typical tyre life is about '+inr(cfg.tyre)+' km, so these are well past it. Plan a replacement.',why:'Based on your answer in the Questions tab',pill:'Replace soon'});else if(ks!=null&&ks>=cfg.tyre)attn.push({v,sev:'warn',title:'No newer '+v.name+' tyre bill',text:'The last tyre entry is '+dFmt(ty.d)+(ty.approx?' (an estimate)':'')+' at '+inr(ty.km)+' km. That is about '+km(ks)+' km ago, past a typical tyre life of about '+inr(cfg.tyre)+' km. If you changed them since, add the bill.',why:'Based on tyre entries and the latest odometer',pill:'Missing?'})}
   else if(odo>=12000)attn.push({v,sev:'warn',title:'No '+v.name+' tyre bill on record',text:'Nothing in the ledger mentions tyres, and you are at about '+km(odo)+' km. Add the bill if you have changed them.',why:'Based on all entries and the latest odometer',pill:'Check'});
   /* battery */
   const bt=last(cat('battery',699));
   if(bt){const due=dAdd(bt.d,42),dl=dDiff(t,due);
     if(dl<0)attn.push({v,sev:'warn',title:v.name+' battery is ageing',text:'Last changed '+dMon(bt.d)+'. Batteries here last about 3 to 4 years.',why:'Based on the battery entry',pill:'Check'});
-    else if(dl<=450)soon.push({v,date:due,title:v.name+' battery',text:'Last changed '+dMon(bt.d)+'. Batteries here last about 3 to 4 years.',pill:dMon(due)});}
+    else if(dl<=450)soon.push({v,amt:bt.t,date:due,title:v.name+' battery',text:'Last changed '+dMon(bt.d)+'. Batteries here last about 3 to 4 years.',pill:dMon(due)});}
   /* repeat costs */
   const cy=+t.slice(0,4),fy=+(bills.map(b=>b.d).sort()[0]||t).slice(0,4);
   const ys=[];for(let y=Math.max(fy,cy-6);y<=cy-1;y++)ys.push(y);
@@ -1281,6 +1571,9 @@ function intelFor(v){
     if(hit>=Math.min(4,ys.length)&&(!best||avg>best.avg))best={nm:nmx,hit,avg,max:Math.max(...per),n:ys.length};
   });
   if(best)attn.push({v,sev:'warn',title:best.nm+' keeps coming back on the '+v.name,text:'Spent in '+best.hit+' of the last '+best.n+' years, about ₹'+inr(best.avg)+' a year on average and ₹'+inr(best.max)+' in the worst year. Keep about ₹'+inr(Math.round(best.avg/500)*500)+' aside each year.',why:'Based on '+best.n+' years of entries',pill:'Pattern'});
+  /* mileage */
+  const ma=mileageAlert(v);
+  if(ma&&ma.drop>=0.15)attn.push({v,sev:ma.drop>=0.25?'bad':'warn',title:v.name+' mileage dropped '+Math.round(ma.drop*100)+'%',text:'The latest full tank ('+dFmt(ma.last.d)+') gave '+ma.last.kmpl.toFixed(1)+' km per litre, against your usual '+ma.usual.toFixed(1)+'. Check the tyre pressure first, then for a dragging brake or a dirty air filter. Heavy traffic can cause one bad tank, so see whether the next one is back to normal.',why:'Based on your previous '+ma.n+' full tanks',pill:'Check'});
   /* forecast */
   const d0=+((BF[v.key]||{}).d0||t).slice(0,4),yrs=[];for(let y=cy-3;y<=cy-1;y++)if(y>=d0)yrs.push(y);
   const X={buy:1,acc:1,fuel:1,toll:1,wash:1,ins:1,puc:1};
@@ -1344,7 +1637,7 @@ function renderQ(){
    '<header class="hero"><h1>Questions.</h1><p>Things you still need to find out or do. Each one stays here until you answer it, and your answers are kept as a record.</p></header>'
    +'<section id="q_open" style="margin-top:28px"><h2>Open ('+open.length+')</h2><p class="lede">Answer in your own words. A date, an amount or just “don’t know” is fine.</p><div class="qq">'+(open.length?open.map(openRow).join(''):'<div class="ii-empty">No open questions. Add one below to keep track of something you need to look up or ask.</div>')+'</div></section>'
    +'<section id="q_done"><h2>Answered ('+done.length+')</h2><p class="lede">Your record of answers. Reopen one if something changes.</p><div class="qq">'+(done.length?done.map(doneRow).join(''):'<div class="ii-empty">Answers will appear here.</div>')+'</div></section>'
-   +'<section id="q_add"><h2>Add a question</h2><p class="lede">Anything you want to remember to look up or ask later.</p><div class="card"><div class="q-add"><select id="qn_v" aria-label="Vehicle">'+qOpts()+'</select><textarea id="qn_q" placeholder="e.g. Did the bike get a new chain in 2022?" style="min-height:64px"></textarea><div class="q-row" style="margin-top:0"><button class="btn sm" type="button" id="qn_go">Add question</button></div></div></div></section>';
+   +'<section id="q_add"><h2>Add a question</h2><p class="lede">Anything you want to remember to look up or ask later.</p><div class="card"><div class="q-add"><select id="qn_v" aria-label="Vehicle">'+qOpts()+'</select><textarea id="qn_q" placeholder="e.g. Did the Ntorq get a new chain in 2022?" style="min-height:64px"></textarea><div class="q-row" style="margin-top:0"><button class="btn sm" type="button" id="qn_go">Add question</button></div></div></div></section>';
   foot.textContent='Questions and answers are saved on this device and in your automatic backup.';
   curKeys=Object.keys(VEH);
   view.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',()=>{
@@ -1359,15 +1652,159 @@ function renderQ(){
     saveStore();renderQ();qBadge();window.scrollTo(0,0)});
 }
 
+/* ================= WHAT IF: COST PER KM, ALL VEHICLES ================= */
+const CPK={per:'Y',lens:'all',veh:'all',more:false,basis:'spread'};
+const NC_KEY='vehicleLedger.nc',NC_DEF={price:1200000,res:55,yrs:5,km:12000,fuel:7,run:40000};
+function ncGet(){try{const x=JSON.parse(localStorage.getItem(NC_KEY)||'null');return Object.assign({},NC_DEF,x||{})}catch(e){return Object.assign({},NC_DEF)}}
+function ncSet(o){try{localStorage.setItem(NC_KEY,JSON.stringify(o))}catch(e){}}
+function cpkVeh(v,o){
+  const now=todayStr(),kmBy={},run={},cat={},big={},paid={};let pool=0,totKm=0;
+  monthKm(v).forEach(m=>{const k=Math.max(0,m.km);kmBy[m.month]=(kmBy[m.month]||0)+k;totKm+=k});
+  const add=(d,amt,c,title)=>{if(!d||!(amt>0)||d>now)return;const mk=d.slice(0,7);run[mk]=(run[mk]||0)+amt;const cm=cat[mk]=cat[mk]||{};cm[c]=(cm[c]||0)+amt;if(title&&(!big[mk]||amt>big[mk].t))big[mk]={t:amt,title:title}};
+  allBills(v).forEach(b=>{
+    if(!b.d||b.d>now)return;const c=b.c||{};
+    pool+=(c.buy||0)+(c.acc||0);
+    if((c.buy||0)+(c.acc||0)>0)paid[b.d.slice(0,7)]=(paid[b.d.slice(0,7)]||0)+(c.buy||0)+(c.acc||0);
+    const ks=Object.keys(c).filter(k=>k!=='buy'&&k!=='acc');
+    if(!Object.keys(c).length){add(b.d,b.t,'other',b.title);return}
+    const r=ks.reduce((a,k)=>a+(c[k]||0),0);
+    ks.forEach(k=>add(b.d,c[k],k));
+    if(r>0){const mk=b.d.slice(0,7);if(!big[mk]||r>big[mk].t)big[mk]={t:r,title:b.title}}
+  });
+  (v.W||[]).forEach(w=>add(w.d,w.t,'wash'));
+  getFuel(v).forEach(f=>add(f.d,f.t,'fuel'));
+  bfMonths(v).forEach(m=>add(m.d,m.t,'fuel'));
+  const resale=+o.resale[v.key]||0,net=Math.max(0,pool-resale),rate=totKm?net/totKm:0;
+  return {v,kmBy,run,cat,big,paid,pool,resale,net,rate,totKm};
+}
+function cpkAll(){const o=getOpp();return Object.values(VEH).map(v=>cpkVeh(v,o))}
+function cpkRows(D,keyFn,basis){
+  const R={};
+  D.forEach(x=>{
+    const ms=new Set(Object.keys(x.kmBy).concat(Object.keys(x.run)).concat(basis==='paid'?Object.keys(x.paid):[]));
+    ms.forEach(m=>{const k=keyFn(m);const r=R[k]=R[k]||{km:0,run:0,own:0,cat:{},big:null};
+      const km=x.kmBy[m]||0;r.km+=km;r.run+=x.run[m]||0;r.own+=basis==='paid'?(x.paid[m]||0):km*x.rate;
+      Object.entries(x.cat[m]||{}).forEach(([c,a])=>r.cat[c]=(r.cat[c]||0)+a);
+      const b=x.big[m];if(b&&(!r.big||b.t>r.big.t))r.big={t:b.t,title:b.title,veh:x.v.name}});
+  });
+  return R;
+}
+const cpkMonthsBack=n=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+function cpkWindow(D,from,to){const R=cpkRows(D,m=>(m>=from&&m<=to)?'w':'x');return R.w||{km:0,run:0,own:0,cat:{}}}
+function cpkInsights(D){
+  const cur=cpkMonthsBack(0),a1=cpkMonthsBack(12),a2=cpkMonthsBack(1),b1=cpkMonthsBack(24),b2=cpkMonthsBack(13);
+  const L=cpkWindow(D,a1,a2),P=cpkWindow(D,b1,b2),out=[];
+  const pk=r=>r.km?(r.run+r.own)/r.km:0,rk=r=>r.km?r.run/r.km:0;
+  if(L.km){
+    const now=pk(L),was=pk(P);let t='Over the last 12 full months, everything together cost <b>'+pkf(now)+' a km</b>: '+pkf(rk(L))+' running and '+pkf(L.own/L.km)+' purchase.';
+    if(was){const ch=(now-was)/was*100;t+=' That is <b class="'+(ch>0?'cpk-up':'cpk-dn')+'">'+(ch>0?'up ':'down ')+Math.abs(ch).toFixed(0)+'%</b> on the 12 months before ('+pkf(was)+').'}
+    out.push(t);
+    out.push('At that pace you spend about <b>'+cr((L.run+L.own)/12)+' a month</b>, or '+cr(L.run+L.own)+' a year, for about '+inr(L.km/12)+' km a month. Running alone is '+cr(L.run/12)+' a month.');
+    const cs=Object.entries(L.cat).sort((x,y)=>y[1]-x[1]);
+    if(cs.length&&L.run){const [c,a]=cs[0];const nm=(CATS[c]||{n:c}).n;let t2='<b>'+nm+'</b> is the biggest running cost, '+Math.round(a/L.run*100)+'% of it';if(cs[1])t2+=', then '+((CATS[cs[1][0]]||{n:cs[1][0]}).n).toLowerCase()+' at '+Math.round(cs[1][1]/L.run*100)+'%';out.push(t2+'.')}
+  }
+  if(D.length>1){
+    const per=D.map(x=>{const r=cpkWindow([x],a1,a2);return {n:x.v.name,km:r.km,c:r.km?(r.run+r.own)/r.km:0}}).filter(x=>x.km>200).sort((x,y)=>x.c-y.c);
+    if(per.length>1)out.push('Cheapest to use per km: <b>'+per[0].n+'</b> at '+pkf(per[0].c)+'. Most expensive: <b>'+per[per.length-1].n+'</b> at '+pkf(per[per.length-1].c)+' (last 12 months, everything included).');
+  }
+  const hi=D.filter(x=>x.rate>0).sort((x,y)=>y.rate-x.rate)[0];
+  if(hi){const yk=cpkWindow([hi],a1,a2).km;if(yk>0){const nx=hi.net/(hi.totKm+yk);out.push('The '+hi.v.name+' purchase share is '+pkf(hi.rate)+' a km now. Every km you ride spreads it thinner: another year at your pace ('+inr(yk)+' km) takes it to about <b>'+pkf(nx)+'</b>, if the resale value holds.')}}
+  const y=cur.slice(0,4),mo=+cur.slice(5,7)-1;
+  if(mo>=2){const R=cpkRows(D,m=>m.slice(0,4)===y&&m<cur?'y':'x').y;if(R&&R.km){const f=12/mo;out.push(y+' so far: '+cr(R.run+R.own)+' over '+inr(R.km)+' km in '+mo+' full months. At this rate the full year comes to about <b>'+cr((R.run+R.own)*f)+'</b>.')}}
+  return out.length?'<div class="cpk-ins">'+out.map(t=>'<div>'+t+'</div>').join('')+'</div>':'';
+}
+function cpkNewCar(D){
+  const n=ncGet(),altis=D.find(x=>x.v.key==='altis');
+  const fld=(id,l,v,st)=>'<label class="fld">'+l+'<input type="number" inputmode="decimal" id="nc_'+id+'" step="'+st+'" value="'+v+'"></label>';
+  return '<h3 style="margin:26px 0 4px;font-size:19px">If you bought a new car</h3><p class="pkt" style="margin:0 0 10px">Example numbers to start with, not yours. Change them to the car you are considering. They are kept on this device.</p>'
+   +'<div class="card"><div class="flds">'+fld('price','Price on road (₹)',n.price,'10000')+fld('res','Resale when you sell (%)',n.res,'1')+fld('yrs','Years you would keep it',n.yrs,'1')+fld('km','Km a year',n.km,'500')+fld('fuel','Fuel (₹ a km)',n.fuel,'0.1')+fld('run','Insurance and service (₹ a year)',n.run,'1000')+'</div><div id="nc_out"></div></div><div id="kr_out"></div>';
+}
+function cpkNewCarCalc(D){
+  const g=id=>{const x=parseFloat((document.getElementById('nc_'+id)||{}).value);return isFinite(x)&&x>=0?x:0};
+  const n={price:g('price'),res:g('res'),yrs:g('yrs')||1,km:g('km'),fuel:g('fuel'),run:g('run')};ncSet(n);
+  const el=document.getElementById('nc_out');if(!el)return;
+  if(!n.km){el.innerHTML='';return}
+  const buy=n.price*(1-n.res/100)/n.yrs/n.km,runk=n.fuel+n.run/n.km,tot=buy+runk;
+  const a=D.find(x=>x.v.type==='car')||D.find(x=>x.v.key==='altis'),w=a?cpkWindow([a],cpkMonthsBack(12),cpkMonthsBack(1)):null,ak=w&&w.km?(w.run+w.own)/w.km:0;
+  let cmp='';
+  if(ak){const d=tot-ak,yr=d*n.km;cmp='<div class="cpk-res" style="border-top:0;margin-top:2px;padding-top:0"><span>Your '+a.v.name+', last 12 months: '+pkf(ak)+' a km</span><span class="'+(d>0?'cpk-up':'cpk-dn')+'" style="font-weight:600;white-space:nowrap">'+(d>0?'+':'−')+pkf(Math.abs(d))+' a km</span></div>'
+    +'<p class="pkt" style="margin:8px 0 0">At '+inr(n.km)+' km a year the new car would cost <b>'+cr(Math.abs(yr))+' a year '+(d>0?'more':'less')+'</b> than the '+a.v.name+' does now'+(d>0?', mostly because of the purchase share ('+pkf(buy)+' a km against the '+a.v.name+'’s '+pkf(a.rate)+').':'.')+'</p>'}
+  const kr=document.getElementById('kr_out');if(kr)kr.innerHTML=keepReplace(D,tot,n);
+  el.innerHTML='<div class="cpk-res"><span>New car, everything included</span><b>'+pkf(tot)+' a km</b></div>'
+    +'<div class="cpk-res" style="border-top:0;margin-top:2px;padding-top:0;font-size:14px;color:var(--ink2)"><span>Purchase '+pkf(buy)+' · running '+pkf(runk)+'</span><span>'+cr(tot*n.km/12)+' a month</span></div>'+cmp;
+}
+const KR_DROP=12;
+function keepReplace(D,newPk,n){
+  const x=D.find(z=>z.v.type==='car')||D.find(z=>z.v.key==='altis');if(!x)return '';
+  const v=x.v,REP=k=>!/^(fuel|wash|ins|puc|toll|warr)$/.test(k);
+  const yr={};Object.keys(x.kmBy).forEach(m=>{const y=m.slice(0,4);(yr[y]=yr[y]||{km:0,rep:0}).km+=x.kmBy[m]});
+  Object.entries(x.cat).forEach(([m,c])=>{const y=m.slice(0,4);yr[y]=yr[y]||{km:0,rep:0};Object.entries(c).forEach(([k,a])=>{if(REP(k))yr[y].rep+=a})});
+  const cy=todayStr().slice(0,4),full=Object.keys(yr).filter(y=>(y<cy&&yr[y].km>500)||(y===cy&&yr[y].km>3000)).sort().slice(-5);
+  if(full.length<2||!full.some(y=>yr[y].rep>0))return '';
+  const pts=full.map((y,i)=>({i,y,r:yr[y].rep/yr[y].km}));
+  const mx=pts.reduce((a,p)=>a+p.i,0)/pts.length,my=pts.reduce((a,p)=>a+p.r,0)/pts.length;
+  const sl=pts.length>=3?pts.reduce((a,p)=>a+(p.i-mx)*(p.r-my),0)/pts.reduce((a,p)=>a+(p.i-mx)**2,0):0;
+  const nxt=pts[pts.length-1].y===cy?pts.length:pts.length+1;const proj=Math.max(0,my+sl*(nxt-mx));
+  const w=cpkWindow([x],cpkMonthsBack(12),cpkMonthsBack(1));if(!w.km)return '';
+  const fuel=(w.cat.fuel||0)/w.km,oth=['wash','ins','puc','toll','warr'].reduce((a,k)=>a+(w.cat[k]||0),0)/w.km,dep=x.resale*KR_DROP/100/w.km;
+  const R=(getOpp().ret[cy]!=null?getOpp().ret[cy]:7)/100,capK=x.resale*R/w.km,capN=n.km?(n.price+n.price*n.res/100)/2*R/n.km:0;
+  const keep=fuel+oth+proj+dep+capK,newAll=newPk+capN,diff=keep-newAll,yrly=diff*w.km;
+  const need=newAll-fuel-oth-dep-capK;
+  let when='';
+  if(diff<0&&sl>0&&need>proj){const yrs=Math.ceil((need-proj)/sl);when=' If repairs keep rising at the rate of the last '+pts.length+' years, the new car starts to win in about '+yrs+' year'+(yrs>1?'s':'')+' ('+(+cy+yrs)+').'}
+  else if(diff<0&&sl<=0)when=' Repairs per km are not rising, so on these numbers keeping it stays cheaper.';
+  const verdict=diff<0?'<b class="cpk-dn">Keeping the '+v.name+' is cheaper</b>, by about '+cr(-yrly)+' over the next year.':'<b class="cpk-up">The new car is cheaper</b>, by about '+cr(yrly)+' over the next year, at your '+inr(w.km)+' km a year.';
+  return '<h3 style="margin:26px 0 4px;font-size:19px">Keep the '+v.name+' or replace it</h3><p class="pkt" style="margin:0 0 10px">What the next year of the '+v.name+' is likely to cost per km, against the new car above. Money already spent on buying it is left out, because you don’t get it back either way.</p>'
+   +'<div class="card ptab"><table><thead><tr><th>Year</th><th>Km</th><th>Repairs</th><th>Per km</th></tr></thead><tbody>'+pts.map(p=>'<tr><td>'+p.y+(p.y===cy?'*':'')+'</td><td>'+inr(yr[p.y].km)+'</td><td>'+cr(yr[p.y].rep)+'</td><td><b>'+pkf(p.r)+'</b></td></tr>').join('')+'</tbody></table></div>'
+   +'<div class="card" style="margin-top:12px">'+kv([['Fuel, last 12 months',pkf(fuel)+' a km'],['Insurance, tolls, washing and other',pkf(oth)+' a km'],['Repairs next year (trend '+(sl>=0?'rising':'falling')+' '+pkf(Math.abs(sl))+' a km a year)',pkf(proj)+' a km'],['Resale lost, about '+KR_DROP+'% a year',pkf(dep)+' a km'],['Returns lost on its resale value, '+(R*100).toFixed(1)+'% a year',pkf(capK)+' a km'],['<b>Keeping it, next year</b>','<b>'+pkf(keep)+' a km</b>'],['New car above',pkf(newPk)+' a km'],['Returns lost on the money a new car ties up',pkf(capN)+' a km'],['<b>New car, all in</b>','<b>'+pkf(newAll)+' a km</b>']])
+   +'<p class="pkt" style="margin:12px 0 0">'+verdict+when+'</p></div>'
+   +'<p class="fn">Repairs are services, parts and labour, without fuel, insurance, tolls or washing. The 12% yearly drop in resale value is my assumption. Lost returns use this year’s rate from Assumptions below, on the average money a new car ties up over the years you keep it. Change the new car’s numbers above and this updates.</p>';
+}
+function cpkRender(){
+  const box=document.getElementById('cpkbox');if(!box)return;
+  const all=cpkAll(),D=CPK.veh==='all'?all:all.filter(x=>x.v.key===CPK.veh);
+  const cur=cpkMonthsBack(0),cy=cur.slice(0,4);
+  const R=CPK.per==='Y'?cpkRows(D,m=>m.slice(0,4),CPK.basis):cpkRows(D,m=>m,CPK.basis);
+  let keys=Object.keys(R).filter(k=>R[k].km>0||R[k].run>0||R[k].own>0).sort();
+  if(CPK.per==='M'){keys.reverse();if(!CPK.more)keys=keys.slice(0,12)}
+  const f=CPK.lens==='run'?r=>r.run:CPK.lens==='buy'?r=>r.own:r=>r.run+r.own;
+  const tk=keys.reduce((a,k)=>a+R[k].km,0),tt=keys.reduce((a,k)=>a+f(R[k]),0);
+  const med=(()=>{const a=keys.map(k=>R[k]).filter(r=>r.km>100).map(r=>r.run/r.km).sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0})();
+  const lab=k=>CPK.per==='Y'?(k===cy?k+'*':k):MON[+k.slice(5)-1]+' '+k.slice(0,4)+(k===cur?'*':'');
+  const tag=k=>{if(CPK.per!=='M'||CPK.lens==='buy')return '';const r=R[k];if(!r.km||!med||r.run/r.km<2*med||!r.big)return '';return '<span class="cpk-tag" title="'+r.big.title.replace(/"/g,'&quot;')+'">'+r.big.title.split(/[,(]/)[0].slice(0,26)+'</span>'};
+  const seg=(id,cur,opts)=>'<div class="seg cpk-seg" id="'+id+'" role="group">'+opts.map(o=>'<button data-k="'+o[0]+'" aria-pressed="'+(o[0]===cur)+'">'+o[1]+'</button>').join('')+'</div>';
+  const span=CPK.per==='Y'?'all years':(CPK.more?'all months':'last 12 months');
+  const nm=CPK.lens==='run'?'running and maintenance':CPK.lens==='buy'?'purchase share':'everything';
+  box.innerHTML=
+    seg('cpk_v',CPK.veh,[['all','All vehicles']].concat(Object.values(VEH).map(v=>[v.key,v.name])))
+    +cpkInsights(D)
+    +seg('cpk_l',CPK.lens,[['run','Running & maintenance'],['buy','Purchase'],['all','Everything']])
+    +seg('cpk_p',CPK.per,[['Y','By year'],['M','Monthly']])
+    +(CPK.lens==='run'?'':seg('cpk_b',CPK.basis,[['spread','Purchase spread over km'],['paid','Purchase as paid']]))
+    +'<div class="stats sum3 cpk-st" style="margin-top:0;grid-template-columns:repeat(3,minmax(0,1fr))">'+'<div class="stat"><div class="n">'+(tt>=1e5?'₹'+(tt/1e5).toFixed(tt>=1e7?0:1)+' lakh':cr(tt))+'</div><div class="l">'+nm+', '+span+'</div></div><div class="stat"><div class="n">'+inr(tk)+'</div><div class="l">km</div></div><div class="stat"><div class="n">'+(tk?(tt/tk>=1000?'₹'+inr(tt/tk):pkf(tt/tk)):'—')+'</div><div class="l">per km</div></div></div>'
+    +'<div class="card ptab" style="margin-top:12px"><table><thead><tr><th>'+(CPK.per==='Y'?'Year':'Month')+'</th><th>Km</th><th>Total spent</th><th>Per km</th></tr></thead><tbody>'
+    +keys.map(k=>{const r=R[k],c=f(r);return '<tr><td>'+lab(k)+tag(k)+'</td><td>'+(r.km?inr(r.km):'—')+'</td><td>'+cr(c)+'</td><td><b>'+(r.km?(c/r.km>=1000?'₹'+inr(c/r.km):pkf(c/r.km)):'—')+'</b></td></tr>'}).join('')
+    +'</tbody></table></div>'
+    +(CPK.per==='M'?'<div class="btnrow"><button class="btn alt sm" id="cpk_more">'+(CPK.more?'Show last 12 months':'Show every month')+'</button></div>':'')
+    +'<p class="fn">'+(CPK.lens==='run'?'Fuel, services, repairs, tyres, battery, insurance, tolls, pollution checks and washing. The purchase price and accessories are left out.':(CPK.lens==='buy'?(CPK.basis==='paid'?'Price and accessories exactly when you paid them. A month with a purchase and few km shows a very large cost per km, and resale value is not deducted.':'Price plus accessories, minus the resale values in Assumptions below, spread evenly over every km each vehicle has done. So each km carries the same share, instead of it all landing in the month you paid.'):('Running and maintenance plus the purchase '+(CPK.basis==='paid'?'price as you paid it. A month with a purchase and few km shows a very large cost per km.':'share.'))))+' * Not over yet. Estimated entries are included, and it updates as you add bills, fill-ups and odometer readings.'+(CPK.per==='M'&&CPK.lens!=='buy'?' A tag marks a month that cost more than twice your usual per km, with the biggest bill that month.':'')+'</p>'
+    +cpkNewCar(all);
+  const wire=(id,key)=>box.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{CPK[key]=b.dataset.k;if(key==='per')CPK.more=false;cpkRender()}));
+  wire('cpk_v','veh');wire('cpk_l','lens');wire('cpk_p','per');wire('cpk_b','basis');
+  const mb=document.getElementById('cpk_more');if(mb)mb.addEventListener('click',()=>{CPK.more=!CPK.more;cpkRender()});
+  box.querySelectorAll('[id^=nc_]').forEach(i=>{if(i.tagName==='INPUT')i.addEventListener('input',()=>cpkNewCarCalc(all))});
+  cpkNewCarCalc(all);
+}
+
 function renderOpp(){
   const o=getOpp();
   view.style.setProperty('--acc','var(--blue)');
-  nav.innerHTML='<a href="#o_set">Assumptions</a><a href="#o_res">Results</a><a href="#o_km">Km travelled</a><a href="#o_src">Sources</a>';
+  nav.innerHTML='<a href="#o_cpk">Cost per km</a><a href="#o_set">Assumptions</a><a href="#o_res">Results</a><a href="#o_km">Km travelled</a><a href="#o_src">Sources</a>';
   const num=(id,label,val,step)=>'<label class="fld">'+label+'<input type="number" inputmode="decimal" id="'+id+'" step="'+step+'" value="'+val+'"></label>';
   const yrs=Object.keys(OPP_DEF.ret);
   view.innerHTML=
    '<header class="hero" style="padding-bottom:0"><h1>What if.</h1><p>What your vehicles cost once you count the money they tied up, what you could sell them for, and what the same km would have cost by public transport or Uber. None of this changes your real costs on the other pages.</p></header>'
-   +'<section id="o_set" style="margin-top:28px"><h2>Assumptions</h2><p class="lede">Starting numbers came from the sources at the bottom (October 2026). The fares are Mumbai’s, so change them to your city. Resale starts at 0 because it depends on your vehicle: enter what you could sell it for today.</p><div class="card">'
+   +'<section id="o_cpk" style="margin-top:28px"><h2>What your kilometres cost</h2><p class="lede">Total spent and the cost per km, for all vehicles together or one at a time. Worked out from your entries each time you open this page.</p><div id="cpkbox"></div></section>'
+   +'<section id="o_set"><h2>Assumptions</h2><p class="lede">Starting numbers came from the sources at the bottom (October 2026). The fares are Mumbai’s, so change them to your city. Resale starts at 0 because it depends on your vehicle: enter what you could sell it for today.</p><div class="card">'
    +'<h4 style="margin:0 0 8px;font-size:15px">What the invested money earned each year (%)</h4><p class="pkt" style="margin:0 0 10px">2019 to 2024 are the actual Nifty 50 returns with dividends. I found no source I trust for 2025 and 2026 so far, so those two start at 7% and are yours to set.</p>'
    +'<div class="flds" style="grid-template-columns:1fr 1fr 1fr">'+yrs.map(y=>num('o_y'+y,y,o.ret[y],'0.1')).join('')+'</div>'
    +'<div class="btnrow" style="margin:12px 0 0"><button class="btn alt sm" data-ret="nifty">Nifty 50 (actual)</button><button class="btn alt sm" data-ret="fd">Fixed deposit, 6.5% every year</button></div>'
@@ -1381,7 +1818,8 @@ function renderOpp(){
    +'<section id="o_src"><h2>Sources</h2><p class="lede">Where the starting numbers came from.</p><div class="card">'+kl(SRC.map(s=>s[0]+' <a href="'+s[1]+'" target="_blank" rel="noopener">'+s[2]+'</a>'))+'</div></section>';
   foot.textContent='Rates and resale values are assumptions you can edit. They are saved on this device.';
   curKeys=Object.keys(VEH);
-  const upd=()=>{document.getElementById('oppres').innerHTML=oppResults()};
+  const upd=()=>{document.getElementById('oppres').innerHTML=oppResults();cpkRender()};
+  cpkRender();
   const rd=id=>{const x=parseFloat(document.getElementById(id).value);return isFinite(x)?x:null};
   [['o_pt','pt'],['o_cab','cab'],['o_bike','bike'],['o_inf','inf']].forEach(([id,k])=>document.getElementById(id).addEventListener('input',()=>{const x=rd(id);if(x==null||x<0)return;setOpp({[k]:x});upd()}));
   yrs.forEach(y=>document.getElementById('o_y'+y).addEventListener('input',()=>{const x=rd('o_y'+y);if(x==null)return;const r=getOpp().ret;r[y]=x;setOpp({ret:r});upd()}));
@@ -1402,6 +1840,6 @@ state.veh='';switchTo('both',true);
 })();
 
 </script>
-<!-- answers v31 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 -->
 </body>
 </html>
