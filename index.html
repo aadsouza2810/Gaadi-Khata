@@ -33,7 +33,7 @@ html{height:auto;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);-w
 body{margin:0;background:var(--bg);color:var(--ink);
   font:400 17px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   -webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
-.wrap{max-width:980px;margin:0 auto;padding:0 20px 80px}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 120px}
 :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:10px}
 button{font:inherit;color:inherit}
 
@@ -151,9 +151,10 @@ h2{margin:0 0 6px;font-size:clamp(26px,5vw,36px);font-weight:700;letter-spacing:
 .rbi{padding:2px 18px 20px 72px}
 .cmp .rh{grid-template-columns:1fr auto auto}
 .cmp .rbi{padding:2px 18px 20px}
-.flds{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink2)}
-.fld input{font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:10px 12px;width:100%;font-variant-numeric:tabular-nums}
+.flds{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.fld{min-width:0;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink2)}
+.fld input,.fld select,.fld textarea{box-sizing:border-box}
+.fld input{min-width:0;font:inherit;font-size:17px;color:var(--ink);background:var(--track);border:0;border-radius:12px;padding:10px 12px;width:100%;font-variant-numeric:tabular-nums}
 .basis{margin:12px 0 0;font-size:14px;color:var(--ink2);line-height:1.45}
 .cf{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--track);color:var(--ink);margin-right:6px;vertical-align:1px}
 .caveat{margin-top:12px;background:var(--card);border-radius:24px;padding:20px 22px;box-shadow:var(--shadow)}
@@ -276,8 +277,58 @@ textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var
 .cpk-up{color:var(--red)}.cpk-dn{color:var(--green)}
 .cpk-res{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:15px}
 .cpk-res b{font-size:20px;white-space:nowrap;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.qf-big{display:block;width:100%;font:inherit;font-size:22px;font-weight:600;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+.qf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.qf-row label,.qf-one label{display:block;font-size:13px;color:var(--ink2)}
+.qf-row input,.qf-one input{margin-top:4px}
+.qf-calc{font-size:14px;color:var(--ink2);margin:10px 0 0;min-height:20px}
+.qf-go{display:block;width:100%;font-size:17px;padding:14px;margin-top:12px}
+.qf-more{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.qf-more .btn{width:100%}
 .btnrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 [hidden]{display:none!important}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.bnav div{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.bnav button{font:inherit;font-size:11px;border:0;background:none;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;cursor:pointer;position:relative}
+.bnav button[aria-current="page"]{color:var(--blue);font-weight:600}
+.bnav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bnav i{position:absolute;top:0;left:calc(50% + 6px);background:var(--red);color:#fff;font-style:normal;font-size:10px;font-weight:700;border-radius:99px;padding:1px 5px}
+.hm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:18px 0 12px}
+.hm-head h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:0}
+.hm-head div{text-align:right;font-size:13px;color:var(--ink2)}
+.hm-head div b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.hm h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:20px 0 8px}
+.hm .card{border-radius:18px;padding:14px}
+.hm .seg{margin-bottom:0}
+.hm-row{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.9fr) minmax(0,1.05fr);gap:8px;margin-top:10px}
+.hm-row label{font-size:12px;color:var(--ink2);min-width:0}
+.hm-row input{box-sizing:border-box;display:block;width:100%;min-width:0;margin-top:3px;font:inherit;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 8px;-moz-appearance:textfield}
+.hm-row input::-webkit-outer-spin-button,.hm-row input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.hm-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.hm-chip{cursor:pointer}
+.hm-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.hm-chip span{display:inline-block;font-size:14px;border:1px solid var(--line);color:var(--ink2);border-radius:99px;padding:6px 12px}
+.hm-chip input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.hm-chip input:focus-visible+span{outline:2px solid var(--blue);outline-offset:2px}
+.hm .qf-calc{margin:0 0 0 auto;font-size:13px;min-height:0;text-align:right}
+.hm-links{display:flex;gap:18px;justify-content:center;margin-top:12px}
+.hm-links button{font:inherit;font-size:14px;font-weight:600;border:0;background:none;color:var(--blue);cursor:pointer;padding:4px}
+.hm-list{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.hm-list>*{display:block;border-top:1px solid var(--line)}
+.hm-list>:first-child{border-top:0}
+.hm-list summary,.hm-list>button{box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;cursor:pointer;list-style:none;color:var(--ink);font:inherit;font-weight:600;font-size:15px;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0}
+.hm-list>button:first-child{border-top:0}
+.hm-list summary::-webkit-details-marker{display:none}
+.hm-list .t{flex:1;min-width:0}
+.hm-list .t small{display:block;font-size:13px;color:var(--ink2);font-weight:400}
+.hm-list .ch{color:var(--ink3);font-weight:400}
+.hm-list details p{margin:0;padding:0 14px 13px;font-size:14px;color:var(--ink2)}
+.hm-pill{font-size:12px;font-weight:600;border-radius:99px;padding:3px 9px;white-space:nowrap;background:var(--track);color:var(--ink2)}
+.hm-pill.bad{background:rgba(229,52,43,.14);color:var(--red)} .hm-pill.warn{background:rgba(217,119,6,.15);color:var(--orange)}
+.hm-kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
+.hm-kv.top{font-size:15px;color:var(--ink);margin-top:0}
+.pg-back{font:inherit;font-size:15px;font-weight:600;border:0;background:none;color:var(--blue);cursor:pointer;padding:14px 0 0}
+@media (max-width:560px){.bar:has(#vseg[hidden]){display:none}}
 .vseg button{padding:6px 10px}.vseg button[data-v=add]{font-weight:700;color:var(--acc,var(--blue))}
 .frow{grid-template-columns:1fr auto auto}
 
@@ -327,18 +378,13 @@ textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var
 <body>
 <div class="wrap" id="top">
   <div class="bar" id="bar">
-    <div class="seg vseg" id="vseg" role="group" aria-label="Choose vehicle">
-      <button data-v="both" aria-pressed="true">All</button>
-      <button data-v="intel" aria-pressed="false">Intelligence</button>
-      <button data-v="q" aria-pressed="false" id="qbtn">Questions</button>
-      <button data-v="opp" aria-pressed="false">What if</button>
-      <button data-v="add" aria-pressed="false">Add</button>
-    </div>
+    <div class="seg vseg" id="vseg" role="group" aria-label="Choose" hidden></div>
     <nav class="nav" id="nav" aria-label="Sections"></nav>
   </div>
   <div id="view"></div>
   <footer id="foot"></footer>
 </div>
+<nav class="bnav" id="bnav" aria-label="Main"><div><button data-bn="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>Home</button><button data-bn="add"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>Add</button><button data-bn="veh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5a2 2 0 0 1 2-1.5h9a2 2 0 0 1 2 1.5L20 15v3H4z"/><circle cx="8" cy="18" r="1.6"/><circle cx="16" cy="18" r="1.6"/></svg>Vehicles</button><button data-bn="ins"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M12 19V5M19 19v-6"/></svg>Insights</button><button data-bn="more"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>More<i id="bn_badge" hidden></i></button></div></nav>
 <script>
 (function(){
 
@@ -485,7 +531,7 @@ let storeOK=true;
 try{const raw=localStorage.getItem(STORE_KEY);if(raw)STORE=normalise(JSON.parse(raw))}catch(e){storeOK=false}
 function saveLocal(){try{localStorage.setItem(STORE_KEY,JSON.stringify(STORE));return true}catch(e){storeOK=false;return false}}
 function saveStore(){const ok=saveLocal();scheduleBackup(1500);return ok}
-const getFuel=v=>(STORE.fuel[v.key]||[]).map(f=>({id:f.id,d:f.d,km:f.km,l:f.l,t:f.amt||0,full:f.full!==false}));
+const getFuel=v=>(STORE.fuel[v.key]||[]).map(f=>({id:f.id,d:f.d,km:f.km,l:f.l,t:f.amt||0,full:f.full!==false,p:f.p===true}));
 function bfMonths(v){
   const b=BF[v.key];if(!b)return [];
   const T=d=>new Date(d+'T00:00:00').getTime();
@@ -515,11 +561,11 @@ const allBills=v=>v.B.concat(getExp(v));
 const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 function mileageSegs(list){
   const e=list.slice().sort((a,b)=>a.km-b.km||a.d.localeCompare(b.d));
-  const segs=[];let base=null,lit=0,amt=0;
+  const segs=[];let base=null,lit=0,amt=0,np=0,nf=0;
   e.forEach(x=>{
-    if(base===null){if(x.full){base=x.km;lit=0;amt=0}return}
-    lit+=x.l;amt+=x.t;
-    if(x.full){const dist=x.km-base;if(dist>0&&lit>0)segs.push({id:x.id,d:x.d,dist,l:lit,amt,kmpl:dist/lit});base=x.km;lit=0;amt=0}
+    if(base===null){if(x.full){base=x.km;lit=0;amt=0;np=0;nf=0}return}
+    lit+=x.l;amt+=x.t;nf++;if(x.p)np++;
+    if(x.full){const dist=x.km-base;if(dist>0&&lit>0)segs.push({id:x.id,d:x.d,dist,l:lit,amt,kmpl:dist/lit,pt:np===0?'r':np===nf?'p':'m'});base=x.km;lit=0;amt=0;np=0;nf=0}
   });
   return segs;
 }
@@ -655,6 +701,22 @@ function perKmTable(){
 
 
 /* ================= FUEL & MILEAGE (report only) ================= */
+function premiumCard(v){
+  const L=getFuel(v).filter(f=>f.l>0&&f.t>0),P=L.filter(f=>f.p),R=L.filter(f=>!f.p);
+  if(!P.length)return '';
+  const sum=(a,k)=>a.reduce((x,y)=>x+y[k],0),pl=sum(P,'l'),pt=sum(P,'t'),pr=pt/pl;
+  let extra='',kp='';
+  if(R.length){
+    const rr=sum(R,'t')/sum(R,'l'),ex=pt-pl*rr;
+    extra='<p class="pkt" style="margin:6px 0 0">Regular petrol cost you ₹'+rr.toFixed(2)+' a litre. Premium cost ₹'+pr.toFixed(2)+', so about ₹'+inr(Math.round(ex))+' more over '+pl.toFixed(1)+' litres (₹'+(pr-rr).toFixed(0)+' a litre).</p>';
+  }else extra='<p class="pkt" style="margin:6px 0 0">Log a regular fill-up as well and this will show what premium costs you over regular.</p>';
+  const m=mileageStats(getFuel(v)),sg=m.segs||[],sp=sg.filter(x=>x.pt==='p'),sr=sg.filter(x=>x.pt==='r');
+  const km=a=>a.reduce((x,y)=>x+y.dist,0)/a.reduce((x,y)=>x+y.l,0);
+  if(sp.length&&sr.length){const a=km(sp),b=km(sr),d=(a/b-1)*100;
+    kp='<p class="pkt" style="margin:6px 0 0">Mileage: premium '+a.toFixed(1)+' km per litre ('+sp.length+' tank'+(sp.length>1?'s':'')+'), regular '+b.toFixed(1)+' ('+sr.length+' tank'+(sr.length>1?'s':'')+'). '+(Math.abs(d)<3?'No real difference yet.':'Premium is '+Math.abs(d).toFixed(0)+'% '+(d>0?'better':'worse')+'.')+(sp.length+sr.length<6?' Too few tanks to be sure.':'')+'</p>';
+  }else kp='<p class="pkt" style="margin:6px 0 0">Mileage comparison appears once you have full-tank readings on both premium and regular.</p>';
+  return '<div class="card" style="margin-top:12px"><b>Premium petrol</b>'+extra+kp+'</div>';
+}
 function fuelReport(v){
   const list=getFuel(v),m=mileageStats(list);
   const f1=n=>n.toFixed(1);
@@ -662,15 +724,16 @@ function fuelReport(v){
   const sf=sinceFull(list);
   const segById={};(m.segs||[]).forEach(s=>{segById[s.id]=s});
   const rows=list.slice().sort((a,b)=>b.d.localeCompare(a.d)||b.km-a.km).slice(0,6).map(f=>
-    '<div class="frow"><div><b>'+fmt(f.d)+'</b><small>'+inr(f.km)+' km · '+f.l+' L · ₹'+inr(f.t)+(f.full?'':' · part fill')+(sf[f.id]?' · '+inr(sf[f.id])+' km since last full tank':'')+'</small></div><div class="fk">'+(segById[f.id]?f1(segById[f.id].kmpl)+'<small> km/l</small>':'')+'</div></div>').join('');
+    '<div class="frow"><div><b>'+fmt(f.d)+'</b><small>'+inr(f.km)+' km · '+f.l+' L · ₹'+inr(f.t)+(f.p?' · premium':'')+(f.full?'':' · part fill')+(sf[f.id]?' · '+inr(sf[f.id])+' km since last full tank':'')+'</small></div><div class="fk">'+(segById[f.id]?f1(segById[f.id].kmpl)+'<small> km/l</small>':'')+'</div></div>').join('');
   const hint=m.n?'':'<p class="fn" style="margin-top:12px">Log two full-tank fill-ups in the Add tab to see your mileage. The first one sets the starting point.</p>';
   return '<section id="fuel"><h2>Fuel &amp; mileage</h2><p class="lede">Kilometres per litre from your fill-ups, and what fuel costs per km.</p>'
-   +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'+hint
+   +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'+hint+premiumCard(v)
    +(bfEst(v)?(b=>'<div class="card" style="margin-top:12px"><b>Estimated fuel, '+fmt(b.d0)+' to '+fmt(b.d1)+'</b><p class="pkt" style="margin:6px 0 0">'+inr(b.km)+' km ('+inr(b.k0)+' to '+inr(b.k1)+') at '+b.kmpl+' km per litre is about '+inr(b.l)+' L. At ₹'+b.rate+' a litre that is ₹'+inr(b.t)+'. This is an estimate, counted in the cost per km, and kept out of the real mileage figures above. Each month\u2019s share follows the odometer readings on your bills, assuming steady riding between them.</p><details style="margin-top:10px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="ptab"><table><thead><tr><th>Month</th><th>km</th><th>Litres</th><th>Fuel \u20b9</th></tr></thead><tbody>'+bfMonths(v).map(m=>'<tr><td>'+m.month+'</td><td>'+inr(m.km)+'</td><td>'+Math.round(m.l)+'</td><td>'+inr(m.t)+'</td></tr>').join('')+'</tbody></table></div></details></div>')(bfEst(v)):'')
    +(rows?'<div class="list" style="margin-top:12px;padding:6px 16px">'+rows+'</div>':'')
    +'<div class="btnrow"><button class="btn" data-goadd="'+v.key+'">Add a fill-up or expense</button></div></section>';
 }
-function refresh(){const y=scrollY;NOANIM=true;if(state.veh==='add')renderAdd();else if(state.veh==='opp')renderOpp();else if(state.veh==='intel')renderIntel();else if(state.veh==='q')renderQ();else if(state.veh==='both')renderBoth();else renderVeh(VEH[state.veh]);NOANIM=false;qBanner();qBadge();scrollTo(0,y)}
+function draw(k){if(k==='add')renderAdd();else if(k==='opp')renderOpp();else if(k==='intel')renderIntel();else if(k==='q')renderQ();else if(k==='both')renderBoth();else if(k==='home')renderHome();else if(k==='month')renderMonth();else if(k==='more')renderMore();else renderVeh(VEH[k])}
+function refresh(){const y=scrollY;NOANIM=true;draw(state.veh);NOANIM=false;setShell(state.veh);qBadge();scrollTo(0,y)}
 let FLASH=null;
 const flash=(id,text,bad)=>{FLASH={id,text,bad:!!bad}};
 function fuelFormCard(v){
@@ -681,6 +744,7 @@ function fuelFormCard(v){
    +'<label class="fld">Litres<input type="number" inputmode="decimal" step="0.01" id="f_l" placeholder="e.g. 5.2"></label>'
    +'<label class="fld">Amount paid (₹)<input type="number" inputmode="decimal" step="0.01" id="f_a" placeholder="e.g. 550"></label></div>'
    +'<label class="chk"><input type="checkbox" id="f_full" checked> I filled the tank to the top</label>'
+   +'<label class="chk"><input type="checkbox" id="f_p"> Premium petrol (V-Power, XP95 and similar)</label>'
    +'<div class="btnrow" style="margin-top:14px"><button class="btn" id="f_save">Save fill-up</button><span class="fmsg" id="f_msg"></span></div></div>';
 }
 function odoCard(v){
@@ -692,7 +756,7 @@ function odoCard(v){
 function recentList(v){
   const items=[];
   const sf=sinceFull(getFuel(v));
-  getFuel(v).forEach(f=>items.push({d:f.d,id:'f:'+f.id,t:'Fuel · '+f.l+' L',s:inr(f.km)+' km · ₹'+inr(f.t)+(sf[f.id]?' · '+inr(sf[f.id])+' km since last full tank':'')}));
+  getFuel(v).forEach(f=>items.push({d:f.d,id:'f:'+f.id,t:'Fuel · '+f.l+' L'+(f.p?' · premium':''),s:inr(f.km)+' km · ₹'+inr(f.t)+(sf[f.id]?' · '+inr(sf[f.id])+' km since last full tank':'')}));
   (STORE.exp[v.key]||[]).forEach(e=>items.push({d:e.d,id:'x:'+e.id,t:e.title,s:'₹'+inr(e.t)+' · '+CATS[e.cat].n+(e.km?' · '+inr(e.km)+' km':'')}));
   items.sort((a,b)=>b.d.localeCompare(a.d));
   const od=STORE.odo[v.key];
@@ -727,7 +791,7 @@ function initFuel(v){
     STORE.fuel[v.key]=STORE.fuel[v.key]||[];
     if(EDIT&&EDIT.k==='f'){STORE.gone.push(String(EDIT.id));STORE.fuel[v.key]=STORE.fuel[v.key].filter(f=>String(f.id)!==String(EDIT.id))}
     const nid=Date.now()+Math.floor(Math.random()*1000);
-    STORE.fuel[v.key].push({id:nid,d,km:Math.round(km),l:Math.round(l*100)/100,amt:Math.round(a*100)/100,full:$('f_full').checked});
+    STORE.fuel[v.key].push({id:nid,d,km:Math.round(km),l:Math.round(l*100)/100,amt:Math.round(a*100)/100,full:$('f_full').checked,p:$('f_p').checked});
     const wasEdit=EDIT&&EDIT.k==='f';EDIT=null;
     const ok=saveStore();
     const ma=mileageAlert(v),warn=ma&&ma.drop>=0.15&&String(ma.last.id)===String(nid)?' That is '+Math.round(ma.drop*100)+'% below your usual '+ma.usual.toFixed(1)+'. Check the tyre pressure, and see if the next tank is back to normal.':'';
@@ -756,7 +820,7 @@ function initRecent(v){
   view.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
     const [k,id]=b.dataset.edit.split(':');
     if(k==='o'){const o=STORE.odo[id];if(!o)return;EDIT={k:'o',id:o.id};$('o_km').value=o.km;$('o_d').value=o.d;go('a_odo','o_save','Save changes','o_msg','Editing the reading of '+fmt(o.d)+'.')}
-    else if(k==='f'){const f=(STORE.fuel[v.key]||[]).find(x=>String(x.id)===id);if(!f)return;EDIT={k:'f',id:f.id};$('f_d').value=f.d;$('f_km').value=f.km;$('f_l').value=f.l;$('f_a').value=f.amt||'';$('f_full').checked=f.full!==false;go('a_fuel','f_save','Save changes','f_msg','Editing the fill-up of '+fmt(f.d)+'.')}
+    else if(k==='f'){const f=(STORE.fuel[v.key]||[]).find(x=>String(x.id)===id);if(!f)return;EDIT={k:'f',id:f.id};$('f_d').value=f.d;$('f_km').value=f.km;$('f_l').value=f.l;$('f_a').value=f.amt||'';$('f_full').checked=f.full!==false;$('f_p').checked=f.p===true;go('a_fuel','f_save','Save changes','f_msg','Editing the fill-up of '+fmt(f.d)+'.')}
     else if(k==='x'){const e=(STORE.exp[v.key]||[]).find(x=>String(x.id)===id);if(!e)return;EDIT={k:'x',id:e.id,vk:v.key};$('x_v').value=v.key;$('x_d').value=e.d;$('x_t').value=e.t;$('x_km').value=e.km||'';$('x_title').value=e.title;$('x_c').value=e.cat;$('x_n').value=e.note||'';go('xform','x_save','Save changes','x_msg','Editing “'+e.title+'”.')}
   }));
   view.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{
@@ -1348,18 +1412,17 @@ function renderBoth(){
   const vs=Object.values(VEH);
   const totals=vs.map(totalOf),TOTAL=totals.reduce((x,y)=>x+y,0);
   view.style.setProperty('--acc','var(--blue)');
-  nav.innerHTML='<a href="#top">Overview</a><a href="#budget">This month</a><a href="#find">Search</a><a href="#split">By vehicle</a><a href="#perkm">Cost per km</a><a href="#bills">All bills</a>';
+  nav.innerHTML='<a href="#ovw">Total</a><a href="#find">Search</a><a href="#split">By vehicle</a><a href="#perkm">Cost per km</a><a href="#bills">All bills</a>';
   const nBills=vs.reduce((a,v)=>a+v.B.length,0);
   const allDates=vs.flatMap(v=>v.B.map(b=>b.d)).sort();
   const mm=s=>MON[+s.slice(5,7)-1]+' '+s.slice(0,4);
   const card=(v,T)=>'<button class="vcard" data-v="'+v.key+'" style="--vc:'+v.acc+'"><b>'+v.name+'</b><small>'+v.count+' · '+v.period+'</small><div class="vn">₹'+inr(T)+'</div><div class="vb"><i style="width:'+(T/TOTAL*100)+'%"></i></div><div class="vp">'+Math.round(T/TOTAL*100)+'% of all spending. Tap to open.</div></button>';
   const shares=vs.map((v,i)=>v.name+' '+Math.round(totals[i]/TOTAL*100)+'%').join(', ');
   const legend=vs.map(v=>'<span><span class="dot" style="background:'+v.acc+';width:8px;height:8px"></span>'+v.name+'</span>').join('');
-  view.innerHTML=bkBanner()+
-   '<header class="hero"><h1>Every rupee across all your vehicles.</h1><p>'+nBills+' entries, '+allDates[0].slice(0,4)+' to '+mm(allDates[allDates.length-1])+'.</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+vs.map((v,i)=>'₹'+inr(totals[i])+' '+v.name).join(' + ')+'</div><div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
-   +budgetSection()
+  view.innerHTML=BACK+bkBanner()+
+   '<header class="hero" id="ovw"><h1>Every rupee across all your vehicles.</h1><p>'+nBills+' entries, '+allDates[0].slice(0,4)+' to '+mm(allDates[allDates.length-1])+'.</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+vs.map((v,i)=>'₹'+inr(totals[i])+' '+v.name).join(' + ')+'</div><div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
    +'<section id="find"><h2>Search</h2><div class="card"><label class="fld"><span>Find a bill or payment</span><input type="search" id="q" placeholder="e.g. tyre, 4000, service, 2025" autocomplete="off" enterkeyhint="search"></label><p class="fn" id="qn" style="margin:10px 0 0"></p></div><div class="list" id="qres" hidden style="margin-top:12px"></div></section>'
-   +'<section id="split"><h2>By vehicle</h2><p class="lede">Share of the total: '+shares+'. All include their purchase price. Tap a vehicle to open it.</p><div class="split">'+vs.map((v,i)=>card(v,totals[i])).join('')+'</div></section>'
+   +'<section id="split"><h2>By vehicle</h2><p class="lede">Share of the total: '+shares+'. All three include their purchase price. Tap a vehicle to open it.</p><div class="split">'+vs.map((v,i)=>card(v,totals[i])).join('')+'</div></section>'
    +perKmTable()
    +mileageTable()
    +'<section><h2>Year by year</h2><p class="lede">All vehicles together. Tap a year to filter the bills below.</p><div class="card"><div class="years" id="years"></div><div class="legend">'+legend+'</div></div><p class="fn">* Year to date</p></section>'
@@ -1372,7 +1435,106 @@ function renderBoth(){
   view.querySelectorAll('.vcard').forEach(c=>c.addEventListener('click',()=>switchTo(c.dataset.v)));
   buildSeg();renderBills();
   const qi=document.getElementById('q');if(qi){qi.addEventListener('input',runSearch);runSearch()}
-  wireBanner();initBudget();
+  wireBanner();wireBack();
+}
+
+/* ================= HOME: QUICK FUEL + NEEDS DOING ================= */
+const QF={veh:null};
+function qfVeh(){
+  if(QF.veh&&VEH[QF.veh])return VEH[QF.veh];
+  let best=null;Object.values(VEH).forEach(v=>getFuel(v).forEach(f=>{if(!best||f.d>best.d)best={d:f.d,k:v.key}}));
+  QF.veh=best?best.k:Object.keys(VEH)[0];return VEH[QF.veh];
+}
+function qfPrem(v){const f=getFuel(v).filter(x=>x.t>0&&x.l>0).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:b.km-a.km)[0];return !!(f&&f.p)}
+function qfRate(v,p){
+  if(p===undefined)p=qfPrem(v);
+  const f=getFuel(v).filter(x=>x.t>0&&x.l>0&&!!x.p===p).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:b.km-a.km)[0];
+  if(f)return Math.round(f.t/f.l*100)/100;
+  const o=getFuel(v).filter(x=>x.t>0&&x.l>0).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:b.km-a.km)[0];
+  return o?Math.round(o.t/o.l*100)/100:((BF[v.key]||{}).rate||'');
+}
+const BACK='<button class="pg-back" data-home>‹ Home</button>';
+function wireBack(){view.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',()=>switchTo('home')))}
+function todaySection(){
+  const v=qfVeh(),last=effWin(v).km1,rate=qfRate(v),vs=Object.values(VEH);
+  const rank={bad:0,warn:1,ok:2},att=vs.map(intelFor).flatMap(x=>x.attn).sort((a,b)=>rank[a.sev]-rank[b.sev]);
+  const row=r=>'<details><summary><span class="t">'+r.title+'</span><span class="hm-pill '+r.sev+'">'+r.pill+'</span><span class="ch">›</span></summary><p>'+r.text+'</p></details>';
+  const openQ=qOpenCount(),mk=cpkMonthsBack(0),now=new Date(),B=getSet().bud||{},bud=+B.all||0;
+  const tot=vs.reduce((a,x)=>a+monthSpend(x,mk),0);
+  const usual=(()=>{let a=0;for(let i=1;i<=12;i++){const m=cpkMonthsBack(i);vs.forEach(x=>a+=monthSpend(x,m))}return a/12})();
+  const due=vs.map(intelFor).flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date<=dAdd(todayStr(),2)).sort((a,b)=>a.date<b.date?-1:1).slice(0,3);
+  const mname=MON[now.getMonth()];
+  return '<div class="hm" id="today"><div class="hm-head"><h1>Gaadi Khata</h1><div>'+mname+' so far<b>'+cr(tot)+'</b></div></div>'
+   +'<div class="card"><div class="seg" id="qf_v" role="group" aria-label="Vehicle">'+vs.map(x=>'<button data-qv="'+x.key+'" aria-pressed="'+(x.key===v.key)+'">'+x.name+'</button>').join('')+'</div>'
+   +'<div class="hm-row"><label>Odometer (km)<input type="number" inputmode="numeric" id="qf_km" placeholder="'+inr(last)+'"></label><label>Paid (₹)<input type="number" inputmode="decimal" id="qf_a"></label><label>₹ a litre<input type="number" inputmode="decimal" step="0.01" id="qf_r" value="'+rate+'"></label></div>'
+   +'<div class="hm-chips"><label class="hm-chip"><input type="checkbox" id="qf_full" checked><span>Full tank</span></label><label class="hm-chip"><input type="checkbox" id="qf_p"'+(qfPrem(v)?' checked':'')+'><span>Premium</span></label><span class="qf-calc" id="qf_calc">Today, '+now.getDate()+' '+mname+'</span></div>'
+   +'<button class="btn qf-go" id="qf_save">Save fill-up</button><p class="fmsg" id="qf_msg" style="display:block;margin:8px 0 0"></p>'
+   +'<div class="hm-links"><button id="qf_exp">Add an expense</button><button id="qf_odo">Odometer only</button></div></div>'
+   +'<h2>Needs doing</h2><div class="hm-list">'
+   +(att.length?att.slice(0,3).map(row).join(''):'<details open><summary><span class="t">Nothing needs attention right now</span></summary></details>')
+   +'<button id="td_int"><span class="t">'+(att.length>3?(att.length-3)+' more in Insights':'Open Insights')+'</span><span class="ch">›</span></button>'
+   +(openQ?'<button id="td_q"><span class="t">'+openQ+' open question'+(openQ>1?'s':'')+'</span><span class="ch">›</span></button>':'')+'</div>'
+   +'<h2>This month</h2><div class="hm-list"><div style="padding:14px">'
+   +'<div class="hm-kv top"><span>Spent so far</span><b>'+cr(tot)+(bud?' of '+cr(bud):'')+'</b></div>'
+   +'<div class="hm-kv"><span>Your usual month</span><span>'+cr(usual)+'</span></div>'
+   +due.map(r=>'<div class="hm-kv"><span>'+r.title+', '+(r.date<=todayStr()?'due now':dMon(r.date))+'</span><span>about '+cr(r.amt)+'</span></div>').join('')
+   +'</div><button data-go="month"><span class="t">'+(bud?'Budget and details':'Set a budget')+'</span><span class="ch">›</span></button></div>'
+   +'<h2>Look things up</h2><div class="hm-list">'
+   +'<button data-go="both"><span class="t">All-time spending<small>Totals, charts and the split by vehicle</small></span><span class="ch">›</span></button>'
+   +'<button data-go="both:find"><span class="t">Bills and search<small>Every bill and payment on record</small></span><span class="ch">›</span></button>'
+   +'<button data-go="opp:o_cpk"><span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button></div></div>';
+}
+function wireGo(){view.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [k,a]=b.dataset.go.split(':');if(k==='bk'){goAdd(state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60);return}switchTo(k);if(a)setTimeout(()=>{const t=document.getElementById(a);if(t)t.scrollIntoView()},60)}))}
+function renderHome(){
+  view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
+  view.innerHTML=bkBanner()+todaySection();wireBanner();initToday();wireGo();
+}
+function renderMonth(){
+  view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
+  view.innerHTML=BACK+budgetSection();initBudget();wireBack();
+}
+function renderMore(){
+  view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
+  const n=qOpenCount(),it=(go,t,sm,pill)=>'<button data-go="'+go+'"><span class="t">'+t+'<small>'+sm+'</small></span>'+(pill?'<span class="hm-pill bad">'+pill+'</span>':'')+'<span class="ch">›</span></button>';
+  view.innerHTML='<div class="hm"><div class="hm-head"><h1>More</h1></div><div class="hm-list">'
+   +it('q','Questions','Things the ledger still needs from you',n?n+' open':'')
+   +it('both','All-time spending','Totals, charts, search and every bill','')
+   +it('month','This month and budget','Spending so far and bills coming up','')
+   +it('opp','What if','Money tied up, resale value and other ways to travel','')
+   +it('opp:o_cpk','Cost per km','Running, purchase, or everything','')
+   +it('bk','Backup and restore','Keep a copy of your entries','')+'</div></div>';
+  wireGo();
+}
+function initToday(){
+  const $=id=>document.getElementById(id);if(!$('qf_save'))return;
+  const say=(t,bad)=>{const e=$('qf_msg');e.textContent=t;e.style.color=bad?'var(--red)':'var(--green)'};
+  view.querySelectorAll('[data-qv]').forEach(b=>b.addEventListener('click',()=>{QF.veh=b.dataset.qv;refresh()}));
+  const calc=()=>{const a=parseFloat($('qf_a').value),r=parseFloat($('qf_r').value),km=parseFloat($('qf_km').value),v=qfVeh(),last=effWin(v).km1;
+    let t='';if(a>0&&r>0)t=(a/r).toFixed(2)+' litres';if(km>last)t+=(t?' · ':'')+inr(km-last)+' km since the last reading';
+    if(t)$('qf_calc').textContent=t};
+  ['qf_a','qf_r','qf_km'].forEach(i=>$(i).addEventListener('input',calc));
+  $('qf_p').addEventListener('change',()=>{const r=qfRate(qfVeh(),$('qf_p').checked);if(r)$('qf_r').value=r;calc()});
+  $('qf_save').addEventListener('click',()=>{
+    const v=qfVeh(),km=parseFloat($('qf_km').value),a=parseFloat($('qf_a').value),r=parseFloat($('qf_r').value),last=effWin(v).km1;
+    if(!(km>0))return say('Enter the odometer reading.',true);
+    if(km<last)return say('That is lower than the latest reading on file ('+inr(last)+' km). Check the number, or use the Add tab for an older fill-up.',true);
+    if(km-last>5000&&!$('qf_save').dataset.sure){$('qf_save').dataset.sure='1';return say('That is '+inr(km-last)+' km since the last reading. If it is right, tap Save again.',true)}
+    if(!(a>0))return say('Enter the amount you paid.',true);
+    if(!(r>0))return say('Enter the price a litre.',true);
+    STORE.fuel[v.key]=STORE.fuel[v.key]||[];
+    const nid=Date.now()+Math.floor(Math.random()*1000);
+    STORE.fuel[v.key].push({id:nid,d:todayStr(),km:Math.round(km),l:Math.round(a/r*100)/100,amt:Math.round(a*100)/100,full:$('qf_full').checked,p:$('qf_p').checked});
+    const ok=saveStore();
+    const ma=mileageAlert(v),warn=ma&&ma.drop>=0.15&&String(ma.last.id)===String(nid)?' That is '+Math.round(ma.drop*100)+'% below your usual '+ma.usual.toFixed(1)+'. Check the tyre pressure.':'';
+    const m=mileageStats(getFuel(v));
+    flash('qf_msg',ok?('Saved to the '+v.name+'.'+(m.n&&String(m.segs[m.segs.length-1].id)===String(nid)?' This tank gave '+m.latest.toFixed(1)+' km per litre.':'')+warn):'Could not save on this device.',!ok||!!warn);
+    refresh();
+  });
+  $('qf_exp').addEventListener('click',()=>{state.addVeh=qfVeh().key;switchTo('add');const e=document.getElementById('add');if(e)e.scrollIntoView()});
+  $('qf_odo').addEventListener('click',()=>{state.addVeh=qfVeh().key;switchTo('add');const e=document.getElementById('a_odo');if(e)e.scrollIntoView()});
+  $('td_int').addEventListener('click',()=>switchTo('intel'));
+  const tq=$('td_q');if(tq)tq.addEventListener('click',()=>switchTo('q'));
+  if(FLASH){const e=$(FLASH.id);if(e){e.textContent=FLASH.text;e.style.color=FLASH.bad?'var(--red)':'var(--green)'}FLASH=null}
 }
 
 /* ================= MONTHLY BUDGET ================= */
@@ -1554,7 +1716,7 @@ function intelFor(v){
   /* tyres */
   const ty=last(bills.filter(b=>/tyre|tire/i.test(b.title||'')).sort((a,b)=>a.d<b.d?-1:1));
   const noChg=false;
-  if(ty){const ks=ty.km?odo-ty.km:null;if(ks!=null&&ks>=cfg.tyre&&noChg)attn.push({v,sev:'bad',title:'Altis tyres are about '+km(ks)+' km old',text:'You confirmed they have not been changed since '+dMon(ty.d)+' (at '+inr(ty.km)+' km). A typical tyre life is about '+inr(cfg.tyre)+' km, so these are well past it. Plan a replacement.',why:'Based on your answer in the Questions tab',pill:'Replace soon'});else if(ks!=null&&ks>=cfg.tyre)attn.push({v,sev:'warn',title:'No newer '+v.name+' tyre bill',text:'The last tyre entry is '+dFmt(ty.d)+(ty.approx?' (an estimate)':'')+' at '+inr(ty.km)+' km. That is about '+km(ks)+' km ago, past a typical tyre life of about '+inr(cfg.tyre)+' km. If you changed them since, add the bill.',why:'Based on tyre entries and the latest odometer',pill:'Missing?'})}
+  if(ty){const ks=ty.km?odo-ty.km:null;if(ks!=null&&ks>=cfg.tyre&&noChg)attn.push({v,sev:'bad',title:v.name+' tyres are about '+km(ks)+' km old',text:'You confirmed they have not been changed since '+dMon(ty.d)+' (at '+inr(ty.km)+' km). A typical tyre life is about '+inr(cfg.tyre)+' km, so these are well past it. Plan a replacement.',why:'Based on your answer in the Questions tab',pill:'Replace soon'});else if(ks!=null&&ks>=cfg.tyre)attn.push({v,sev:'warn',title:'No newer '+v.name+' tyre bill',text:'The last tyre entry is '+dFmt(ty.d)+(ty.approx?' (an estimate)':'')+' at '+inr(ty.km)+' km. That is about '+km(ks)+' km ago, past a typical tyre life of about '+inr(cfg.tyre)+' km. If you changed them since, add the bill.',why:'Based on tyre entries and the latest odometer',pill:'Missing?'})}
   else if(odo>=12000)attn.push({v,sev:'warn',title:'No '+v.name+' tyre bill on record',text:'Nothing in the ledger mentions tyres, and you are at about '+km(odo)+' km. Add the bill if you have changed them.',why:'Based on all entries and the latest odometer',pill:'Check'});
   /* battery */
   const bt=last(cat('battery',699));
@@ -1619,8 +1781,9 @@ const QO={altis:0,ntorq:1,scr:2,all:3};
 const qList=()=>QSEED.map(x=>({id:x.id,v:x.v,q:x.q,h:x.h||''})).sort((a,b)=>(QO[a.v]||0)-(QO[b.v]||0)).concat((STORE.qx||[]).map(x=>({id:x.id,v:x.v,q:x.q,h:'Added by you',at:x.at})));
 const qIsOpen=x=>{const a=(STORE.qa||{})[x.id];return !(a&&a.a)};
 const qOpenCount=()=>qList().filter(qIsOpen).length;
-function qBadge(){const b=document.getElementById('qbtn');if(!b)return;const n=qOpenCount();b.innerHTML='Questions'+(n?'<span class="q-badge">'+n+'</span>':'')}
+function qBadge(){const b=document.getElementById('bn_badge');if(!b)return;const n=qOpenCount();b.textContent=n||'';b.hidden=!n}
 function qBanner(){
+  return;
   if(state.veh==='q'||state.veh==='add')return;
   const n=qOpenCount();if(!n)return;
   view.insertAdjacentHTML('afterbegin','<div class="q-ban" id="qban"><span><b>'+n+' open question'+(n>1?'s':'')+'</b> waiting for your answer</span><button type="button" id="qgo">Answer</button></div>');
@@ -1827,19 +1990,28 @@ function renderOpp(){
   view.querySelectorAll('[data-ret]').forEach(b=>b.addEventListener('click',()=>{const r={};yrs.forEach(y=>{r[y]=b.dataset.ret==='fd'?6.5:OPP_DEF.ret[y]});setOpp({ret:r});yrs.forEach(y=>document.getElementById('o_y'+y).value=r[y]);upd()}));
 }
 
+const vseg=document.getElementById('vseg'),bnav=document.getElementById('bnav');
+function setShell(key){
+  let h='';
+  if(VEH[key]){state.lastVeh=key;h=Object.values(VEH).map(v=>'<button data-v="'+v.key+'" aria-pressed="'+(v.key===key)+'">'+v.name+'</button>').join('')}
+  else if(key==='intel'||key==='opp')h='<button data-v="intel" aria-pressed="'+(key==='intel')+'">Needs doing</button><button data-v="opp" aria-pressed="'+(key==='opp')+'">What if and cost per km</button>';
+  vseg.innerHTML=h;vseg.hidden=!h;
+  const cur=VEH[key]?'veh':key==='intel'||key==='opp'?'ins':key==='add'?'add':key==='more'||key==='q'?'more':'home';
+  bnav.querySelectorAll('button').forEach(b=>{if(b.dataset.bn===cur)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+}
 function switchTo(key,keepScroll){
   const prev=state.veh;
   state.veh=key;state.filter='all';state.rf='look';
-  document.querySelectorAll('#vseg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===key));
-  if(key==='add'){if(VEH[prev])state.addVeh=prev;renderAdd()}else if(key==='opp')renderOpp();else if(key==='intel')renderIntel();else if(key==='q')renderQ();else if(key==='both')renderBoth();else renderVeh(VEH[key]);
-  qBanner();qBadge();
+  if(key==='add'&&VEH[prev])state.addVeh=prev;
+  draw(key);setShell(key);qBadge();
   if(!keepScroll)window.scrollTo(0,0);
 }
-document.querySelectorAll('#vseg button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.v!==state.veh)switchTo(b.dataset.v)}));
-state.veh='';switchTo('both',true);
+vseg.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b&&b.dataset.v!==state.veh)switchTo(b.dataset.v)});
+bnav.addEventListener('click',e=>{const b=e.target.closest('button[data-bn]');if(!b)return;const k=b.dataset.bn,to=k==='veh'?(state.lastVeh||qfVeh().key):k==='ins'?'intel':k;if(to!==state.veh)switchTo(to);else window.scrollTo(0,0)});
+state.veh='';switchTo('home',true);
 })();
 
 </script>
-<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 -->
 </body>
 </html>
