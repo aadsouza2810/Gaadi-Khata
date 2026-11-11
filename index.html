@@ -513,7 +513,7 @@ const washTotal=v=>v.W?sumT(v.W):0;
 
 /* ================= SAVED ENTRIES (fuel log, odometer) ================= */
 const STORE_KEY='vehicleLedger.family.v1';
-const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[]});
+const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[],alt:[]});
 function normalise(p){
   const s=EMPTY();if(!p||typeof p!=='object')return s;
   for(const k of ['altis','ntorq','scr']){s.fuel[k]=((p.fuel||{})[k]||[]).slice();s.exp[k]=((p.exp||{})[k]||[]).slice()}
@@ -522,6 +522,7 @@ function normalise(p){
   s.gone=Array.isArray(p.gone)?p.gone.map(String):[];
   if(p.qa&&typeof p.qa==='object')Object.keys(p.qa).forEach(k=>{const o=p.qa[k];if(o&&typeof o==='object')s.qa[k]={a:o.a==null?null:String(o.a),at:+o.at||0}});
   if(Array.isArray(p.qx))s.qx=p.qx.filter(x=>x&&x.id&&x.q).map(x=>({id:String(x.id),v:x.v||'all',q:String(x.q),at:+x.at||0}));
+  if(Array.isArray(p.alt))s.alt=p.alt.filter(x=>x&&x.id&&x.d&&+x.amt>0).map(x=>({id:String(x.id),d:String(x.d),amt:+x.amt,v:x.v||'altis',title:String(x.title||''),note:String(x.note||''),approx:x.approx!==false}));
   if(p.opp&&typeof p.opp==='object'){s.opp=p.opp;s.oppAt=+p.oppAt||1}
   if(p.set&&typeof p.set==='object'){s.set=p.set;s.setAt=+p.setAt||1}
   return s;
@@ -1127,7 +1128,7 @@ function initAdd(v){
 /* ================= BACKUP FILE ================= */
 const BK={state:'off',at:null,msg:'',ref:null,pushing:false,dirty:false,timer:null,force:false,lastSig:null,lastManual:0};
 try{BK.lastManual=+localStorage.getItem('vehicleLedger.lastBackup')||0}catch(e){}
-const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(s.setAt?'$'+s.setAt:'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
+const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(s.setAt?'$'+s.setAt:'')+((s.alt||[]).length?'%'+(s.alt||[]).map(x=>x.id+x.amt).sort().join(','):'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
 const hasData=s=>storeSig(Object.assign(EMPTY(),s,{gone:[]}))!=='#';
 function mergeStores(a,b){
   const gone=new Set([...(a.gone||[]),...(b.gone||[])].map(String));
@@ -1135,6 +1136,7 @@ function mergeStores(a,b){
   Object.keys(Object.assign({},a.qa,b.qa)).forEach(k=>{const x=(a.qa||{})[k],y=(b.qa||{})[k];out.qa[k]=!x?y:!y?x:(x.at>=y.at?x:y)});
   const qm=new Map();[...(a.qx||[]),...(b.qx||[])].forEach(x=>{if(!gone.has(x.id))qm.set(x.id,x)});out.qx=[...qm.values()];
   const oa=(a.oppAt||0)>=(b.oppAt||0)?a:b;if(oa.opp){out.opp=oa.opp;out.oppAt=oa.oppAt||1}
+  const am=new Map();[...(a.alt||[]),...(b.alt||[])].forEach(x=>{if(!gone.has(String(x.id)))am.set(String(x.id),x)});out.alt=[...am.values()];
   const sa=(a.setAt||0)>=(b.setAt||0)?a:b;if(sa.set){out.set=sa.set;out.setAt=sa.setAt||1}
   for(const k of ['altis','ntorq','scr']){
     for(const part of ['fuel','exp']){
@@ -1603,7 +1605,9 @@ function oppCalc(v,o){
   const fare=(r,m)=>r/Math.pow(1+o.inf/100,Math.max(0,(now-T0(m.d))/(365.25*DAY)));
   const alt=r=>({nom:months.reduce((a,m)=>a+m.km*fare(r,m),0),fv:months.reduce((a,m)=>a+m.km*fare(r,m)*growth(m.d,o.ret,now),0)});
   const resale=+o.resale[v.key]||0;
-  return {v,spent,fv,lost:fv-spent,km,resale,netNow:spent-resale,ownFv:fv-resale,pt:alt(o.pt),ub:alt(uRate),uRate,flat:{pt:km*o.pt,ub:km*uRate}};
+  const AL=(STORE.alt||[]).filter(x=>x.v===v.key&&x.d&&T0(x.d)<=now),altA={nom:AL.reduce((a,x)=>a+x.amt,0),fv:AL.reduce((a,x)=>a+x.amt*growth(x.d,o.ret,now),0),n:AL.length};
+  const ptb=alt(o.pt);
+  return {v,spent,fv,lost:fv-spent,km,resale,netNow:spent-resale,ownFv:fv-resale,pt:{nom:ptb.nom+altA.nom,fv:ptb.fv+altA.fv},ub:alt(uRate),uRate,altA,flat:{pt:km*o.pt,ub:km*uRate}};
 }
 const cr=n=>'₹'+inr(n);
 function oppCard(c,o){
@@ -1614,7 +1618,7 @@ function oppCard(c,o){
    +'<p class="pkt" style="margin:0 0 10px">'+inr(c.km)+' km covered.'+(c.km>0?' Owning, net of resale, works out at '+pkf(c.netNow/c.km)+' per km, or '+pkf(c.ownFv/c.km)+' with lost returns.':'')+'</p>'
    +kv(rows)
    +'<h4 style="margin:18px 0 6px;font-size:15px">The same km without the '+v.name+'</h4>'
-   +kv([['By public transport, fares of the day',cr(c.pt.nom)],['By '+uName+', fares of the day',cr(c.ub.nom)],['Public transport, in today’s money',cr(c.pt.fv)],[uName+', in today’s money',cr(c.ub.fv)]])
+   +kv([['By public transport, fares of the day',cr(c.pt.nom)],].concat(c.altA.n?[['Includes real travel while it was in the garage',cr(c.altA.nom)]]:[]).concat([['By '+uName+', fares of the day',cr(c.ub.nom)],['Public transport, in today’s money',cr(c.pt.fv)],[uName+', in today’s money',cr(c.ub.fv)]]))
    +'<p class="pkt" style="margin:12px 0 0">'+verdict(c.ownFv,c.pt.fv,'public transport')+'. '+verdict(c.ownFv,c.ub.fv,'Uber')+'. Both sides are in today’s money.</p></div>';
 }
 function oppResults(){
@@ -1958,6 +1962,26 @@ function cpkRender(){
   cpkNewCarCalc(all);
 }
 
+function altSection(){
+  const L=(STORE.alt||[]).slice().sort((a,b)=>b.d.localeCompare(a.d)),tot=L.reduce((a,x)=>a+x.amt,0);
+  const vs=Object.values(VEH);
+  return '<div class="card"><div class="flds"><label class="fld">Date<input type="date" id="al_d" value="'+todayStr()+'"></label><label class="fld">Amount (₹)<input type="number" inputmode="numeric" id="al_a" placeholder="2500"></label></div>'
+   +'<label class="fld" style="margin-top:12px">What it was<input type="text" id="al_t" value="Travel while car in garage" autocomplete="off"></label>'
+   +'<label class="fld" style="margin-top:12px">Which vehicle was in the garage<select id="al_v">'+vs.map(v=>'<option value="'+v.key+'">'+v.name+'</option>').join('')+'</select></label>'
+   +'<div class="btnrow"><button class="btn" id="al_go">Add</button><span class="fn" id="al_m" style="margin:0"></span></div></div>'
+   +(L.length?'<div class="list" style="margin-top:12px">'+L.map(x=>'<div class="row"><div class="rh" style="cursor:default"><span class="rt"><b>'+qEsc(x.title||'Travel')+'</b><span>'+dMon(x.d)+(x.note?' · '+qEsc(x.note):'')+(x.approx?' · approximate':'')+'</span></span><span class="ra">'+cr(x.amt)+'</span><button class="btn alt sm" data-aldel="'+x.id+'" aria-label="Remove">Remove</button></div></div>').join('')+'</div><p class="fn">Total '+cr(tot)+' across '+L.length+' entr'+(L.length>1?'ies':'y')+'.</p>':'<p class="fn" style="margin-top:12px">Nothing added yet.</p>');
+}
+function wireAlt(upd){
+  const box=document.getElementById('altbox');if(!box)return;
+  const redo=()=>{box.innerHTML=altSection();wireAlt(upd);upd()};
+  document.getElementById('al_go').addEventListener('click',()=>{
+    const d=document.getElementById('al_d').value,a=parseFloat(document.getElementById('al_a').value),m=document.getElementById('al_m');
+    if(!d||!(a>0)){m.textContent='Enter a date and an amount.';return}
+    STORE.alt=(STORE.alt||[]).concat([{id:'al'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),d,amt:Math.round(a),v:document.getElementById('al_v').value,title:document.getElementById('al_t').value.trim()||'Travel while car in garage',note:'',approx:false}]);
+    saveStore();redo();
+  });
+  box.querySelectorAll('[data-aldel]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.aldel;STORE.alt=(STORE.alt||[]).filter(x=>x.id!==id);STORE.gone=(STORE.gone||[]).concat([id]);saveStore();redo()}));
+}
 function renderOpp(){
   const o=getOpp();
   view.style.setProperty('--acc','var(--blue)');
@@ -1976,6 +2000,7 @@ function renderOpp(){
    +'<p class="pkt" style="margin:10px 0 0">These are today’s rates. Older km are costed at lower fares, using the yearly rise above (my assumption, close to normal inflation).</p>'
    +'<h4 style="margin:20px 0 8px;font-size:15px">Approximate resale value today</h4><p class="pkt" style="margin:0 0 10px">Look up the same model, year and city on a used-vehicle site, and take off about 12%, because buyers offer less than the asking price. A real offer is better.</p>'
    +'<div class="flds">'+Object.values(VEH).map(v=>num('o_rs_'+v.key,v.name+' (₹)',o.resale[v.key],'5000')).join('')+'</div></div></section>'
+   +'<section id="o_alt"><h2>Travel while a vehicle was in the garage</h2><p class="lede">Money you actually spent getting around while a vehicle was being repaired: a borrowed car, a trip by cab or train. It is added to the public transport side of the comparison below, and it does not change that vehicle\u2019s own costs.</p><div id="altbox">'+altSection()+'</div></section>'
    +'<section id="o_res"><h2>Results</h2><p class="lede">Each payment grows from the day you made it, to today.</p><div id="oppres">'+oppResults()+'</div></section>'
    +'<section id="o_km"><h2>Km travelled</h2><p class="lede">Worked out from the odometer readings you entered, assuming steady use between them. It needs an odometer reading for today in your setup, or fill-ups and expenses with the odometer filled in.</p>'+kmTables()+'<p class="fn">Km after your last odometer reading are not counted. A car carries several people and one trip by cab is not always one trip you would have made, so read the public transport and Uber figures as a rough guide.</p></section>'
    +'<section id="o_src"><h2>Sources</h2><p class="lede">Where the starting numbers came from.</p><div class="card">'+kl(SRC.map(s=>s[0]+' <a href="'+s[1]+'" target="_blank" rel="noopener">'+s[2]+'</a>'))+'</div></section>';
@@ -1988,6 +2013,7 @@ function renderOpp(){
   yrs.forEach(y=>document.getElementById('o_y'+y).addEventListener('input',()=>{const x=rd('o_y'+y);if(x==null)return;const r=getOpp().ret;r[y]=x;setOpp({ret:r});upd()}));
   Object.keys(VEH).forEach(k=>document.getElementById('o_rs_'+k).addEventListener('input',()=>{const x=rd('o_rs_'+k);if(x==null||x<0)return;const r=getOpp().resale;r[k]=x;setOpp({resale:r});upd()}));
   view.querySelectorAll('[data-ret]').forEach(b=>b.addEventListener('click',()=>{const r={};yrs.forEach(y=>{r[y]=b.dataset.ret==='fd'?6.5:OPP_DEF.ret[y]});setOpp({ret:r});yrs.forEach(y=>document.getElementById('o_y'+y).value=r[y]);upd()}));
+  wireAlt(upd);
 }
 
 const vseg=document.getElementById('vseg'),bnav=document.getElementById('bnav');
@@ -2012,6 +2038,6 @@ state.veh='';switchTo('home',true);
 })();
 
 </script>
-<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 -->
 </body>
 </html>
