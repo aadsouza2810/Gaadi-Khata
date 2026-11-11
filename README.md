@@ -2,6 +2,8 @@
 
 A free ledger for your cars and bikes. See every rupee your vehicle has cost, what needs attention, and what is coming up.
 
+**Open the app: https://aadsouza2810.github.io/Gaadi-Khata/**
+
 Your data stays on your own phone. Nothing is uploaded anywhere. The PDF reader loads a small reader program from the internet the first time you use it, but your PDF itself never leaves the phone.
 
 ## What it does
@@ -22,7 +24,7 @@ Your data stays on your own phone. Nothing is uploaded anywhere. The PDF reader 
 
 ## Start using it
 
-1. Open the link for this app on your phone (ask whoever shared it).
+1. Open https://aadsouza2810.github.io/Gaadi-Khata/ on your phone.
 2. Tap **Start my ledger** and enter your vehicle details.
 3. Set the service gap and tyre life. They start with typical values. Check your owner's manual or ask your mechanic.
 4. In your browser menu choose **Add to Home Screen**, so it opens like an app.
