@@ -10,6 +10,7 @@ Your data stays on your own phone. Nothing is uploaded anywhere. The PDF reader 
 
 - Add up to three vehicles: a car, a bike or a scooter
 - **Home screen:** add a fill-up in seconds (odometer and amount; the price is filled in from your last fill-up), see what needs doing, and check this month's spending. A bar at the bottom moves between Home, Add, Vehicles, Insights and More
+- **Travel while a vehicle was in the garage:** log the cab, borrowed-car or train costs you paid, and see them counted on the public transport side of What if
 - **Premium petrol:** tick it on a fill-up to see what premium costs you over regular, and whether the mileage is better
 - Log fuel fill-ups, expenses and odometer readings
 - See cost per km, year by year and by category
