@@ -771,6 +771,27 @@ function groupSub(v){
   const c=costs(v);
   return [c.purchase>0?'₹'+inr(c.purchase)+' purchase and accessories':null,'₹'+inr(c.maint)+' maintenance','₹'+inr(c.running)+' running'].filter(Boolean).join(' + ');
 }
+function pk12(v){
+  const w=effWin(v),T=d=>new Date(d+'T00:00:00').getTime(),DAY=86400000;
+  const iso=t=>new Date(t).toISOString().slice(0,10);
+  let pts=[{d:w.from,km:w.km0}];
+  v.B.filter(x=>x.km&&x.d>w.from&&x.d<w.to).sort((a,b)=>a.d.localeCompare(b.d)||a.km-b.km).forEach(x=>{const l=pts[pts.length-1];if(x.km>l.km&&x.km<w.km1&&x.d>l.d)pts.push({d:x.d,km:x.km})});
+  pts.push({d:w.to,km:w.km1});
+  const kmAt=d=>{const t=T(d);if(t<=T(pts[0].d))return pts[0].km;for(let i=1;i<pts.length;i++){const a=pts[i-1],c=pts[i];if(t<=T(c.d))return a.km+(c.km-a.km)*(t-T(a.d))/Math.max(1,T(c.d)-T(a.d))}return w.km1};
+  const e=T(w.to),s1=iso(e-365*DAY),s0=iso(e-730*DAY);
+  const a=s1<w.from?w.from:s1,days=(e-T(a))/DAY;
+  if(days<150)return null;
+  const run=(f,t)=>{const c=costs(v,{from:f,to:t},true);return {amt:c.maint+c.running,km:kmAt(t)-kmAt(f)}};
+  const cur=run(a,w.to);if(!(cur.km>=300)||!(cur.amt>0))return null;
+  let prev=null;if(s0>=w.from){const p=run(s0,s1);if(p.km>=300&&p.amt>0)prev=p}
+  return {from:a,full:s1>=w.from,pk:cur.amt/cur.km,amt:cur.amt,km:cur.km,prev:prev?prev.amt/prev.km:null};
+}
+function pk12Card(v){
+  const r=pk12(v);if(!r)return '';
+  let tr='';
+  if(r.prev!=null){const p=(r.pk-r.prev)/r.prev*100,up=p>0;tr='<div class="pkt" style="margin-top:6px"><b class="'+(up?'cpk-up':'cpk-dn')+'">'+(up?'&#9650; up ':'&#9660; down ')+Math.abs(Math.round(p))+'%</b> on the 12 months before ('+pkf(r.prev)+' a km). '+(up?'Running this vehicle is getting dearer.':'Running this vehicle is getting cheaper.')+'</div>'}
+  return '<div class="pkbig"><div class="big">'+pkf(r.pk)+'<small>per km, '+(r.full?'last 12 months':'recent months')+'</small></div><div class="pkt" style="margin-top:8px"><b>Running costs only.</b> ₹'+inr(r.amt)+' of fuel, servicing, repairs, insurance and other upkeep over '+inr(Math.round(r.km))+' km, from '+fmt(r.from)+'. The purchase price is left out, so this is what it costs to use it today.</div>'+tr+'</div>';
+}
 function perKmSection(v){
   const {w,c,km}=winStats(v),all=costs(v),out=all.total-c.total;
   const aft=costs(v,{from:w.to+'~',to:'9999-12-31'},true).total,bef=out-aft;
@@ -783,7 +804,7 @@ function perKmSection(v){
   const stack=['purchase','maint','running'].filter(k=>c[k]>0).map(k=>'<i style="width:'+(c[k]/c.total*100)+'%;background:'+GCOL[k]+'"></i>').join('');
   const be=bfEst(v);const fuelLine=c.fuel>0?'Fuel so far: ₹'+inr(c.fuel)+(be?' (includes an estimated ₹'+inr(be.t)+' for the first '+inr(be.km)+' km: '+inr(be.l)+' L at ₹'+be.rate+' a litre and '+be.kmpl+' km per litre)':'')+'. ':'No fuel recorded yet. ';
   return '<section id="perkm"><h2>Cost per km</h2><p class="lede">Every cost from '+w.startText+' to '+w.endText+', divided by the '+inr(km)+' km covered.</p>'
-   +'<div class="pkbig"><div class="big">'+pkf(c.total/km)+'<small>per km, all costs</small></div><div class="pkt" style="margin-top:8px">₹'+inr(c.total)+' over '+inr(km)+' km</div><div class="stack" style="margin-top:16px">'+stack+'</div></div>'
+   +pk12Card(v)+'<div class="pkbig" style="margin-top:12px"><div class="big">'+pkf(c.total/km)+'<small>per km, since the start</small></div><div class="pkt" style="margin-top:8px">All costs, including the purchase. ₹'+inr(c.total)+' over '+inr(km)+' km</div><div class="stack" style="margin-top:16px">'+stack+'</div></div>'
    +'<div class="pkgrid">'
    +card('purchase','Purchase cost','The bike and the extras bought with it. It falls with every km you ride.',c.purchase,v.win.nopurchase)
    +card('maint','Maintenance cost','Servicing, repairs, parts, tyres, battery and other workshop bills.',c.maint)
