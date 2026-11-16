@@ -646,7 +646,7 @@ const washTotal=v=>v.W?sumT(v.W):0;
 
 /* ================= SAVED ENTRIES (fuel log, odometer) ================= */
 const STORE_KEY='vehicleLedger.family.v1';
-const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[],alt:[],fix:[],ev:{at:0,ans:{},tick:{},q:[]}});
+const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[],alt:[],fix:[],ev:{at:0,ans:{},tick:{},q:[],x:[]}});
 function normalise(p){
   const s=EMPTY();if(!p||typeof p!=='object')return s;
   for(const k of ['altis','ntorq','scr']){s.fuel[k]=((p.fuel||{})[k]||[]).slice();s.exp[k]=((p.exp||{})[k]||[]).slice()}
@@ -655,7 +655,7 @@ function normalise(p){
   s.gone=Array.isArray(p.gone)?p.gone.map(String):[];
   if(p.qa&&typeof p.qa==='object')Object.keys(p.qa).forEach(k=>{const o=p.qa[k];if(o&&typeof o==='object')s.qa[k]={a:o.a==null?null:String(o.a),at:+o.at||0}});
   if(Array.isArray(p.qx))s.qx=p.qx.filter(x=>x&&x.id&&x.q).map(x=>({id:String(x.id),v:x.v||'all',q:String(x.q),at:+x.at||0}));
-  if(p.ev&&typeof p.ev==='object'){const o={at:+p.ev.at||0,ans:{},tick:{},q:(Array.isArray(p.ev.q)?p.ev.q:[]).filter(x=>x&&x.id&&x.n&&+x.ex>0).map(x=>({id:String(x.id),n:String(x.n),ex:+x.ex,tcs:+x.tcs||0,ins:+x.ins||0,rto:+x.rto||0,d:+x.d||0,note:String(x.note||'')}))};for(const k in (p.ev.ans||{}))if(Number.isInteger(p.ev.ans[k]))o.ans[k]=p.ev.ans[k];for(const k in (p.ev.tick||{}))if(p.ev.tick[k])o.tick[k]=1;s.ev=o}
+  if(p.ev&&typeof p.ev==='object'){const o={at:+p.ev.at||0,ans:{},tick:{},x:(Array.isArray(p.ev.x)?p.ev.x:[]).filter(x=>x&&x.id&&x.n&&+x.amt>0).map(x=>({id:String(x.id),n:String(x.n),amt:+x.amt})),q:(Array.isArray(p.ev.q)?p.ev.q:[]).filter(x=>x&&x.id&&x.n&&+x.ex>0).map(x=>({id:String(x.id),n:String(x.n),ex:+x.ex,tcs:+x.tcs||0,ins:+x.ins||0,rto:+x.rto||0,d:+x.d||0,note:String(x.note||'')}))};for(const k in (p.ev.ans||{}))if(Number.isInteger(p.ev.ans[k]))o.ans[k]=p.ev.ans[k];for(const k in (p.ev.tick||{}))if(p.ev.tick[k])o.tick[k]=1;s.ev=o}
   if(Array.isArray(p.fix))s.fix=p.fix.filter(x=>x&&x.id&&x.t).map(x=>({id:String(x.id),v:x.v||'altis',t:String(x.t),note:String(x.note||''),done:!!x.done,d:String(x.d||''),at:+x.at||0}));
   if(Array.isArray(p.alt))s.alt=p.alt.filter(x=>x&&x.id&&x.d&&+x.amt>0).map(x=>({id:String(x.id),d:String(x.d),amt:+x.amt,v:x.v||'altis',title:String(x.title||''),note:String(x.note||''),approx:x.approx!==false}));
   if(p.opp&&typeof p.opp==='object'){s.opp=p.opp;s.oppAt=+p.oppAt||1}
@@ -1676,7 +1676,11 @@ function evQuotes(){const ev=STORE.ev,Q=ev.q||[];const fin=x=>x.ex+x.tcs+x.ins+x
     +(Q.some(x=>x.note)?'<tr><td>Note</td>'+Q.map(x=>'<td><small>'+qEsc(x.note)+'</small></td>').join('')+'</tr>':'')+'</tbody></table></div>'
     :'<div class="card evp"><p style="margin:0">No quotes yet. Add one below to compare final prices side by side.</p></div>';
   let gap='';if(Q.length>1){const s=Q.slice().sort((a,b)=>fin(a)-fin(b));gap='<div class="card evp evlean" style="margin-top:12px"><b>'+qEsc(s[0].n)+' is cheapest at ₹'+inr(fin(s[0]))+'</b><p>'+qEsc(s[1].n)+' is ₹'+inr(fin(s[1])-fin(s[0]))+' more'+(s.length>2?', and '+qEsc(s[s.length-1].n)+' is ₹'+inr(fin(s[s.length-1])-fin(s[0]))+' more':'')+'. Final price is after discounts, so a quote with no discount yet can still come down.</p></div>'}
-  return '<h2 class="evh2" style="margin-top:18px">Your quotes</h2><p class="evsub">Final price = ex-showroom + TCS + insurance + RTO and FASTag − discounts.</p><div style="margin-top:12px">'+tbl+'</div>'+gap
+  const X=ev.x||[],xt=X.reduce((a,x)=>a+x.amt,0);
+  const extras='<h2 class="evh2">Extras on top</h2><p class="evsub">Costs that come after the purchase. When you buy the car, add these to its costs.</p><div class="card evc" style="margin-top:12px">'+(X.length?X.map(x=>'<div class="fxr" style="cursor:default"><span class="t">'+qEsc(x.n)+'</span><span style="font-weight:600;font-variant-numeric:tabular-nums">₹'+inr(x.amt)+'</span><button class="x" data-evxd="'+x.id+'" aria-label="Remove">Remove</button></div>').join('')+'<div class="fxr" style="cursor:default"><span class="t" style="color:var(--ink2)">Total extras</span><span style="font-weight:700;font-variant-numeric:tabular-nums">₹'+inr(xt)+'</span></div>':'<div class="fx-empty">None yet.</div>')+'</div>'
+   +'<div class="fx-add"><input type="text" id="evx_n" placeholder="e.g. Charger installation" autocomplete="off" aria-label="Extra cost"><input type="number" inputmode="numeric" id="evx_a" placeholder="₹" style="flex:0 0 96px" aria-label="Amount"><button id="evx_go">Add</button></div>';
+  const withx=(Q.length&&xt)?'<div class="card evp" style="margin-top:12px"><b>With extras, the cheapest is ₹'+inr(best+xt)+'</b><p>'+qEsc(Q.slice().sort((a,b)=>fin(a)-fin(b))[0].n)+': ₹'+inr(best)+' final + ₹'+inr(xt)+' extras.</p></div>':'';
+  return '<h2 class="evh2" style="margin-top:18px">Your quotes</h2><p class="evsub">Final price = ex-showroom + TCS + insurance + RTO and FASTag − discounts.</p><div style="margin-top:12px">'+tbl+'</div>'+gap+extras+withx
    +'<h2 class="evh2">Add a quote</h2><div class="card evp"><div class="evg"><label class="w">Car and variant<input type="text" id="evq_n" placeholder="e.g. Sierra Empowered A AWD" autocomplete="off"></label>'
    +'<label>Ex-showroom<input type="number" inputmode="numeric" id="evq_ex"></label><label>TCS 1%<input type="number" inputmode="numeric" id="evq_tcs" placeholder="auto"></label>'
    +'<label>Insurance<input type="number" inputmode="numeric" id="evq_ins"></label><label>RTO and FASTag<input type="number" inputmode="numeric" id="evq_rto"></label>'
@@ -1714,6 +1718,8 @@ function renderEV(){
   const keep=()=>{STORE.ev.at=Date.now();saveStore();const y=scrollY;renderEV();scrollTo(0,y)};
   view.querySelectorAll('[data-evk]').forEach(r=>{const tog=()=>{const k=r.dataset.evk;if(STORE.ev.tick[k])delete STORE.ev.tick[k];else STORE.ev.tick[k]=1;keep()};r.addEventListener('click',tog);r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog()}})});
   view.querySelectorAll('[data-evqd]').forEach(b=>b.addEventListener('click',()=>{STORE.ev.q=(STORE.ev.q||[]).filter(x=>x.id!==b.dataset.evqd);keep()}));
+  view.querySelectorAll('[data-evxd]').forEach(b=>b.addEventListener('click',()=>{STORE.ev.x=(STORE.ev.x||[]).filter(x=>x.id!==b.dataset.evxd);keep()}));
+  const xg=document.getElementById('evx_go');if(xg)xg.addEventListener('click',()=>{const n=document.getElementById('evx_n').value.trim(),a=parseFloat(document.getElementById('evx_a').value);if(!n||!(a>0)){document.getElementById('evx_n').focus();return}STORE.ev.x=(STORE.ev.x||[]).concat([{id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),n,amt:Math.round(a)}]);keep()});
   const qg=document.getElementById('evq_go');if(qg)qg.addEventListener('click',()=>{const g=id=>document.getElementById(id),n=g('evq_n').value.trim(),ex=parseFloat(g('evq_ex').value),ins=parseFloat(g('evq_ins').value)||0,rto=parseFloat(g('evq_rto').value)||0,d=parseFloat(g('evq_d').value)||0;let tcs=parseFloat(g('evq_tcs').value);
     if(!n||!(ex>0)){g('evq_msg').textContent='Add the car name and the ex-showroom price.';return}
     if(!(tcs>=0))tcs=Math.round(ex*0.01);
@@ -2267,6 +2273,6 @@ state.veh='';switchTo('home',true);
 })();
 
 </script>
-<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 --><!-- fix v1 --><!-- ev v1 --><!-- evq v1 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 --><!-- fix v1 --><!-- ev v1 --><!-- evq v1 --><!-- evx v1 -->
 </body>
 </html>
