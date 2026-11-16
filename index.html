@@ -668,6 +668,14 @@ try{const raw=localStorage.getItem(STORE_KEY);if(raw)STORE=normalise(JSON.parse(
 function saveLocal(){try{localStorage.setItem(STORE_KEY,JSON.stringify(STORE));return true}catch(e){storeOK=false;return false}}
 function saveStore(){const ok=saveLocal();scheduleBackup(1500);return ok}
 const getFuel=v=>(STORE.fuel[v.key]||[]).map(f=>({id:f.id,d:f.d,km:f.km,l:f.l,t:f.amt||0,full:f.full!==false,p:f.p===true}));
+function bfExt(v){
+  const b=BF[v.key];if(!b)return null;
+  const fl=getFuel(v);let from=b.k1;fl.forEach(f=>{if(f.km>from)from=f.km});
+  const w=effWin(v),to=w.km1;if(!(to>from))return null;
+  const lf=fl.filter(f=>f.l>0&&f.t>0).sort((a,c)=>a.d<c.d?1:a.d>c.d?-1:c.km-a.km)[0];
+  const rate=lf?Math.round(lf.t/lf.l*100)/100:b.rate,km=to-from,l=km/b.kmpl;
+  return {d:w.to>b.d1?w.to:b.d1,month:(w.to>b.d1?w.to:b.d1).slice(0,7),km,l,t:Math.round(l*rate),k0:from,k1:to,rate,kmpl:b.kmpl,title:'Fuel (estimated)',ext:true};
+}
 function bfMonths(v){
   const b=BF[v.key];if(!b)return [];
   const T=d=>new Date(d+'T00:00:00').getTime();
@@ -688,10 +696,11 @@ function bfMonths(v){
     prev=km;if(last)break;y=nx[0];m=nx[1];
   }
   const tot=Math.round((b.k1-b.k0)/b.kmpl*b.rate),diff=tot-out.reduce((a,x)=>a+x.t,0);out[out.length-1].t+=diff;
+  const ex=bfExt(v);if(ex)out.push(ex);
   return out;
 }
 function bfEst(v){const b=BF[v.key];if(!b||!(b.rate>0))return null;const km=b.k1-b.k0,l=km/b.kmpl;return Object.assign({km,l,t:Math.round(l*b.rate)},b)}
-const fuelTotal=v=>getFuel(v).reduce((a,f)=>a+f.t,0)+(bfEst(v)||{t:0}).t;
+const fuelTotal=v=>getFuel(v).reduce((a,f)=>a+f.t,0)+(bfEst(v)||{t:0}).t+(bfExt(v)||{t:0}).t;
 const getExp=v=>(STORE.exp[v.key]||[]).map(e=>({id:e.id,d:e.d,t:e.t,title:e.title,c:{[e.cat]:e.t},km:e.km||undefined,note:e.note||'',noText:'Added by you'+(e.src==='claude'?', read by Claude':e.src==='free'?', read from a document':''),user:true,cat:e.cat}));
 const allBills=v=>v.B.concat(getExp(v));
 const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -864,7 +873,7 @@ function fuelReport(v){
   const hint=m.n?'':'<p class="fn" style="margin-top:12px">Log two full-tank fill-ups in the Add tab to see your mileage. The first one sets the starting point.</p>';
   return '<section id="fuel"><h2>Fuel &amp; mileage</h2><p class="lede">Kilometres per litre from your fill-ups, and what fuel costs per km.</p>'
    +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'+hint+premiumCard(v)
-   +(bfEst(v)?(b=>'<div class="card" style="margin-top:12px"><b>Estimated fuel, '+fmt(b.d0)+' to '+fmt(b.d1)+'</b><p class="pkt" style="margin:6px 0 0">'+inr(b.km)+' km ('+inr(b.k0)+' to '+inr(b.k1)+') at '+b.kmpl+' km per litre is about '+inr(b.l)+' L. At ₹'+b.rate+' a litre that is ₹'+inr(b.t)+'. This is an estimate, counted in the cost per km, and kept out of the real mileage figures above. Each month\u2019s share follows the odometer readings on your bills, assuming steady riding between them.</p><details style="margin-top:10px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="ptab"><table><thead><tr><th>Month</th><th>km</th><th>Litres</th><th>Fuel \u20b9</th></tr></thead><tbody>'+bfMonths(v).map(m=>'<tr><td>'+m.month+'</td><td>'+inr(m.km)+'</td><td>'+Math.round(m.l)+'</td><td>'+inr(m.t)+'</td></tr>').join('')+'</tbody></table></div></details></div>')(bfEst(v)):'')
+   +(bfEst(v)?(b=>'<div class="card" style="margin-top:12px"><b>Estimated fuel, '+fmt(b.d0)+' to '+fmt(b.d1)+'</b><p class="pkt" style="margin:6px 0 0">'+inr(b.km)+' km ('+inr(b.k0)+' to '+inr(b.k1)+') at '+b.kmpl+' km per litre is about '+inr(b.l)+' L. At ₹'+b.rate+' a litre that is ₹'+inr(b.t)+'. This is an estimate, counted in the cost per km, and kept out of the real mileage figures above. Each month\u2019s share follows the odometer readings on your bills, assuming steady riding between them.</p><details style="margin-top:10px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="ptab"><table><thead><tr><th>Month</th><th>km</th><th>Litres</th><th>Fuel \u20b9</th></tr></thead><tbody>'+bfMonths(v).map(m=>'<tr><td>'+m.month+'</td><td>'+inr(m.km)+'</td><td>'+Math.round(m.l)+'</td><td>'+inr(m.t)+'</td></tr>').join('')+'</tbody></table></div></details>'+(bfExt(v)?(x=>'<p class="pkt" style="margin:10px 0 0"><b>Since your last fill-up:</b> '+inr(x.km)+' km ('+inr(x.k0)+' to '+inr(x.k1)+') with no fill-up logged yet, estimated at \u20b9'+inr(x.t)+' ('+Math.round(x.l*10)/10+' L at \u20b9'+x.rate+' a litre). It drops out as soon as you log your next fill-up.</p>')(bfExt(v)):'')+'</div>')(bfEst(v)):'')
    +(rows?'<div class="list" style="margin-top:12px;padding:6px 16px">'+rows+'</div>':'')
    +'<div class="btnrow"><button class="btn" data-goadd="'+v.key+'">Add a fill-up or expense</button></div></section>';
 }
@@ -2273,6 +2282,6 @@ state.veh='';switchTo('home',true);
 })();
 
 </script>
-<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 --><!-- fix v1 --><!-- ev v1 --><!-- evq v1 --><!-- evx v1 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 --><!-- fix v1 --><!-- ev v1 --><!-- evq v1 --><!-- evx v1 --><!-- fuelext v1 -->
 </body>
 </html>
