@@ -2126,8 +2126,15 @@ function cpkRows(D,keyFn,basis){
   const R={};
   D.forEach(x=>{
     const ms=new Set(Object.keys(x.kmBy).concat(Object.keys(x.run)).concat(basis==='paid'?Object.keys(x.paid):[]));
+    let asR=null;
+    if(basis==='asit'){
+      const all=Array.from(new Set(Object.keys(x.kmBy).concat(Object.keys(x.run)).concat(Object.keys(x.paid)))).sort(),kk={};
+      let cp=0,ck=0;asR={};
+      all.forEach(m=>{cp+=x.paid[m]||0;ck+=Math.max(0,x.kmBy[m]||0);const k=keyFn(m);kk[k]={p:cp,k:ck}});
+      for(const k in kk)asR[k]=kk[k].k>0?kk[k].p/kk[k].k:0;
+    }
     ms.forEach(m=>{const k=keyFn(m);const r=R[k]=R[k]||{km:0,run:0,own:0,cat:{},big:null};
-      const km=x.kmBy[m]||0;r.km+=km;r.run+=x.run[m]||0;r.own+=basis==='paid'?(x.paid[m]||0):km*x.rate;
+      const km=x.kmBy[m]||0;r.km+=km;r.run+=x.run[m]||0;r.own+=basis==='paid'?(x.paid[m]||0):basis==='asit'?km*(asR[k]||0):km*x.rate;
       Object.entries(x.cat[m]||{}).forEach(([c,a])=>r.cat[c]=(r.cat[c]||0)+a);
       const b=x.big[m];if(b&&(!r.big||b.t>r.big.t))r.big={t:b.t,title:b.title,veh:x.v.name}});
   });
@@ -2224,15 +2231,16 @@ function cpkRender(){
     +cpkInsights(D)
     +seg('cpk_l',CPK.lens,[['run','Running & maintenance'],['buy','Purchase'],['all','Everything']])
     +seg('cpk_p',CPK.per,[['Y','By year'],['M','Monthly']])
-    +(CPK.lens==='run'?'':seg('cpk_b',CPK.basis,[['spread','Purchase spread over km'],['paid','Purchase as paid']]))
+    +(CPK.lens==='run'?'':seg('cpk_b',CPK.basis,[['spread','Spread over all km'],['asit','As it was then'],['paid','As paid']]))
     +'<div class="stats sum3 cpk-st" style="margin-top:0;grid-template-columns:repeat(3,minmax(0,1fr))">'+'<div class="stat"><div class="n">'+(tt>=1e5?'₹'+(tt/1e5).toFixed(tt>=1e7?0:1)+' lakh':cr(tt))+'</div><div class="l">'+nm+', '+span+'</div></div><div class="stat"><div class="n">'+inr(tk)+'</div><div class="l">km</div></div><div class="stat"><div class="n">'+(tk?(tt/tk>=1000?'₹'+inr(tt/tk):pkf(tt/tk)):'—')+'</div><div class="l">per km</div></div></div>'
     +'<div class="card ptab" style="margin-top:12px"><table><thead><tr><th>'+(CPK.per==='Y'?'Year':'Month')+'</th><th>Km</th><th>Total spent</th><th>Per km</th></tr></thead><tbody>'
     +keys.map(k=>{const r=R[k],c=f(r);return '<tr><td>'+lab(k)+tag(k)+'</td><td>'+(r.km?inr(r.km):'—')+'</td><td>'+cr(c)+'</td><td><b>'+(r.km?(c/r.km>=1000?'₹'+inr(c/r.km):pkf(c/r.km)):'—')+'</b></td></tr>'}).join('')
     +'</tbody></table></div>'
     +(CPK.per==='M'?'<div class="btnrow"><button class="btn alt sm" id="cpk_more">'+(CPK.more?'Show last 12 months':'Show every month')+'</button></div>':'')
-    +'<p class="fn">'+(CPK.lens==='run'?'Fuel, services, repairs, tyres, battery, insurance, tolls, pollution checks and washing. The purchase price and accessories are left out.':(CPK.lens==='buy'?(CPK.basis==='paid'?'Price and accessories exactly when you paid them. A month with a purchase and few km shows a very large cost per km, and resale value is not deducted.':'Price plus accessories, minus the resale values in Assumptions below, spread evenly over every km each vehicle has done. So each km carries the same share, instead of it all landing in the month you paid.'):('Running and maintenance plus the purchase '+(CPK.basis==='paid'?'price as you paid it. A month with a purchase and few km shows a very large cost per km.':'share.'))))+' * Not over yet. Estimated entries are included, and it updates as you add bills, fill-ups and odometer readings.'+(CPK.per==='M'&&CPK.lens!=='buy'?' A tag marks a month that cost more than twice your usual per km, with the biggest bill that month.':'')+'</p>'
+    +'<p class="fn" id="cpk_fn">'+(CPK.lens==='run'?'Fuel, services, repairs, tyres, battery, insurance, tolls, pollution checks and washing. The purchase price and accessories are left out.':(CPK.lens==='buy'?(CPK.basis==='paid'?'Price and accessories exactly when you paid them. A month with a purchase and few km shows a very large cost per km, and resale value is not deducted.':'Price plus accessories, minus the resale values in Assumptions below, spread evenly over every km each vehicle has done. So each km carries the same share, instead of it all landing in the month you paid.'):('Running and maintenance plus the purchase '+(CPK.basis==='paid'?'price as you paid it. A month with a purchase and few km shows a very large cost per km.':'share.'))))+' * Not over yet. Estimated entries are included, and it updates as you add bills, fill-ups and odometer readings.'+(CPK.per==='M'&&CPK.lens!=='buy'?' A tag marks a month that cost more than twice your usual per km, with the biggest bill that month.':'')+'</p>'
     +cpkNewCar(all);
   const wire=(id,key)=>box.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{CPK[key]=b.dataset.k;if(key==='per')CPK.more=false;cpkRender()}));
+  if(CPK.basis==='asit'&&CPK.lens!=='run'){const fn=document.getElementById('cpk_fn');if(fn)fn.textContent='Each period carries the purchase price and accessories paid so far, divided by the km covered so far, as it stood at the end of that period. So early periods look dear and later ones cheaper. Resale value is not deducted. Running and maintenance are what was spent in the period. * Not over yet. Estimated entries are included.'}
   wire('cpk_v','veh');wire('cpk_l','lens');wire('cpk_p','per');wire('cpk_b','basis');
   const mb=document.getElementById('cpk_more');if(mb)mb.addEventListener('click',()=>{CPK.more=!CPK.more;cpkRender()});
   box.querySelectorAll('[id^=nc_]').forEach(i=>{if(i.tagName==='INPUT')i.addEventListener('input',()=>cpkNewCarCalc(all))});
