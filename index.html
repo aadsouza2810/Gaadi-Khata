@@ -373,6 +373,94 @@ textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var
 .q-ban button{font:inherit;font-weight:600;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:7px 14px;cursor:pointer;white-space:nowrap}
 .q-add{display:grid;gap:10px;margin-top:4px}
 .q-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+
+/* look v2 */
+:root{--round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;--glass2:rgba(255,255,255,.82)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--glass2:rgba(40,40,43,.82)}}
+:root[data-theme="dark"]{--glass2:rgba(40,40,43,.82)}
+.total,.stat .n,.hm-head div b,.hm-gar b,.hm-big input{font-family:var(--round)}
+.ic{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;color:#fff;background:var(--blue)}
+.ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic.bad{background:var(--red)}.ic.warn{background:var(--orange)}.ic.ok{background:var(--green)}
+.ic.c2{background:var(--orange)}.ic.c3{background:var(--green)}.ic.c4{background:var(--purple)}.ic.c5{background:var(--teal)}.ic.c6{background:var(--gray)}
+.hm-head{padding:14px 0 16px}
+.hm-head h1{font-size:34px;line-height:1.1}
+.hm-head .hm-ttl{text-align:left;min-width:0}
+.hm-head .hm-ttl small{display:block;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.hm-head div b{font-size:22px;font-weight:700}
+.hm h2{font-size:20px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin:26px 4px 10px}
+.hm-gar{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;margin-bottom:12px}
+.hm-gar button{min-width:0;text-align:left;background:var(--card);border:2px solid transparent;border-radius:18px;padding:11px 12px;box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.hm-gar button[aria-pressed="true"]{border-color:var(--blue)}
+.hm-gar .nm{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;min-width:0}
+.hm-gar .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-gar i{width:8px;height:8px;border-radius:50%;flex:none;background:var(--green)}
+.hm-gar i.bad{background:var(--red)}.hm-gar i.warn{background:var(--orange)}
+.hm-gar b{font-size:17px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.2}
+.hm-gar small{font-size:11px;color:var(--ink2);line-height:1}
+.hm .card.hm-fill{border-radius:22px;padding:18px}
+.hm-ft{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.hm-ft b{font-size:17px;font-weight:600}
+.hm-ft span{font-size:13px;color:var(--ink2);white-space:nowrap}
+.hm-big{display:flex;align-items:baseline;gap:6px;border-bottom:1px solid var(--line);margin-top:8px;padding-bottom:4px}
+.hm-big span{font-size:22px;font-weight:600;color:var(--ink3)}
+.hm-big input{flex:1;min-width:0;width:100%;border:0;background:none;outline:0;padding:0;color:var(--ink);font-size:44px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hm-big input::placeholder{color:var(--ink3);opacity:.6}
+.hm-big:focus-within{border-bottom-color:var(--blue)}
+.hm-big input::-webkit-outer-spin-button,.hm-big input::-webkit-inner-spin-button,.hm-two input::-webkit-outer-spin-button,.hm-two input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.hm-big input,.hm-two input{-moz-appearance:textfield;appearance:textfield}
+.hm .hm-fill .qf-calc{margin:6px 0 0;text-align:left;font-size:13px;min-height:18px}
+.hm-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.hm-two label{display:block;min-width:0;background:var(--track);border-radius:12px;padding:8px 12px;font-size:12px;color:var(--ink2)}
+.hm-two label:focus-within{outline:2px solid var(--blue)}
+.hm-two input{display:block;width:100%;min-width:0;border:0;background:none;outline:0;padding:0;margin-top:1px;font:inherit;font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.hm-chips{margin-top:14px}
+.hm-chip span{background:var(--track);border-color:transparent;color:var(--ink);font-weight:600;padding:7px 14px}
+.hm .qf-go{border-radius:14px;margin-top:14px}
+.hm-links{gap:28px}.hm-links button{font-size:15px}
+.hm-list{border-radius:20px}
+.hm-list>*{border-top:0}
+.hm-list summary,.hm-list>button,.hm-list>a{border:0;position:relative;gap:12px;padding:12px 14px 12px 16px;font-size:16px;text-decoration:none}
+.hm-list>a{box-sizing:border-box;display:flex;align-items:center;width:100%;color:var(--ink);font-weight:600}
+.hm-list>*+details>summary::before,.hm-list>*+button::before,.hm-list>*+a::before{content:"";position:absolute;top:0;left:58px;right:0;border-top:1px solid var(--line)}
+.hm-list>*+div{border-top:1px solid var(--line)}
+.hm-list .t small.bad{color:var(--red);font-weight:600}.hm-list .t small.warn{color:var(--orange);font-weight:600}
+.hm-list details p{padding:0 14px 13px 58px}
+.hm-list .ch{font-size:20px;line-height:1;opacity:.6}
+.hm-badge{font-size:12px;font-weight:700;color:#fff;background:var(--red);border-radius:99px;padding:1px 7px;flex:none}
+/* floating tab bar */
+.bnav{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-top:0;pointer-events:none;padding:0 max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.bnav div{pointer-events:auto;max-width:440px;align-items:center;background:var(--glass2);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border:1px solid var(--line);border-radius:28px;padding:7px 6px;box-shadow:0 8px 28px rgba(0,0,0,.14)}
+.bnav button{font-size:10px;font-weight:600}
+.bnav button[data-bn="add"]{justify-self:center;justify-content:center;width:46px;height:46px;padding:0;border-radius:50%;background:var(--blue);color:#fff}
+.bnav button[data-bn="add"][aria-current="page"]{color:#fff;box-shadow:0 0 0 4px var(--track)}
+.bnav button[data-bn="add"] svg{stroke-width:2.2}
+/* vehicle page top */
+.hero.vh{padding:18px 0 0}
+.hero.vh h1{font-size:34px;line-height:1.1;letter-spacing:-.02em}
+.hero.vh .eyb{margin:0;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);max-width:none}
+.vh-card{margin-top:16px;padding:20px}
+.vh-lab{font-size:13px;font-weight:600;color:var(--ink2)}
+.vh-card .total{margin-top:4px;font-size:clamp(44px,12vw,84px);letter-spacing:-.03em}
+.vh-bar{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden;margin-top:16px}
+.vh-bar span{display:block;min-width:4px}
+.vh-key{display:grid;gap:8px;margin-top:12px;font-size:14px}
+.vh-key div{display:flex;align-items:center;gap:8px}
+.vh-key i{width:8px;height:8px;border-radius:50%;flex:none}
+.vh-key b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.vh-card .chartbox{margin:18px -4px 0}
+.hero.vh .vh-intro{font-size:14px;color:var(--ink2);margin:12px 4px 0;max-width:none}
+.vh+.stats{margin-top:12px}
+.vh-more{margin-top:26px}
+.vh-more h2{font-size:20px;letter-spacing:-.01em;margin:0 4px 10px}
+.hm-head .hm-ttl h1{color:var(--ink)}
+:root{--segon:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--segon:#5e5e63}}
+:root[data-theme="dark"]{--segon:#5e5e63}
+.seg button[aria-pressed="true"]{background:var(--segon)}
+/* insights rows */
+.ii-r{grid-template-columns:auto minmax(0,1fr) auto}
+.ii-r .sv{align-self:start;width:10px;height:10px;min-height:0;border-radius:50%;margin-top:7px}
 </style>
 </head>
 <body>
@@ -384,7 +472,7 @@ textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var
   <div id="view"></div>
   <footer id="foot"></footer>
 </div>
-<nav class="bnav" id="bnav" aria-label="Main"><div><button data-bn="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>Home</button><button data-bn="add"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>Add</button><button data-bn="veh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5a2 2 0 0 1 2-1.5h9a2 2 0 0 1 2 1.5L20 15v3H4z"/><circle cx="8" cy="18" r="1.6"/><circle cx="16" cy="18" r="1.6"/></svg>Vehicles</button><button data-bn="ins"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M12 19V5M19 19v-6"/></svg>Insights</button><button data-bn="more"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>More<i id="bn_badge" hidden></i></button></div></nav>
+<nav class="bnav" id="bnav" aria-label="Main"><div><button data-bn="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>Home</button><button data-bn="veh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5a2 2 0 0 1 2-1.5h9a2 2 0 0 1 2 1.5L20 15v3H4z"/><circle cx="8" cy="18" r="1.6"/><circle cx="16" cy="18" r="1.6"/></svg>Vehicles</button><button data-bn="add" aria-label="Add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button data-bn="ins"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M12 19V5M19 19v-6"/></svg>Insights</button><button data-bn="more"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>More<i id="bn_badge" hidden></i></button></div></nav>
 <script>
 (function(){
 
@@ -1265,7 +1353,7 @@ function washBlock(v){
   const wr=W.filter(w=>w.who==='Rahul'),wp=W.filter(w=>w.who==='Puspendra');
   const t0=new Date('2023-12-02T00:00:00').getTime(),t1=new Date('2026-10-07T00:00:00').getTime();
   const pos=d=>(new Date(d+'T00:00:00').getTime()-t0)/(t1-t0)*100;
-  const seg=(name,sub,list,col)=>'<div style="margin-top:16px;--vc:'+col+'"><div style="display:flex;justify-content:space-between;gap:12px;font-size:15px"><span><b style="font-weight:600">'+name+'</b> <span style="color:var(--ink2)">'+sub+'</span></span><b style="font-weight:600">₹'+inr(sumT(list))+'</b></div><div class="strip" style="margin-top:12px;--ds:7px">'+list.map(w=>'<i style="left:'+pos(w.d)+'%"></i>').join('')+'</div></div>';
+  const seg=(name,sub,list,col)=>'<div style="margin-top:16px;--vc:'+col+'"><div style="display:flex;justify-content:space-between;gap:12px;font-size:15px"><span><b style="font-weight:600">'+name+'</b> <span style="color:var(--ink2)">'+sub+'</span></span><b style="font-weight:600">₹'+inr(sumT(list))+'</b></div><div class="strip" style="margin-top:12px;--ds:7px">'+list.map(w=>'<i style="left:'+Math.min(100,pos(w.d))+'%"></i>').join('')+'</div></div>';
   const yl='<span>Dec 2023</span><span style="left:'+pos('2025-01-01')+'%">2025</span><span style="left:'+pos('2026-01-01')+'%">2026</span><span style="left:100%;transform:translateX(-100%)">Oct 2026</span>';
   document.getElementById('wash').innerHTML='<div class="rp-h"><div><b style="display:block;font-size:19px;letter-spacing:-.02em">Car washing</b><small style="color:var(--ink2);font-size:14px">Two washers, paid monthly since Dec 2023</small></div><span class="pill" style="--vc:#5e5ce6">'+W.length+' payments</span></div>'
     +seg('Rahul','₹650 · Dec 2023 to Mar 2025',wr,'#5e5ce6')
@@ -1295,7 +1383,7 @@ function repeatsBlock(v){
     const items=G.filter(g=>state.rf==='all'||(state.rf==='look'?['often','redo','optional','ask'].includes(g.v):['ok','info'].includes(g.v)))
       .sort((a,b)=>VT[a.v].o-VT[b.v].o||b.total-a.total);
     rlist.innerHTML=items.map(g=>{
-      const dots=g.occ.map(o=>'<i style="left:'+pos(B[o[0]].d)+'%"></i>').join('');
+      const dots=g.occ.map(o=>'<i style="left:'+Math.min(100,pos(B[o[0]].d))+'%"></i>').join('');
       let extra='';
       if(g.v==='often'&&g.avoidAmt>0)extra=' <b>Likely avoidable: ₹'+inr(g.avoidAmt)+'.</b>';
       if(g.v==='redo'&&g.redo>0)extra=' <b>Second job: ₹'+inr(g.redo)+'.</b>';
@@ -1379,6 +1467,9 @@ function initWhen(){
     if(d<0)r.classList.add('past');
   });
 }
+function vhRange(v){const ds=allBills(v).map(b=>b.d).filter(Boolean).sort();if(!ds.length)return 'No entries yet';const f=d=>MON[+d.slice(5,7)-1]+' '+d.slice(0,4);const w=effWin(v).to||'',e=w>ds[ds.length-1]?w:ds[ds.length-1];return f(ds[0])===f(e)?f(e):f(ds[0])+' to '+f(e)}
+function vhSplit(v){const c=costs(v),P=[['purchase','Purchase and accessories',c.purchase],['running','Running',c.running],['maint','Maintenance',c.maint]].filter(x=>x[2]>0);if(!P.length)return '';
+  return '<div class="vh-bar" role="img" aria-label="Split of the total">'+P.map(x=>'<span style="flex:'+Math.round(x[2])+';background:'+GCOL[x[0]]+'"></span>').join('')+'</div><div class="vh-key">'+P.map(x=>'<div><i style="background:'+GCOL[x[0]]+'"></i>'+x[1]+'<b>₹'+inr(x[2])+'</b></div>').join('')+'</div>'}
 function renderVeh(v){
   const TOTAL=totalOf(v);
   view.style.setProperty('--acc',v.acc);
@@ -1387,8 +1478,14 @@ function renderVeh(v){
   const ws=winStats(v);
   const stats=[[pkf(ws.c.total/ws.km),'per km, all costs included'],[inr(ws.km),'km covered so far'],['₹'+inr(ws.c.total/ws.months),'per month, all costs included']];
   view.innerHTML=bkBanner()+
-   '<header class="hero"><h1>'+v.h1+'</h1><p>'+v.intro+'</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+sub+'</div>'+(v.cover?'<a class="jump" href="#cover">Cover &amp; key details</a>':'')+'<div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
+   '<header class="hero vh"><p class="eyb">'+vhRange(v)+'</p><h1>'+v.name+'</h1><div class="card vh-card"><div class="vh-lab">Every rupee it has cost</div><div class="total" id="total"><span>₹</span>0</div>'+vhSplit(v)+'<div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></div><p class="vh-intro">'+v.intro+'</p></header>'
    +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'
+   +'<div class="vh-more"><h2>Look closer</h2><div class="hm-list">'
+   +'<a href="#perkm">'+ic('road','c4')+'<span class="t">Cost per km<small>What each kilometre costs</small></span><span class="ch">›</span></a>'
+   +'<a href="#fuel">'+ic('fuel','c2')+'<span class="t">Fuel and mileage<small>Fill-ups and km per litre</small></span><span class="ch">›</span></a>'
+   +'<a href="#repeats">'+ic('rep','c5')+'<span class="t">Repeated work<small>Jobs that keep coming back</small></span><span class="ch">›</span></a>'
+   +(v.cover?'<a href="#cover">'+ic('shield','c6')+'<span class="t">Cover and key details<small>Policy numbers and phone numbers</small></span><span class="ch">›</span></a>':'')
+   +'<a href="#bills">'+ic('bill','c3')+'<span class="t">All bills<small>Every bill and payment on record</small></span><span class="ch">›</span></a></div></div>'
    +perKmSection(v)
    +fuelReport(v)
    +'<section><h2>Year by year</h2><p class="lede">'+v.yearLede+'</p><div class="card"><div class="years" id="years"></div></div><p class="fn">* Year to date</p></section>'
@@ -1457,34 +1554,42 @@ function qfRate(v,p){
 }
 const BACK='<button class="pg-back" data-home>‹ Home</button>';
 function wireBack(){view.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',()=>switchTo('home')))}
+const ICO={wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z"/>',tyre:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',batt:'<rect x="3" y="8" width="16" height="9" rx="2"/><path d="M22 11v3M8 12.5h4"/>',fuel:'<path d="M6 20V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v14M5 20h11M15 10h2a2 2 0 0 1 2 2v4"/>',rep:'<path d="M4 12a8 8 0 0 1 13.7-5.7L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.7 5.7L4 16M4 20v-4h4"/>',alert:'<path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/>',list:'<path d="M5 12h14M5 6h14M5 18h9"/>',q:'<path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/><circle cx="12" cy="12" r="9"/>',chart:'<path d="M4 18l5-6 4 3 7-9"/>',bill:'<path d="M7 3h10v18l-2.5-2-2.5 2-2.5-2L7 21z"/><path d="M10 8h4M10 12h4"/>',road:'<path d="M8 4L5 20M16 4l3 16M12 5v3M12 11v3M12 17v3"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',swap:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',cloud:'<path d="M7 18a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 9.5 4.2 4.2 0 0 1 17.5 18z"/>',bars:'<path d="M6 20v-6M12 20V6M18 20v-9"/>'};
+const ic=(n,c)=>'<span class="ic '+(c||'')+'" aria-hidden="true"><svg viewBox="0 0 24 24">'+ICO[n]+'</svg></span>';
+const icFor=t=>/service/i.test(t)?'wrench':/tyre/i.test(t)?'tyre':/insurance/i.test(t)?'shield':/battery/i.test(t)?'batt':/mileage/i.test(t)?'fuel':/keeps coming/i.test(t)?'rep':'alert';
 function todaySection(){
   const v=qfVeh(),last=effWin(v).km1,rate=qfRate(v),vs=Object.values(VEH);
   const rank={bad:0,warn:1,ok:2},att=vs.map(intelFor).flatMap(x=>x.attn).sort((a,b)=>rank[a.sev]-rank[b.sev]);
-  const row=r=>'<details><summary><span class="t">'+r.title+'</span><span class="hm-pill '+r.sev+'">'+r.pill+'</span><span class="ch">›</span></summary><p>'+r.text+'</p></details>';
+  const row=r=>'<details><summary>'+ic(icFor(r.title),r.sev)+'<span class="t">'+r.title+'<small class="'+r.sev+'">'+r.pill+'</small></span><span class="ch">›</span></summary><p>'+r.text+'</p></details>';
+  const sevOf=x=>{const a=intelFor(x).attn;return a.some(r=>r.sev==='bad')?'bad':a.some(r=>r.sev==='warn')?'warn':''};
   const openQ=qOpenCount(),mk=cpkMonthsBack(0),now=new Date(),B=getSet().bud||{},bud=+B.all||0;
   const tot=vs.reduce((a,x)=>a+monthSpend(x,mk),0);
   const usual=(()=>{let a=0;for(let i=1;i<=12;i++){const m=cpkMonthsBack(i);vs.forEach(x=>a+=monthSpend(x,m))}return a/12})();
   const due=vs.map(intelFor).flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date<=dAdd(todayStr(),2)).sort((a,b)=>a.date<b.date?-1:1).slice(0,3);
   const mname=MON[now.getMonth()];
-  return '<div class="hm" id="today"><div class="hm-head"><h1>Gaadi Khata</h1><div>'+mname+' so far<b>'+cr(tot)+'</b></div></div>'
-   +'<div class="card"><div class="seg" id="qf_v" role="group" aria-label="Vehicle">'+vs.map(x=>'<button data-qv="'+x.key+'" aria-pressed="'+(x.key===v.key)+'">'+x.name+'</button>').join('')+'</div>'
-   +'<div class="hm-row"><label>Odometer (km)<input type="number" inputmode="numeric" id="qf_km" placeholder="'+inr(last)+'"></label><label>Paid (₹)<input type="number" inputmode="decimal" id="qf_a"></label><label>₹ a litre<input type="number" inputmode="decimal" step="0.01" id="qf_r" value="'+rate+'"></label></div>'
-   +'<div class="hm-chips"><label class="hm-chip"><input type="checkbox" id="qf_full" checked><span>Full tank</span></label><label class="hm-chip"><input type="checkbox" id="qf_p"'+(qfPrem(v)?' checked':'')+'><span>Premium</span></label><span class="qf-calc" id="qf_calc">Today, '+now.getDate()+' '+mname+'</span></div>'
+  const dayLine=now.toLocaleDateString('en-IN',{weekday:'long'})+' '+now.getDate()+' '+mname;
+  return '<div class="hm" id="today"><div class="hm-head"><div class="hm-ttl"><small>'+dayLine+'</small><h1>Gaadi Khata</h1></div><div>'+mname+' so far<b>'+cr(tot)+'</b></div></div>'
+   +'<div class="hm-gar" id="qf_v" role="group" aria-label="Vehicle">'+vs.map(x=>'<button data-qv="'+x.key+'" aria-pressed="'+(x.key===v.key)+'"><span class="nm"><i class="'+sevOf(x)+'"></i><span>'+x.name+'</span></span><b>'+inr(effWin(x).km1)+'</b><small>km</small></button>').join('')+'</div>'
+   +'<div class="card hm-fill"><div class="hm-ft"><b>Fill up the '+v.name+'</b><span>Today, '+now.getDate()+' '+mname+'</span></div>'
+   +'<label class="hm-big"><span>₹</span><input type="number" inputmode="decimal" id="qf_a" placeholder="0" aria-label="Amount paid, in rupees"></label>'
+   +'<p class="qf-calc" id="qf_calc"></p>'
+   +'<div class="hm-two"><label>Odometer, km<input type="number" inputmode="numeric" id="qf_km" placeholder="'+inr(last)+'"></label><label>₹ a litre<input type="number" inputmode="decimal" step="0.01" id="qf_r" value="'+rate+'"></label></div>'
+   +'<div class="hm-chips"><label class="hm-chip"><input type="checkbox" id="qf_full" checked><span>Full tank</span></label><label class="hm-chip"><input type="checkbox" id="qf_p"'+(qfPrem(v)?' checked':'')+'><span>Premium</span></label></div>'
    +'<button class="btn qf-go" id="qf_save">Save fill-up</button><p class="fmsg" id="qf_msg" style="display:block;margin:8px 0 0"></p>'
    +'<div class="hm-links"><button id="qf_exp">Add an expense</button><button id="qf_odo">Odometer only</button></div></div>'
    +'<h2>Needs doing</h2><div class="hm-list">'
-   +(att.length?att.slice(0,3).map(row).join(''):'<details open><summary><span class="t">Nothing needs attention right now</span></summary></details>')
-   +'<button id="td_int"><span class="t">'+(att.length>3?(att.length-3)+' more in Insights':'Open Insights')+'</span><span class="ch">›</span></button>'
-   +(openQ?'<button id="td_q"><span class="t">'+openQ+' open question'+(openQ>1?'s':'')+'</span><span class="ch">›</span></button>':'')+'</div>'
+   +(att.length?att.slice(0,3).map(row).join(''):'<details open><summary>'+ic('alert','ok')+'<span class="t">Nothing needs attention right now</span></summary></details>')
+   +'<button id="td_int">'+ic('list','c5')+'<span class="t">'+(att.length>3?(att.length-3)+' more in Insights':'Open Insights')+'</span><span class="ch">›</span></button>'
+   +(openQ?'<button id="td_q">'+ic('q')+'<span class="t">Open question'+(openQ>1?'s':'')+'</span><span class="hm-badge">'+openQ+'</span><span class="ch">›</span></button>':'')+'</div>'
    +'<h2>This month</h2><div class="hm-list"><div style="padding:14px">'
    +'<div class="hm-kv top"><span>Spent so far</span><b>'+cr(tot)+(bud?' of '+cr(bud):'')+'</b></div>'
    +'<div class="hm-kv"><span>Your usual month</span><span>'+cr(usual)+'</span></div>'
    +due.map(r=>'<div class="hm-kv"><span>'+r.title+', '+(r.date<=todayStr()?'due now':dMon(r.date))+'</span><span>about '+cr(r.amt)+'</span></div>').join('')
-   +'</div><button data-go="month"><span class="t">'+(bud?'Budget and details':'Set a budget')+'</span><span class="ch">›</span></button></div>'
+   +'</div><button data-go="month">'+ic('cal','c2')+'<span class="t">'+(bud?'Budget and details':'Set a budget')+'</span><span class="ch">›</span></button></div>'
    +'<h2>Look things up</h2><div class="hm-list">'
-   +'<button data-go="both"><span class="t">All-time spending<small>Totals, charts and the split by vehicle</small></span><span class="ch">›</span></button>'
-   +'<button data-go="both:find"><span class="t">Bills and search<small>Every bill and payment on record</small></span><span class="ch">›</span></button>'
-   +'<button data-go="opp:o_cpk"><span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button></div></div>';
+   +'<button data-go="both">'+ic('chart')+'<span class="t">All-time spending<small>Totals, charts and the split by vehicle</small></span><span class="ch">›</span></button>'
+   +'<button data-go="both:find">'+ic('bill','c3')+'<span class="t">Bills and search<small>Every bill and payment on record</small></span><span class="ch">›</span></button>'
+   +'<button data-go="opp:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button></div></div>';
 }
 function wireGo(){view.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [k,a]=b.dataset.go.split(':');if(k==='bk'){goAdd(state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60);return}switchTo(k);if(a)setTimeout(()=>{const t=document.getElementById(a);if(t)t.scrollIntoView()},60)}))}
 function renderHome(){
@@ -1497,14 +1602,14 @@ function renderMonth(){
 }
 function renderMore(){
   view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
-  const n=qOpenCount(),it=(go,t,sm,pill)=>'<button data-go="'+go+'"><span class="t">'+t+'<small>'+sm+'</small></span>'+(pill?'<span class="hm-pill bad">'+pill+'</span>':'')+'<span class="ch">›</span></button>';
+  const n=qOpenCount(),it=(go,t,sm,pill,i,c)=>'<button data-go="'+go+'">'+ic(i,c)+'<span class="t">'+t+'<small>'+sm+'</small></span>'+(pill?'<span class="hm-badge">'+pill+'</span>':'')+'<span class="ch">›</span></button>';
   view.innerHTML='<div class="hm"><div class="hm-head"><h1>More</h1></div><div class="hm-list">'
-   +it('q','Questions','Things the ledger still needs from you',n?n+' open':'')
-   +it('both','All-time spending','Totals, charts, search and every bill','')
-   +it('month','This month and budget','Spending so far and bills coming up','')
-   +it('opp','What if','Money tied up, resale value and other ways to travel','')
-   +it('opp:o_cpk','Cost per km','Running, purchase, or everything','')
-   +it('bk','Backup and restore','Keep a copy of your entries','')+'</div></div>';
+   +it('q','Questions','Things the ledger still needs from you',n?n:'','q')
+   +it('both','All-time spending','Totals, charts, search and every bill','','chart')
+   +it('month','This month and budget','Spending so far and bills coming up','','cal','c2')
+   +it('opp','What if','Money tied up, resale value and other ways to travel','','swap','c5')
+   +it('opp:o_cpk','Cost per km','Running, purchase, or everything','','road','c4')
+   +it('bk','Backup and restore','Keep a copy of your entries','','cloud','c6')+'</div></div>';
   wireGo();
 }
 function initToday(){
@@ -1755,7 +1860,7 @@ function renderIntel(){
   const rank={bad:0,warn:1,ok:2};
   const att=all.flatMap(x=>x.attn).sort((a,b)=>rank[a.sev]-rank[b.sev]);
   const soon=all.flatMap(x=>x.soon).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  const row=(r,sev)=>'<div class="ii-r '+sev+'"><span class="sv"></span><div><b>'+r.title+'</b><p>'+r.text+'</p>'+(r.why?'<small>'+r.why+'</small>':'')+'</div><span class="ii-p">'+r.pill+'</span></div>';
+  const row=(r,sev)=>'<div class="ii-r '+sev+'">'+ic(icFor(r.title),sev)+'<div><b>'+r.title+'</b><p>'+r.text+'</p>'+(r.why?'<small>'+r.why+'</small>':'')+'</div><span class="ii-p">'+r.pill+'</span></div>';
   const tot=all.reduce((a,x)=>a+x.rep+x.ren,0),mx=Math.max(1,...all.map(x=>x.rep+x.ren));
   const est=Object.values(VEH).reduce((a,v)=>a+allBills(v).filter(b=>b.approx&&!b.pk&&!(b.c&&(b.c.acc||b.c.wash||b.c.buy))).length,0);
   const noIns=all.filter(x=>x.unins).map(x=>x.v.name);
@@ -2038,6 +2143,6 @@ state.veh='';switchTo('home',true);
 })();
 
 </script>
-<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 -->
 </body>
 </html>
