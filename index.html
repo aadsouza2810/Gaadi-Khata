@@ -472,6 +472,24 @@ textarea.bk{width:100%;font:16px/1.4 ui-monospace,Menlo,monospace;background:var
 .fx-add button{flex:none;border:0;border-radius:12px;background:var(--blue);color:#fff;font:inherit;font-weight:600;padding:0 18px;cursor:pointer}
 .fx-empty{padding:16px;color:var(--ink2);font-size:15px}
 #tofix{margin-top:26px}#tofix h2{font-size:20px;letter-spacing:-.01em;margin:0 4px 10px}
+
+.evt{width:100%;border-collapse:collapse;font-size:14px}
+.evt th,.evt td{padding:10px 12px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+.evt thead th{border-top:0;font-size:13px}
+.evt td:first-child{color:var(--ink2);font-size:12px;width:30%}
+.evt td small{display:block;color:var(--ink2);font-size:11px;margin-top:2px}
+.evt .win{color:var(--green);font-weight:700}
+.evc{overflow:hidden;border-radius:20px}
+.evp{padding:16px}.evp p{margin:6px 0 0;font-size:14px;color:var(--ink2)}
+.evlean{border:2px solid var(--blue)}
+.evo{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.evo button{font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;border:0;background:var(--track);color:var(--ink);cursor:pointer}
+.evo button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.evsay{background:var(--track);border-radius:14px;padding:12px 14px;font-size:14px}
+.evsay b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:3px}
+.evsub{font-size:13px;color:var(--ink2);margin:6px 4px 0}
+.evh2{font-size:20px;font-weight:700;letter-spacing:-.01em;margin:26px 4px 10px}
+.evsrc{font-size:12px;color:var(--ink2);margin:12px 4px 0}.evsrc a{color:var(--blue)}
 /* insights rows */
 .ii-r{grid-template-columns:auto minmax(0,1fr) auto}
 .ii-r .sv{align-self:start;width:10px;height:10px;min-height:0;border-radius:50%;margin-top:7px}
@@ -615,7 +633,7 @@ const washTotal=v=>v.W?sumT(v.W):0;
 
 /* ================= SAVED ENTRIES (fuel log, odometer) ================= */
 const STORE_KEY='vehicleLedger.family.v1';
-const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[],alt:[],fix:[]});
+const EMPTY=()=>({fuel:{altis:[],ntorq:[],scr:[]},exp:{altis:[],ntorq:[],scr:[]},odo:{},gone:[],opp:null,oppAt:0,qa:{},qx:[],alt:[],fix:[],ev:{at:0,ans:{},tick:{}}});
 function normalise(p){
   const s=EMPTY();if(!p||typeof p!=='object')return s;
   for(const k of ['altis','ntorq','scr']){s.fuel[k]=((p.fuel||{})[k]||[]).slice();s.exp[k]=((p.exp||{})[k]||[]).slice()}
@@ -624,6 +642,7 @@ function normalise(p){
   s.gone=Array.isArray(p.gone)?p.gone.map(String):[];
   if(p.qa&&typeof p.qa==='object')Object.keys(p.qa).forEach(k=>{const o=p.qa[k];if(o&&typeof o==='object')s.qa[k]={a:o.a==null?null:String(o.a),at:+o.at||0}});
   if(Array.isArray(p.qx))s.qx=p.qx.filter(x=>x&&x.id&&x.q).map(x=>({id:String(x.id),v:x.v||'all',q:String(x.q),at:+x.at||0}));
+  if(p.ev&&typeof p.ev==='object'){const o={at:+p.ev.at||0,ans:{},tick:{}};for(const k in (p.ev.ans||{}))if(Number.isInteger(p.ev.ans[k]))o.ans[k]=p.ev.ans[k];for(const k in (p.ev.tick||{}))if(p.ev.tick[k])o.tick[k]=1;s.ev=o}
   if(Array.isArray(p.fix))s.fix=p.fix.filter(x=>x&&x.id&&x.t).map(x=>({id:String(x.id),v:x.v||'altis',t:String(x.t),note:String(x.note||''),done:!!x.done,d:String(x.d||''),at:+x.at||0}));
   if(Array.isArray(p.alt))s.alt=p.alt.filter(x=>x&&x.id&&x.d&&+x.amt>0).map(x=>({id:String(x.id),d:String(x.d),amt:+x.amt,v:x.v||'altis',title:String(x.title||''),note:String(x.note||''),approx:x.approx!==false}));
   if(p.opp&&typeof p.opp==='object'){s.opp=p.opp;s.oppAt=+p.oppAt||1}
@@ -836,7 +855,7 @@ function fuelReport(v){
    +(rows?'<div class="list" style="margin-top:12px;padding:6px 16px">'+rows+'</div>':'')
    +'<div class="btnrow"><button class="btn" data-goadd="'+v.key+'">Add a fill-up or expense</button></div></section>';
 }
-function draw(k){if(k==='add')renderAdd();else if(k==='opp')renderOpp();else if(k==='intel')renderIntel();else if(k==='q')renderQ();else if(k==='both')renderBoth();else if(k==='home')renderHome();else if(k==='month')renderMonth();else if(k==='more')renderMore();else renderVeh(VEH[k])}
+function draw(k){if(k==='add')renderAdd();else if(k==='opp')renderOpp();else if(k==='intel')renderIntel();else if(k==='q')renderQ();else if(k==='both')renderBoth();else if(k==='home')renderHome();else if(k==='month')renderMonth();else if(k==='more')renderMore();else if(k==='ev')renderEV();else renderVeh(VEH[k])}
 function refresh(){const y=scrollY;NOANIM=true;draw(state.veh);NOANIM=false;setShell(state.veh);qBadge();scrollTo(0,y)}
 let FLASH=null;
 const flash=(id,text,bad)=>{FLASH={id,text,bad:!!bad}};
@@ -1231,7 +1250,7 @@ function initAdd(v){
 /* ================= BACKUP FILE ================= */
 const BK={state:'off',at:null,msg:'',ref:null,pushing:false,dirty:false,timer:null,force:false,lastSig:null,lastManual:0};
 try{BK.lastManual=+localStorage.getItem('vehicleLedger.lastBackup')||0}catch(e){}
-const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(s.setAt?'$'+s.setAt:'')+((s.fix||[]).length?'!'+(s.fix||[]).map(x=>x.id+(x.done?1:0)+x.at).sort().join(','):'')+((s.alt||[]).length?'%'+(s.alt||[]).map(x=>x.id+x.amt).sort().join(','):'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
+const storeSig=s=>{const a=[];for(const k of ['altis','ntorq','scr']){['fuel','exp'].forEach(p=>(s[p][k]||[]).forEach(e=>a.push(p+k+e.id+(e.km||'')+(e.t||e.amt||''))));const o=s.odo[k];if(o)a.push('o'+k+o.id+o.km)}a.sort();return a.join('|')+'#'+[...new Set((s.gone||[]).map(String))].sort().join(',')+(s.oppAt?'@'+s.oppAt:'')+(s.setAt?'$'+s.setAt:'')+(s.ev&&s.ev.at?'~'+s.ev.at:'')+((s.fix||[]).length?'!'+(s.fix||[]).map(x=>x.id+(x.done?1:0)+x.at).sort().join(','):'')+((s.alt||[]).length?'%'+(s.alt||[]).map(x=>x.id+x.amt).sort().join(','):'')+(Object.keys(s.qa||{}).length||(s.qx||[]).length?'&'+Object.keys(s.qa||{}).sort().map(k=>k+':'+s.qa[k].at).join(',')+'/'+(s.qx||[]).map(x=>x.id).sort().join(','):'')};
 const hasData=s=>storeSig(Object.assign(EMPTY(),s,{gone:[]}))!=='#';
 function mergeStores(a,b){
   const gone=new Set([...(a.gone||[]),...(b.gone||[])].map(String));
@@ -1241,6 +1260,7 @@ function mergeStores(a,b){
   const oa=(a.oppAt||0)>=(b.oppAt||0)?a:b;if(oa.opp){out.opp=oa.opp;out.oppAt=oa.oppAt||1}
   const am=new Map();[...(a.alt||[]),...(b.alt||[])].forEach(x=>{if(!gone.has(String(x.id)))am.set(String(x.id),x)});out.alt=[...am.values()];
   const fm=new Map();[...(a.fix||[]),...(b.fix||[])].forEach(x=>{const k=String(x.id);if(gone.has(k))return;const o=fm.get(k);if(!o||(x.at||0)>=(o.at||0))fm.set(k,x)});out.fix=[...fm.values()];
+  out.ev=((a.ev&&a.ev.at)||0)>=((b.ev&&b.ev.at)||0)?(a.ev||EMPTY().ev):(b.ev||EMPTY().ev);
   const sa=(a.setAt||0)>=(b.setAt||0)?a:b;if(sa.set){out.set=sa.set;out.setAt=sa.setAt||1}
   for(const k of ['altis','ntorq','scr']){
     for(const part of ['fuel','exp']){
@@ -1583,7 +1603,7 @@ function qfRate(v,p){
 }
 const BACK='<button class="pg-back" data-home>‹ Home</button>';
 function wireBack(){view.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',()=>switchTo('home')))}
-const ICO={wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z"/>',tyre:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',batt:'<rect x="3" y="8" width="16" height="9" rx="2"/><path d="M22 11v3M8 12.5h4"/>',fuel:'<path d="M6 20V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v14M5 20h11M15 10h2a2 2 0 0 1 2 2v4"/>',rep:'<path d="M4 12a8 8 0 0 1 13.7-5.7L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.7 5.7L4 16M4 20v-4h4"/>',alert:'<path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/>',list:'<path d="M5 12h14M5 6h14M5 18h9"/>',q:'<path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/><circle cx="12" cy="12" r="9"/>',chart:'<path d="M4 18l5-6 4 3 7-9"/>',bill:'<path d="M7 3h10v18l-2.5-2-2.5 2-2.5-2L7 21z"/><path d="M10 8h4M10 12h4"/>',road:'<path d="M8 4L5 20M16 4l3 16M12 5v3M12 11v3M12 17v3"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',swap:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',cloud:'<path d="M7 18a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 9.5 4.2 4.2 0 0 1 17.5 18z"/>',bars:'<path d="M6 20v-6M12 20V6M18 20v-9"/>'};
+const ICO={bolt:'<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z"/>',tyre:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',batt:'<rect x="3" y="8" width="16" height="9" rx="2"/><path d="M22 11v3M8 12.5h4"/>',fuel:'<path d="M6 20V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v14M5 20h11M15 10h2a2 2 0 0 1 2 2v4"/>',rep:'<path d="M4 12a8 8 0 0 1 13.7-5.7L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.7 5.7L4 16M4 20v-4h4"/>',alert:'<path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/>',list:'<path d="M5 12h14M5 6h14M5 18h9"/>',q:'<path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/><circle cx="12" cy="12" r="9"/>',chart:'<path d="M4 18l5-6 4 3 7-9"/>',bill:'<path d="M7 3h10v18l-2.5-2-2.5 2-2.5-2L7 21z"/><path d="M10 8h4M10 12h4"/>',road:'<path d="M8 4L5 20M16 4l3 16M12 5v3M12 11v3M12 17v3"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',swap:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',cloud:'<path d="M7 18a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 9.5 4.2 4.2 0 0 1 17.5 18z"/>',bars:'<path d="M6 20v-6M12 20V6M18 20v-9"/>'};
 const ic=(n,c)=>'<span class="ic '+(c||'')+'" aria-hidden="true"><svg viewBox="0 0 24 24">'+ICO[n]+'</svg></span>';
 const icFor=t=>/service/i.test(t)?'wrench':/tyre/i.test(t)?'tyre':/insurance/i.test(t)?'shield':/battery/i.test(t)?'batt':/mileage/i.test(t)?'fuel':/keeps coming/i.test(t)?'rep':'alert';
 function todaySection(){
@@ -1620,7 +1640,8 @@ function todaySection(){
    +'<h2>Look things up</h2><div class="hm-list">'
    +'<button data-go="both">'+ic('chart')+'<span class="t">All-time spending<small>Totals, charts and the split by vehicle</small></span><span class="ch">›</span></button>'
    +'<button data-go="both:find">'+ic('bill','c3')+'<span class="t">Bills and search<small>Every bill and payment on record</small></span><span class="ch">›</span></button>'
-   +'<button data-go="opp:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button></div></div>';
+   +'<button data-go="opp:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button>'
+   +'<button data-go="ev">'+ic('bolt','c3')+'<span class="t">EV car<small>'+(evProg()[0]?evProg()[0]+' of '+evProg()[1]+' checks done':'Sierra or Harrier: decide, quote, inspect')+'</small></span><span class="ch">›</span></button></div></div>';
 }
 function wireGo(){view.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [k,a]=b.dataset.go.split(':');if(k==='bk'){goAdd(state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60);return}switchTo(k);if(a)setTimeout(()=>{const t=document.getElementById(a);if(t)t.scrollIntoView()},60)}))}
 function renderHome(){
@@ -1631,6 +1652,42 @@ function renderMonth(){
   view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
   view.innerHTML=BACK+budgetSection();initBudget();wireBack();
 }
+const EVL={"quo1":[["Ex-showroom price","Matches the maker's price list for that variant"],["Home charger and fitting","A 7.2 kW wall box; ask what it costs on that car"],["Registration and road tax","Ask what applies to an EV in your state and get it printed"],["Insurance","You can buy your own; the dealer's should not be compulsory"],["Handling, logistics or other fees","Each one asked for by name; ask to drop any with no receipt"],["Accessories and add-ons","Only the ones you asked for; nothing pre-loaded"],["Extended warranty or service plan","Optional, and priced separately"],["Total on-road price","One figure, signed, with the date it is valid until"]],"quo2":[["Cash or loyalty discount","Ask for a number, not an offer"],["Corporate or exchange bonus","Ask for your current car's exchange value separately from the new car price"],["Free charger and fitting","Often the easiest thing to win"],["Free accessories or first service","Ask for what you will actually use"],["Dealer-fit items removed","Remove anything you did not ask for"],["Same quote from a second dealer","Nearby dealers can differ"],["Booking amount refundable","Get the refund terms in writing before you pay it"],["Delivery date in writing","With what happens if it is late"]],"pdi1":[["VIN on the car matches the invoice and papers",""],["Paint, panel gaps and glass","Walk the car in daylight, roof included"],["Tyres: brand, size, date code","Date code should be recent"],["Underbody and battery cover","Look for scrapes or dents"],["Interior, seats, mats, no stains",""],["Odometer reading","Should be very low; ask why if over 50 km"],["Manufacturing date","Within the last few months"]],"pdi2":[["Charge port and flap open and close",""],["Portable charger and cable in the boot","Plus the wall box if included"],["Battery charge level shown","Dealers usually hand over at 80% or more"],["No warnings on the dashboard","No high-voltage or service message"],["Software version and pending updates","Ask the dealer to update before handover"]],"pdi3":[["Short test drive: brakes, steering, no odd noises",""],["Regen levels and drive modes work",""],["Air conditioning cools and heats",""],["All screens, speakers and cameras work","360\u00b0 view, parking sensors, ADAS"],["Wipers, washer, lights, indicators",""],["Windows, locks, sunroof, tailgate",""],["Phone pairing and the maker's app login",""]],"del1":[["Tax invoice for the car","Price matches the signed quote"],["Registration papers or temporary registration",""],["Insurance policy copy","Your name, correct variant"],["Battery warranty certificate","Get the terms printed and check the years and km"],["Charger invoice and warranty",""],["Owner's manual and service book",""],["Both keys, plus spare key card",""],["Road tax and registration receipts",""]],"del2":[["Total paid equals the signed quote","No new charges added on the day"],["Accessories fitted are what you ordered",""],["Free services and what they cover, in writing",""],["Roadside assistance number saved","And how an EV tow is arranged"],["Charger fitting date agreed","With who does it and what your society needs"],["FASTag fitted",""],["Photos and video of the handover","Time-stamped, car and paperwork"]],"del3":[["Charger working at home; check the charge log",""],["Check software updates have installed",""],["First service date in the calendar",""],["Compare real range with the claimed figure","Note it in the ledger"],["Move the car into your vehicles","Once you own it, it gets its own page with costs"]]},EVQ=[["Can you fit a 7.2 kW charger where you park at home?",["Yes","Not yet","No"]],["How often do you do long trips?",["Rarely","Monthly","Weekly"]],["What happens to your current car?",["Sell","Keep","Not decided"]],["Do you need the big boot?",["Yes","No"]]];
+const EVT=[['dec','Decide'],['quo','Quote'],['pdi','PDI'],['del','Delivery']];
+function evProg(){const ev=STORE.ev||{tick:{}};let n=0,t=0;['pdi1','pdi2','pdi3','del1','del2','del3'].forEach(k=>EVL[k].forEach((x,i)=>{t++;if(ev.tick[k+i])n++}));return [n,t]}
+function evList(k){const ev=STORE.ev;return '<div class="card evc">'+EVL[k].map((x,i)=>'<div class="fxr'+(ev.tick[k+i]?' done':'')+'" role="button" tabindex="0" data-evk="'+k+i+'" aria-pressed="'+!!ev.tick[k+i]+'"><span class="chk">'+(ev.tick[k+i]?'\u2713':'')+'</span><span class="t">'+x[0]+(x[1]?'<small style="display:block;font-size:13px;font-weight:500;color:var(--ink2)">'+x[1]+'</small>':'')+'</span></div>').join('')+'</div>'}
+function evPanel(t){const ev=STORE.ev,pr=evProg();
+  if(t==='dec')return '<h2 class="evh2" style="margin-top:18px">Sierra or Harrier</h2><p class="evsub">Both at the top trim with all-wheel drive and a 75 kWh battery: Sierra EV Empowered A AWD and Harrier EV Empowered 75 AWD.</p>'
+   +'<div class="card evc" style="margin-top:12px;overflow-x:auto"><table class="evt"><thead><tr><th></th><th>Sierra EV<br>Empowered A AWD</th><th>Harrier EV<br>Empowered 75 AWD</th></tr></thead><tbody>'
+   +'<tr><td>Ex-showroom</td><td class="win">\u20b925.99 lakh<small>1 Jul 2026</small></td><td>\u20b928.99 to 29.29 lakh<small>sources differ</small></td></tr>'
+   +'<tr><td>Torque</td><td>504 Nm</td><td>504 Nm</td></tr>'
+   +'<tr><td>Claimed range (MIDC)</td><td>624 km</td><td>622 km</td></tr>'
+   +'<tr><td>Real-world range</td><td>480 to 500 km<small>estimate</small></td><td>about 400 km<small>one road test, 75 kWh car</small></td></tr>'
+   +'<tr><td>Fast charge 20 to 80%</td><td>about 26 min</td><td>about 25 min</td></tr>'
+   +'<tr><td>Home charger</td><td>7.2 kW wall box and fitting<br>\u20b949,000 extra</td><td>Not in the price<small>ask the dealer for the cost</small></td></tr>'
+   +'<tr><td>Battery warranty</td><td>15 years, unlimited km<small>first private owner</small></td><td>Not confirmed<small>ask in writing</small></td></tr>'
+   +'<tr><td>Boot</td><td>Front boot 35 L</td><td>502 L + front boot 35 L</td></tr>'
+   +'<tr><td>Driver aids</td><td>Level 2+ ADAS, 540\u00b0 camera</td><td>Level 2 ADAS, 540\u00b0 camera</td></tr>'
+   +'<tr><td>Seats and sound</td><td>Ventilated and powered<br>12-speaker JBL</td><td>Ventilated and powered<br>10-speaker JBL, panoramic sunroof</td></tr></tbody></table></div>'
+   +'<div class="card evp evlean" style="margin-top:12px"><b>My lean: Sierra</b><p>Same battery and torque for about \u20b93 lakh less, and the charger cost and 15-year battery cover are clear. Pick the Harrier only if boot space or the Harrier\u2019s look decides it for you.</p></div>'
+   +'<h2 class="evh2">Only you can answer these</h2><div class="card evp" id="evq">'+EVQ.map((q,i)=>'<div'+(i?' style="margin-top:16px"':'')+'><b style="font-size:15px">'+q[0]+'</b><div class="evo">'+q[1].map((o,j)=>'<button data-evq="'+i+'" data-evo="'+j+'" aria-pressed="'+(ev.ans[i]===j)+'">'+o+'</button>').join('')+'</div></div>').join('')+'</div>'
+   +'<p class="evsrc">Prices are ex-showroom as reported in July 2026, so confirm every figure with the dealer. The Harrier price and power figures conflict between sources, so I left power out. Figures from <a href="https://www.autocarindia.com/auto-features/which-tata-sierra-ev-variant-should-you-buy-440732" target="_blank" rel="noopener">Autocar India (Sierra)</a>, <a href="https://carhp.in/car-news/2026-tata-sierra-ev-every-variant-explained" target="_blank" rel="noopener">CarHP</a>, <a href="https://www.indiacarnews.com/news/tata-harrier-ev-awd-launched-full-price-list-booking-details-65192/" target="_blank" rel="noopener">India Car News (Harrier)</a> and <a href="https://www.autocarindia.com/cars/tata/harrier-ev" target="_blank" rel="noopener">Autocar India (Harrier)</a>.</p>';
+  if(t==='quo')return '<h2 class="evh2" style="margin-top:18px">Read the quotation</h2><p class="evsub">Get the same variant quoted by at least two dealers on the same day, in writing.</p><div style="margin-top:12px">'+evList('quo1')+'</div>'
+   +'<h2 class="evh2">Bargain</h2><p class="evsub">Ask for each of these. Anything agreed goes on the quote, not just said.</p><div style="margin-top:12px">'+evList('quo2')+'</div>'
+   +'<div class="evsay" style="margin-top:12px"><b>What to say</b>\u201cI am booking this month if the on-road price on one sheet comes to the figure I have from the other dealer. Please add the charger and fitting at no cost, and write every discount on the quote.\u201d</div>'
+   +'<div class="evsay" style="margin-top:10px"><b>Walk-away rule</b>If a price changes between the quote and the booking form, stop and ask for a new signed quote before paying anything.</div>';
+  if(t==='pdi')return '<h2 class="evh2" style="margin-top:18px">Pre-delivery inspection</h2><p class="evsub">Do this at the dealer yard in daylight, before you sign delivery papers. Take photos of anything off. '+pr[0]+' of '+pr[1]+' done across PDI and delivery.</p><div style="margin-top:12px">'+evList('pdi1')+'</div><h2 class="evh2">Charging and battery</h2>'+evList('pdi2')+'<h2 class="evh2">Drive and electronics</h2>'+evList('pdi3');
+  return '<h2 class="evh2" style="margin-top:18px">Delivery day</h2><p class="evsub">Pay the balance only after every item here is ticked. '+pr[0]+' of '+pr[1]+' done across PDI and delivery.</p><div style="margin-top:12px">'+evList('del1')+'</div><h2 class="evh2">Before you drive away</h2>'+evList('del2')+'<h2 class="evh2">First week</h2>'+evList('del3')}
+function renderEV(){
+  view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
+  const t=state.evTab||'dec';
+  view.innerHTML=bkBanner()+'<div class="hm"><div class="hm-head"><div class="hm-ttl"><small>Planning</small><h1>EV car</h1></div></div><div class="seg" role="group" aria-label="Section">'+EVT.map(x=>'<button data-evt="'+x[0]+'" aria-pressed="'+(x[0]===t)+'">'+x[1]+'</button>').join('')+'</div>'+evPanel(t)+'</div>';
+  wireBanner();
+  view.querySelectorAll('[data-evt]').forEach(b=>b.addEventListener('click',()=>{state.evTab=b.dataset.evt;renderEV();window.scrollTo(0,0)}));
+  const keep=()=>{STORE.ev.at=Date.now();saveStore();const y=scrollY;renderEV();scrollTo(0,y)};
+  view.querySelectorAll('[data-evk]').forEach(r=>{const tog=()=>{const k=r.dataset.evk;if(STORE.ev.tick[k])delete STORE.ev.tick[k];else STORE.ev.tick[k]=1;keep()};r.addEventListener('click',tog);r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog()}})});
+  view.querySelectorAll('[data-evq]').forEach(b=>b.addEventListener('click',()=>{const i=b.dataset.evq,j=+b.dataset.evo;if(STORE.ev.ans[i]===j)delete STORE.ev.ans[i];else STORE.ev.ans[i]=j;keep()}));
+}
 function renderMore(){
   view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
   const n=qOpenCount(),it=(go,t,sm,pill,i,c)=>'<button data-go="'+go+'">'+ic(i,c)+'<span class="t">'+t+'<small>'+sm+'</small></span>'+(pill?'<span class="hm-badge">'+pill+'</span>':'')+'<span class="ch">›</span></button>';
@@ -1639,6 +1696,7 @@ function renderMore(){
    +it('both','All-time spending','Totals, charts, search and every bill','','chart')
    +it('month','This month and budget','Spending so far and bills coming up','','cal','c2')
    +it('opp','What if','Money tied up, resale value and other ways to travel','','swap','c5')
+   +it('ev','EV car','Sierra or Harrier: decide, quote, inspection, delivery day','','bolt','c3')
    +it('opp:o_cpk','Cost per km','Running, purchase, or everything','','road','c4')
    +it('bk','Backup and restore','Keep a copy of your entries','','cloud','c6')+'</div></div>';
   wireGo();
@@ -2158,8 +2216,10 @@ function setShell(key){
   let h='';
   if(VEH[key]){state.lastVeh=key;h=Object.values(VEH).map(v=>'<button data-v="'+v.key+'" aria-pressed="'+(v.key===key)+'">'+v.name+'</button>').join('')}
   else if(key==='intel'||key==='opp')h='<button data-v="intel" aria-pressed="'+(key==='intel')+'">Needs doing</button><button data-v="opp" aria-pressed="'+(key==='opp')+'">What if and cost per km</button>';
+  if(h&&(VEH[key]||key==='ev'))h=h.replace(/(<button data-v="[^"]*" aria-pressed="(?:true|false)">[^<]*<\/button>)$/,'$1')+'<button data-v="ev" aria-pressed="'+(key==='ev')+'">EV car</button>';
+  if(key==='ev'){h=Object.values(VEH).map(v=>'<button data-v="'+v.key+'" aria-pressed="false">'+v.name+'</button>').join('')+'<button data-v="ev" aria-pressed="true">EV car</button>'}
   vseg.innerHTML=h;vseg.hidden=!h;
-  const cur=VEH[key]?'veh':key==='intel'||key==='opp'?'ins':key==='add'?'add':key==='more'||key==='q'?'more':'home';
+  const cur=VEH[key]||key==='ev'?'veh':key==='intel'||key==='opp'?'ins':key==='add'?'add':key==='more'||key==='q'?'more':'home';
   bnav.querySelectorAll('button').forEach(b=>{if(b.dataset.bn===cur)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
 }
 function switchTo(key,keepScroll){
@@ -2175,6 +2235,6 @@ state.veh='';switchTo('home',true);
 })();
 
 </script>
-<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 --><!-- fix v1 -->
+<!-- answers v31 --><!-- cpk v1 --><!-- all v1 --><!-- paid v1 --><!-- home v2 --><!-- alt v1 --><!-- look v2 --><!-- fix v1 --><!-- ev v1 -->
 </body>
 </html>
