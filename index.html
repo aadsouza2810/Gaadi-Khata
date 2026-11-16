@@ -810,7 +810,7 @@ function perKmSection(v){
    +card('maint','Maintenance cost','Servicing, repairs, parts, tyres, battery and other workshop bills.',c.maint)
    +card('running','Running cost','Insurance, warranty and roadside cover, car washing, toll, pollution check and fuel.',c.running)
    +'</div>'
-   +'<p class="fn">'+fuelLine+'Add fill-ups in the Add tab and they count here.'+(out>0&&w.excl?' '+w.excl(bef,aft,w):'')+'</p>'+perKmTrend(v)+'</section>';
+   +'<p class="fn">'+fuelLine+'Add fill-ups in the Add tab and they count here.'+(out>0&&w.excl?' '+w.excl(bef,aft,w):'')+'</p>'+perKmTrend(v)+perKmPurchase(v)+'</section>';
 }
 
 function trendPts(v){
@@ -825,11 +825,11 @@ function trendPts(v){
     const km=Math.round(kmAt(b)-kmAt(a));
     const cum=costs(v,{from:'1900-01-01',to:b},true),yr=costs(v,{from:a,to:b},true);
     const kc=kmAt(b)-w.km0,own=yr.maint+yr.running;
-    rows.push({y,part:y===y1||y===y0,km,own,ownPk:km>=800?own/km:null,cumPk:kc>=800?cum.total/kc:null,cumTotal:cum.total});
+    const mo=(T(b)-T(w.from))/86400000/30.44;rows.push({y,part:y===y1||y===y0,km,own,purPk:cum.purchase>0&&kc>=800?cum.purchase/kc:null,purMo:cum.purchase>0&&mo>=6?cum.purchase/mo:null,pur:cum.purchase,kc,mo,ownPk:km>=800?own/km:null,cumPk:kc>=800?cum.total/kc:null,cumTotal:cum.total});
   }
   return rows.filter(r=>r.cumTotal>0);
 }
-function lineChart(rows,key,color,title){
+function lineChart(rows,key,color,title,fm){fm=fm||pkf;
   const P=rows.filter(r=>r[key]!=null);
   if(P.length<2)return '';
   const W=340,H=150,l=44,r=14,t=14,b=24,mx=Math.max(...P.map(p=>p[key]))*1.12,mn=0;
@@ -840,7 +840,21 @@ function lineChart(rows,key,color,title){
   const dots=P.map((p,i)=>'<circle cx="'+X(i)+'" cy="'+Y(p[key])+'" r="3.5" fill="'+color+'"/><text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--ink3)">'+(p.part&&i===P.length-1?"'"+String(p.y).slice(2)+'*':"'"+String(p.y).slice(2))+'</text>').join('');
   const last=P[P.length-1],first=P[0];
   return '<div class="card" style="margin-top:12px"><b>'+title+'</b><svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+title+'" style="margin-top:6px">'+g+'<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round"/>'+dots
-    +'<text x="'+X(P.length-1)+'" y="'+(Y(last[key])-9)+'" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink)">'+pkf(last[key])+'</text></svg></div>';
+    +'<text x="'+X(P.length-1)+'" y="'+(Y(last[key])-9)+'" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink)">'+fm(last[key])+'</text></svg></div>';
+}
+function perKmPurchase(v){
+  const rows=trendPts(v).filter(r=>r.pur>0);
+  const pk=rows.filter(r=>r.purPk!=null);
+  if(pk.length<2)return '';
+  const a=pk[0],b=pk[pk.length-1],mo=rows.filter(r=>r.purMo!=null),ma=mo[0],mb=mo[mo.length-1];
+  const mfm=n=>'₹'+inr(Math.round(n));
+  const say='The purchase and accessories cost ₹'+inr(b.pur)+'. Spread over the km covered, that was '+pkf(a.purPk)+' a km at the end of '+a.y+' and is '+pkf(b.purPk)+' a km now, down '+Math.round((1-b.purPk/a.purPk)*100)+'%.'+(mo.length>1?' Spread over the months you have owned it, it has gone from '+mfm(ma.purMo)+' a month to '+mfm(mb.purMo)+' a month.':'');
+  const tr=rows.map(r=>'<tr><td>'+r.y+(r.part?'*':'')+'</td><td>'+inr(Math.round(r.kc))+'</td><td>'+(r.purPk!=null?pkf(r.purPk):'—')+'</td><td>'+(r.purMo!=null?mfm(r.purMo):'—')+'</td></tr>').join('');
+  return '<div style="margin-top:20px"><h3 style="font-size:19px;letter-spacing:-.02em;margin:0 0 4px">Purchase cost over time</h3><p class="pkt" style="margin:0">'+say+'</p></div>'
+    +lineChart(rows,'purPk','#6b8f71','Purchase cost per km, by year end')
+    +lineChart(rows,'purMo','#6b8f71','Purchase cost per month owned, by year end',mfm)
+    +'<div class="card ptab" style="margin-top:12px"><table><thead><tr><th>Year end</th><th>Km so far</th><th>₹ per km</th><th>₹ per month</th></tr></thead><tbody>'+tr+'</tbody></table></div>'
+    +'<p class="fn">Purchase and accessories divided by the km covered, and by the months owned, up to the end of each year. * Part year. Years under 800 km, or under 6 months, are left out of the lines.</p>';
 }
 function perKmTrend(v){
   const rows=trendPts(v);
