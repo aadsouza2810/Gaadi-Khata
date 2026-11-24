@@ -946,7 +946,7 @@ function recentList(v){
    +items.slice(0,40).map(x=>'<div class="frow"><div><b>'+x.t+'</b><small>'+fmt(x.d)+' · '+x.s+'</small></div><div class="fk"></div><button class="btn alt sm" data-edit="'+x.id+'">Edit</button><button class="btn alt sm" data-del="'+x.id+'">Remove</button></div>').join('')+'</div>';
 }
 function bkText(){
-  return {t:'Your entries are saved on this device only. Download a backup file now and then, and always before you clear your browser data or change phone.',c:'var(--ink2)'};
+  return {t:'Your entries are saved on this device only. Download a backup file now and then, and always before you clear your browser data or change phone.'+(BK.lastManual?' Last backup: '+fmt(new Date(BK.lastManual).toISOString().slice(0,10))+'.':' No backup yet.'),c:'var(--ink2)'};
 }
 function backupCard(){
   const st=bkText();
@@ -1341,10 +1341,12 @@ function scheduleBackup(delay){
 function bkBanner(){
   if(BK.state==='on'||BK.state==='checking'||!hasData(STORE))return '';
   const days=BK.lastManual?Math.floor((Date.now()-BK.lastManual)/86400000):null;
-  if(days!==null&&days<14)return '';
-  return '<div class="caveat" style="margin:14px 0 0"><p style="margin:0"><b>Back up your entries.</b> '+(days===null?'You haven’t made a backup yet.':'It’s been '+days+' days since your last backup.')+' <a href="#" data-gobk class="tel">Back up now</a></p></div>';
+  if(days!==null&&days<30)return '';
+  let sn=0;try{sn=+localStorage.getItem('vehicleLedger.bkSnooze')||0}catch(e){}
+  if(Date.now()<sn)return '';
+  return '<div class="caveat" style="margin:14px 0 0"><p style="margin:0"><b>Back up your entries.</b> '+(days===null?'You haven’t made a backup yet.':'Your last backup was on '+fmt(new Date(BK.lastManual).toISOString().slice(0,10))+', '+days+' days ago.')+' Your entries are kept only on this device. <a href="#" data-gobk class="tel">Back up now</a> · <a href="#" data-bksn class="tel">Remind me in 3 days</a></p></div>';
 }
-function wireBanner(){view.querySelectorAll('[data-gobk]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goAdd(VEH[state.veh]?state.veh:state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60)}))}
+function wireBanner(){view.querySelectorAll('[data-bksn]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();try{localStorage.setItem('vehicleLedger.bkSnooze',String(Date.now()+3*86400000))}catch(x){}const c=a.closest('.caveat');if(c)c.remove()}));view.querySelectorAll('[data-gobk]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goAdd(VEH[state.veh]?state.veh:state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60)}))}
 
 /* ================= SHELL ================= */
 (function(){const sg=document.getElementById('vseg'),o=sg.querySelector('[data-v=opp]');Object.values(VEH).forEach(v=>{const b=document.createElement('button');b.dataset.v=v.key;b.setAttribute('aria-pressed','false');b.textContent=v.name;sg.insertBefore(b,o)})})();
@@ -1578,7 +1580,7 @@ function wireFix(v){const box=document.getElementById('fxbox');if(!box)return;
 function renderVeh(v){
   const TOTAL=totalOf(v);
   view.style.setProperty('--acc',v.acc);
-  nav.innerHTML='<a href="#top">Overview</a><a href="#tofix">To fix</a><a href="#perkm">Cost per km</a><a href="#fuel">Fuel</a><a href="#repeats">Repeated work</a>'+(v.cover?'<a href="#cover">Cover &amp; details</a>':'')+'<a href="#bills">All bills</a>';
+  nav.innerHTML='<a href="#top">Overview</a><a href="#tofix">To fix</a><a href="#perkm">Cost per km</a><a href="#kmm">Km</a><a href="#fuel">Fuel</a><a href="#repeats">Repeated work</a>'+(v.cover?'<a href="#cover">Cover &amp; details</a>':'')+'<a href="#bills">All bills</a>';
   const sub=groupSub(v);
   const ws=winStats(v);
   const stats=[[pkf(ws.c.total/ws.km),'per km, all costs included'],[inr(ws.km),'km covered so far'],['₹'+inr(ws.c.total/ws.months),'per month, all costs included']];
@@ -1588,11 +1590,13 @@ function renderVeh(v){
    +fixSection(v)
    +'<div class="vh-more"><h2>Look closer</h2><div class="hm-list">'
    +'<a href="#perkm">'+ic('road','c4')+'<span class="t">Cost per km<small>What each kilometre costs</small></span><span class="ch">›</span></a>'
+   +'<a href="#kmm">'+ic('bars','c2')+'<span class="t">Kilometres by month<small>How far it goes each month</small></span><span class="ch">›</span></a>'
    +'<a href="#fuel">'+ic('fuel','c2')+'<span class="t">Fuel and mileage<small>Fill-ups and km per litre</small></span><span class="ch">›</span></a>'
    +'<a href="#repeats">'+ic('rep','c5')+'<span class="t">Repeated work<small>Jobs that keep coming back</small></span><span class="ch">›</span></a>'
    +(v.cover?'<a href="#cover">'+ic('shield','c6')+'<span class="t">Cover and key details<small>Policy numbers and phone numbers</small></span><span class="ch">›</span></a>':'')
    +'<a href="#bills">'+ic('bill','c3')+'<span class="t">All bills<small>Every bill and payment on record</small></span><span class="ch">›</span></a></div></div>'
    +perKmSection(v)
+   +kmCard(v)
    +fuelReport(v)
    +'<section><h2>Year by year</h2><p class="lede">'+v.yearLede+'</p><div class="card"><div class="years" id="years"></div></div><p class="fn">* Year to date</p></section>'
    +'<section><h2>Where it went</h2><p class="lede">'+v.catLede+'</p><div class="card" id="cats"></div>'+(v.W?'<div class="card" id="wash" style="margin-top:12px"></div>':'')+'</section>'
@@ -1668,6 +1672,11 @@ function todaySection(){
   const rank={bad:0,warn:1,ok:2},att=vs.map(intelFor).flatMap(x=>x.attn).sort((a,b)=>rank[a.sev]-rank[b.sev]);
   const row=r=>'<details><summary>'+ic(icFor(r.title),r.sev)+'<span class="t">'+r.title+'<small class="'+r.sev+'">'+r.pill+'</small></span><span class="ch">›</span></summary><p>'+r.text+'</p></details>';
   const fixN=x=>(STORE.fix||[]).filter(y=>y.v===x.key&&!y.done).length;
+  const fixOld=x=>{const L=(STORE.fix||[]).filter(y=>y.v===x.key&&!y.done&&y.d).map(y=>y.d).sort();return L.length?Math.max(0,dDiff(L[0],todayStr())):null};
+  const odoOld=vs.map(x=>{const d=lastRead(x);return {x,d,n:d?dDiff(d,todayStr()):null}}).filter(o=>o.n!=null&&o.n>=30);
+  const ro=getOpp(),resOld=Object.values(ro.resale).some(n=>n>0)&&dDiff(ro.resAt,todayStr())>=365;
+  const up=vs.map(intelFor).flatMap(x=>x.soon).filter(r=>r.date&&r.date>=todayStr()&&dDiff(todayStr(),r.date)<=90).sort((a,b)=>a.date<b.date?-1:1).slice(0,4);
+  const inDays=n=>n===0?'Today':n===1?'Tomorrow':'In '+n+' days';
   const sevOf=x=>{const a=intelFor(x).attn;return a.some(r=>r.sev==='bad')?'bad':a.some(r=>r.sev==='warn')?'warn':''};
   const openQ=qOpenCount(),mk=cpkMonthsBack(0),now=new Date(),B=getSet().bud||{},bud=+B.all||0;
   const tot=vs.reduce((a,x)=>a+monthSpend(x,mk),0);
@@ -1685,10 +1694,13 @@ function todaySection(){
    +'<button class="btn qf-go" id="qf_save">Save fill-up</button><p class="fmsg" id="qf_msg" style="display:block;margin:8px 0 0"></p>'
    +'<div class="hm-links"><button id="qf_exp">Add an expense</button><button id="qf_odo">Odometer only</button></div></div>'
    +'<h2>Needs doing</h2><div class="hm-list">'
-   +vs.filter(x=>fixN(x)).map(x=>'<button data-fixgo="'+x.key+'">'+ic('wrench','warn')+'<span class="t">'+x.name+' has '+fixN(x)+' thing'+(fixN(x)>1?'s':'')+' to fix<small>On the '+x.name+' page</small></span><span class="ch">›</span></button>').join('')
-   +(att.length?att.slice(0,3).map(row).join(''):vs.some(fixN)?'':'<details open><summary>'+ic('alert','ok')+'<span class="t">Nothing needs attention right now</span></summary></details>')
+   +vs.filter(x=>fixN(x)).map(x=>'<button data-fixgo="'+x.key+'">'+ic('wrench','warn')+'<span class="t">'+x.name+' has '+fixN(x)+' thing'+(fixN(x)>1?'s':'')+' to fix<small>'+(fixOld(x)==null?'On the '+x.name+' page':fixOld(x)===0?'Added today':'Oldest open for '+fixOld(x)+' day'+(fixOld(x)>1?'s':''))+'</small></span><span class="ch">›</span></button>').join('')
+   +odoOld.map(o=>'<button data-odogo="'+o.x.key+'">'+ic('road','warn')+'<span class="t">No '+o.x.name+' odometer reading for '+o.n+' days<small>Add one so cost per km and fuel stay up to date</small></span><span class="ch">›</span></button>').join('')
+   +(resOld?'<button data-go="opp:o_set">'+ic('swap','warn')+'<span class="t">Check the resale values<small>Last updated '+fmt(ro.resAt)+'</small></span><span class="ch">›</span></button>':'')
+   +(att.length?att.slice(0,3).map(row).join(''):(vs.some(fixN)||odoOld.length||resOld)?'':'<details open><summary>'+ic('alert','ok')+'<span class="t">Nothing needs attention right now</span></summary></details>')
    +'<button id="td_int">'+ic('list','c5')+'<span class="t">'+(att.length>3?(att.length-3)+' more in Insights':'Open Insights')+'</span><span class="ch">›</span></button>'
    +(openQ?'<button id="td_q">'+ic('q')+'<span class="t">Open question'+(openQ>1?'s':'')+'</span><span class="hm-badge">'+openQ+'</span><span class="ch">›</span></button>':'')+'</div>'
+   +(up.length?'<h2>Coming up</h2><div class="hm-list">'+up.map(r=>'<details><summary>'+ic(icFor(r.title),'c2')+'<span class="t">'+r.title+'<small>'+inDays(dDiff(todayStr(),r.date))+' · '+dFmt(r.date)+(r.amt?' · about '+cr(r.amt):'')+'</small></span><span class="ch">›</span></summary><p>'+r.text+'</p></details>').join('')+'</div>':'')
    +'<h2>This month</h2><div class="hm-list"><div style="padding:14px">'
    +'<div class="hm-kv top"><span>Spent so far</span><b>'+cr(tot)+(bud?' of '+cr(bud):'')+'</b></div>'
    +'<div class="hm-kv"><span>Your usual month</span><span>'+cr(usual)+'</span></div>'
@@ -1698,12 +1710,14 @@ function todaySection(){
    +'<button data-go="both">'+ic('chart')+'<span class="t">All-time spending<small>Totals, charts and the split by vehicle</small></span><span class="ch">›</span></button>'
    +'<button data-go="both:find">'+ic('bill','c3')+'<span class="t">Bills and search<small>Every bill and payment on record</small></span><span class="ch">›</span></button>'
    +'<button data-go="opp:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button>'
+   +'<button data-go="opp:o_km">'+ic('bars','c2')+'<span class="t">Kilometres travelled<small>By year and month, all vehicles together</small></span><span class="ch">›</span></button>'
    +'<button data-go="ev">'+ic('bolt','c3')+'<span class="t">EV car<small>'+(evProg()[0]?evProg()[0]+' of '+evProg()[1]+' checks done':'Sierra or Harrier: decide, quote, inspect')+'</small></span><span class="ch">›</span></button></div></div>';
 }
 function wireGo(){view.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [k,a]=b.dataset.go.split(':');if(k==='bk'){goAdd(state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60);return}switchTo(k);if(a)setTimeout(()=>{const t=document.getElementById(a);if(t)t.scrollIntoView()},60)}))}
 function renderHome(){
   view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
   view.innerHTML=bkBanner()+todaySection();wireBanner();initToday();wireGo();
+  view.querySelectorAll('[data-odogo]').forEach(b=>b.addEventListener('click',()=>{state.addVeh=b.dataset.odogo;switchTo('add');setTimeout(()=>{const e=document.getElementById('a_odo');if(e)e.scrollIntoView()},60)}));
 }
 function renderMonth(){
   view.style.setProperty('--acc','var(--blue)');nav.innerHTML='';foot.textContent='';
@@ -1713,6 +1727,16 @@ const EVL={"ask":[["Ask every dealer to match your best discount","Use the lowes
 const EVT=[['dec','Decide'],['quo','Quote'],['pdi','PDI'],['del','Delivery']];
 function evProg(){const ev=STORE.ev||{tick:{}};let n=0,t=0;['pdi1','pdi2','pdi3','del1','del2','del3'].forEach(k=>EVL[k].forEach((x,i)=>{t++;if(ev.tick[k+i])n++}));return [n,t]}
 function evList(k){const ev=STORE.ev;return '<div class="card evc">'+EVL[k].map((x,i)=>'<div class="fxr'+(ev.tick[k+i]?' done':'')+'" role="button" tabindex="0" data-evk="'+k+i+'" aria-pressed="'+!!ev.tick[k+i]+'"><span class="chk">'+(ev.tick[k+i]?'\u2713':'')+'</span><span class="t">'+x[0]+(x[1]?'<small style="display:block;font-size:13px;font-weight:500;color:var(--ink2)">'+x[1]+'</small>':'')+'</span></div>').join('')+'</div>'}
+const EVD={pk:1.6,run:45000};
+function evCmp(total){
+  const D=cpkAll(),a=D.find(x=>x.v.key==='altis')||D.find(x=>x.v.type==='car');if(!a)return null;
+  const w=cpkWindow([a],cpkMonthsBack(12),cpkMonthsBack(1));if(!(w.km>0))return null;
+  const n=ncGet(),pk=n.ev?n.fuel:EVD.pk,run=n.ev?n.run:EVD.run,yrs=n.yrs||5,res=n.res;
+  const buy=total*(1-res/100)/yrs/w.km,runk=pk+run/w.km;
+  return {a,km:w.km,ar:w.run/w.km,buy,runk,tot:buy+runk,pk,run,yrs,res};
+}
+function evFill(total){const D=cpkAll(),a=D.find(x=>x.v.key==='altis')||D.find(x=>x.v.type==='car'),w=a?cpkWindow([a],cpkMonthsBack(12),cpkMonthsBack(1)):null,n=ncGet();
+  ncSet(Object.assign(n,{price:Math.round(total),fuel:n.ev?n.fuel:EVD.pk,run:n.ev?n.run:EVD.run,km:w&&w.km?Math.round(w.km/500)*500:n.km,ev:1}))}
 function evQuotes(){const ev=STORE.ev,Q=ev.q||[];const fin=x=>x.ex+x.tcs+x.ins+x.rto+(x.ew||0)-x.d,on=x=>x.ex+x.tcs+x.ins+x.rto;const best=Q.length?Math.min(...Q.map(fin)):0;
   const row=(l,f,c)=>'<tr'+(c?' class="'+c+'"':'')+'><td>'+l+'</td>'+Q.map(x=>'<td'+(c==='fin'&&fin(x)===best&&Q.length>1?' class="win"':'')+'>'+f(x)+'</td>').join('')+'</tr>';
   const tbl=Q.length?'<div class="card evc" style="overflow-x:auto"><table class="evq"><thead><tr><th></th>'+Q.map(x=>'<th>'+qEsc(x.n)+'<button class="rm" data-evqd="'+x.id+'">Remove</button></th>').join('')+'</tr></thead><tbody>'
@@ -1723,8 +1747,16 @@ function evQuotes(){const ev=STORE.ev,Q=ev.q||[];const fin=x=>x.ex+x.tcs+x.ins+x
   const X=ev.x||[],xt=X.reduce((a,x)=>a+x.amt,0);
   const extras='<h2 class="evh2">Extras on top</h2><p class="evsub">Costs that come after the purchase. When you buy the car, add these to its costs.</p><div class="card evc" style="margin-top:12px">'+(X.length?X.map(x=>'<div class="fxr" style="cursor:default"><span class="t">'+qEsc(x.n)+'</span><span style="font-weight:600;font-variant-numeric:tabular-nums">₹'+inr(x.amt)+'</span><button class="x" data-evxd="'+x.id+'" aria-label="Remove">Remove</button></div>').join('')+'<div class="fxr" style="cursor:default"><span class="t" style="color:var(--ink2)">Total extras</span><span style="font-weight:700;font-variant-numeric:tabular-nums">₹'+inr(xt)+'</span></div>':'<div class="fx-empty">None yet.</div>')+'</div>'
    +'<div class="fx-add"><input type="text" id="evx_n" placeholder="e.g. Charger installation" autocomplete="off" aria-label="Extra cost"><input type="number" inputmode="numeric" id="evx_a" placeholder="₹" style="flex:0 0 96px" aria-label="Amount"><button id="evx_go">Add</button></div>';
+  const grp={};Q.forEach(x=>{const k=(x.n.trim().split(/\s+/)[0]||'').toLowerCase();if(!grp[k]||fin(x)<fin(grp[k]))grp[k]=x});
+  const gk=Object.keys(grp).sort((a,b)=>fin(grp[a])-fin(grp[b]));
+  const bo=gk.length>1?'<h2 class="evh2">Best offer so far</h2><div class="card evc" style="margin-top:12px">'+gk.map(k=>'<div class="fxr" style="cursor:default"><span class="t">'+qEsc(grp[k].n)+'<small style="display:block;font-size:13px;font-weight:500;color:var(--ink2)">Best '+qEsc(grp[k].n.split(/\s+/)[0])+' quote'+(grp[k].d?', after ₹'+inr(grp[k].d)+' off':', no discount yet')+'</small></span><span style="font-weight:700;font-variant-numeric:tabular-nums">₹'+inr(fin(grp[k]))+'</span></div>').join('')+'</div><p class="evsub" style="margin-top:8px">Show each dealer the other car’s best final price and ask them to match the discount. A quote with no discount yet has the most room to come down.</p>':'';
+  let cmp='';const c0=Q.length?evCmp(best+xt):null;
+  if(c0){const rows=Q.slice().sort((a,b)=>fin(a)-fin(b)).map(x=>{const c=evCmp(fin(x)+xt),d=(c.tot-c.ar)*c.km;return '<tr><td>'+qEsc(x.n)+'</td><td>'+pkf(c.tot)+'</td><td class="'+(d>0?'cpk-up':'cpk-dn')+'">'+(d>0?'+':'−')+cr(Math.abs(d))+'</td></tr>'}).join('');
+    cmp='<h2 class="evh2">Against keeping the '+c0.a.v.name+'</h2><p class="evsub">The '+c0.a.v.name+' costs '+pkf(c0.ar)+' a km to run (last 12 months, '+inr(c0.km)+' km). Its purchase is left out, because that money is spent either way. Each EV carries its own purchase share.</p>'
+     +'<div class="card ptab" style="margin-top:12px"><table><thead><tr><th>Quote, with extras</th><th>EV ₹/km</th><th>A year vs keeping</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+     +'<div class="card evp" style="margin-top:12px"><b>Running alone, the EV is '+pkf(c0.runk)+' a km against '+pkf(c0.ar)+'</b><p>That saves about '+cr(Math.max(0,(c0.ar-c0.runk)*c0.km))+' a year. The purchase share ('+pkf(c0.buy)+' a km for the cheapest quote) is what decides it.</p><p style="margin-top:8px;color:var(--ink2);font-size:13px">My assumptions: electricity about '+pkf(c0.pk)+' a km charging at home, insurance and service about '+cr(c0.run)+' a year, kept '+c0.yrs+' years and sold for '+c0.res+'% of the price. Change them in the full comparison.</p><button class="evgo" data-evcmp="'+(best+xt)+'" style="margin-top:10px">Full keep-or-replace comparison</button></div>'}
   const withx=(Q.length&&xt)?'<div class="card evp" style="margin-top:12px"><b>With extras, the cheapest is ₹'+inr(best+xt)+'</b><p>'+qEsc(Q.slice().sort((a,b)=>fin(a)-fin(b))[0].n)+': ₹'+inr(best)+' final + ₹'+inr(xt)+' extras.</p></div>':'';
-  return '<h2 class="evh2" style="margin-top:18px">Your quotes</h2><p class="evsub">Final price = ex-showroom + TCS + insurance + RTO and FASTag + extended warranty − discounts.</p><div style="margin-top:12px">'+tbl+'</div>'+gap+extras+withx
+  return bo+cmp+'<h2 class="evh2" style="margin-top:18px">Your quotes</h2><p class="evsub">Final price = ex-showroom + TCS + insurance + RTO and FASTag + extended warranty − discounts.</p><div style="margin-top:12px">'+tbl+'</div>'+gap+extras+withx
    +'<h2 class="evh2">Add a quote</h2><div class="card evp"><div class="evg"><label class="w">Car and variant<input type="text" id="evq_n" placeholder="e.g. Sierra Empowered A AWD" autocomplete="off"></label>'
    +'<label>Ex-showroom<input type="number" inputmode="numeric" id="evq_ex"></label><label>TCS 1%<input type="number" inputmode="numeric" id="evq_tcs" placeholder="auto"></label>'
    +'<label>Insurance<input type="number" inputmode="numeric" id="evq_ins"></label><label>RTO and FASTag<input type="number" inputmode="numeric" id="evq_rto"></label>'
@@ -1768,6 +1800,7 @@ function renderEV(){
     if(!n||!(ex>0)){g('evq_msg').textContent='Add the car name and the ex-showroom price.';return}
     if(!(tcs>=0))tcs=Math.round(ex*0.01);
     STORE.ev.q=(STORE.ev.q||[]).concat([{id:'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),n,ex:Math.round(ex),tcs:Math.round(tcs),ins:Math.round(ins),rto:Math.round(rto),ew:Math.round(ew),d:Math.round(d),note:g('evq_note').value.trim()}]);keep()});
+  view.querySelectorAll('[data-evcmp]').forEach(b=>b.addEventListener('click',()=>{evFill(+b.dataset.evcmp);switchTo('opp');setTimeout(()=>{const t=document.getElementById('o_nc');if(t)t.scrollIntoView()},80)}));
   view.querySelectorAll('[data-evq]').forEach(b=>b.addEventListener('click',()=>{const i=b.dataset.evq,j=+b.dataset.evo;if(STORE.ev.ans[i]===j)delete STORE.ev.ans[i];else STORE.ev.ans[i]=j;keep()}));
 }
 function renderMore(){
@@ -1859,7 +1892,7 @@ function initBudget(){
 /* ================= WHAT IF (opportunity cost) ================= */
 const RET_SRC={2019:13.5,2020:16.1,2021:25.6,2022:5.7,2023:21.3,2024:10.1};
 const OPP_DEF={ret:Object.assign({},RET_SRC,{2025:7,2026:7}),pt:2,cab:22.7,bike:10.3,inf:4,resale:{altis:0,ntorq:0,scr:0}};
-const getOpp=()=>{const o=STORE.opp||{};return {ret:Object.assign({},OPP_DEF.ret,o.ret||{}),pt:o.pt!=null?o.pt:OPP_DEF.pt,cab:o.cab!=null?o.cab:OPP_DEF.cab,bike:o.bike!=null?o.bike:OPP_DEF.bike,inf:o.inf!=null?o.inf:OPP_DEF.inf,resale:Object.assign({},OPP_DEF.resale,o.resale||{})}};
+const getOpp=()=>{const o=STORE.opp||{};return {ret:Object.assign({},OPP_DEF.ret,o.ret||{}),pt:o.pt!=null?o.pt:OPP_DEF.pt,cab:o.cab!=null?o.cab:OPP_DEF.cab,bike:o.bike!=null?o.bike:OPP_DEF.bike,inf:o.inf!=null?o.inf:OPP_DEF.inf,resale:Object.assign({},OPP_DEF.resale,o.resale||{}),resAt:o.resAt||'2026-10-13'}};
 function setOpp(patch){const o=getOpp();STORE.opp=Object.assign(o,patch);STORE.oppAt=Date.now();saveStore()}
 const DAY=86400000,T0=d=>new Date(d+'T00:00:00').getTime();
 /* growth of 1 rupee from date d to now, using each calendar year's return for the part of the year it was invested */
@@ -1910,8 +1943,15 @@ function oppResults(){
    +'<p class="fn">All in today’s money. Owning is what you spent, minus resale, plus what that money would have earned. Public transport and Uber use each month’s km at that month’s fare, with the same market returns applied to the fare you would have saved.</p>';
   return head+cmp+cs.map(c=>oppCard(c,o)).join('');
 }
+function kmBase(v){
+  const r=[];allBills(v).concat(getFuel(v),getExp(v)).forEach(x=>{if(x.km>0&&x.d)r.push({d:x.d,km:x.km})});
+  const o=(STORE.odo||{})[v.key];if(o&&o.km>0&&o.d)r.push({d:o.d,km:o.km});
+  if(r.length<2)return null;r.sort((a,b)=>a.d.localeCompare(b.d)||a.km-b.km);
+  return {d0:r[0].d,k0:r[0].km,d1:r[0].d,k1:r[0].km};
+}
+function lastRead(v){let d='';const f=x=>{if(x&&x.km>0&&x.d&&x.d>d)d=x.d};allBills(v).forEach(f);getFuel(v).forEach(f);getExp(v).forEach(f);f((STORE.odo||{})[v.key]);return d}
 function monthKm(v){
-  const b=BF[v.key];if(!b)return [];
+  const b=BF[v.key]||kmBase(v);if(!b)return [];
   const T=d=>new Date(d+'T00:00:00').getTime();
   let pts=[{d:b.d0,km:b.k0}];
   v.B.filter(x=>x.km&&x.d>b.d0&&x.d<b.d1).sort((x,y)=>x.d.localeCompare(y.d)||x.km-y.km).forEach(x=>{const l=pts[pts.length-1];if(x.km>l.km&&x.km<b.k1&&x.d>l.d)pts.push({d:x.d,km:x.km})});
@@ -1933,6 +1973,20 @@ function monthKm(v){
   }
   return out;
 }
+function kmCard(v){
+  const M=monthKm(v);if(M.length<2)return '';
+  const cur=cpkMonthsBack(0),L=M.slice().reverse(),lr=lastRead(v);
+  const full=L.filter(m=>m.month<cur).slice(0,12),avg=full.length?full.reduce((a,m)=>a+m.km,0)/full.length:0;
+  const cy=cur.slice(0,4),ytd=M.filter(m=>m.month.slice(0,4)===cy).reduce((a,m)=>a+m.km,0),all=M.reduce((a,m)=>a+m.km,0);
+  const lab=mk=>MON[+mk.slice(5)-1]+' '+mk.slice(0,4)+(mk===cur?'*':'');
+  const tbl=rows=>{const mx=Math.max(1,...rows.map(m=>m.km));return '<table><thead><tr><th>Month</th><th>Km</th><th style="width:42%"></th></tr></thead><tbody>'+rows.map(m=>'<tr><td>'+lab(m.month)+'</td><td>'+inr(m.km)+'</td><td><i style="display:block;height:8px;border-radius:4px;background:var(--acc);opacity:.8;width:'+Math.max(2,m.km/mx*100)+'%"></i></td></tr>').join('')+'</tbody></table>'};
+  const st=[[inr(Math.round(avg)),'km a month, last '+full.length+' months'],[inr(ytd),'km in '+cy+' so far'],[inr(all),'km on record']];
+  return '<section id="kmm"><h2>Kilometres by month</h2><p class="lede">From your odometer readings, spread evenly between them.'+(lr?' Your last reading is '+fmt(lr)+', so km after that are not counted yet.':'')+'</p>'
+   +'<div class="stats" style="margin-top:0">'+st.map(x=>'<div class="stat"><div class="n">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>').join('')+'</div>'
+   +'<div class="card ptab" style="margin-top:12px">'+tbl(L.slice(0,12))+'</div>'
+   +(L.length>12?'<details style="margin-top:12px"><summary class="pkt" style="cursor:pointer">See every month</summary><div class="card ptab" style="margin-top:8px">'+tbl(L)+'</div></details>':'')
+   +'<p class="fn">* Part month, up to your last reading. All vehicles together are in Insights, under Km travelled.</p></section>';
+}
 function kmTables(){
   const vs=Object.values(VEH);const by={};
   vs.forEach(v=>monthKm(v).forEach(m=>{(by[m.month]=by[m.month]||{})[v.key]=m.km}));
@@ -1941,7 +1995,7 @@ function kmTables(){
   const row=(l,r)=>'<tr><td>'+l+'</td>'+vs.map(v=>'<td>'+(r[v.key]?inr(r[v.key]):'—')+'</td>').join('')+'<td><b>'+inr(vs.reduce((a,v)=>a+(r[v.key]||0),0))+'</b></td></tr>';
   const head='<thead><tr><th></th>'+vs.map(v=>'<th>'+v.name+'</th>').join('')+'<th>All</th></tr></thead>';
   return '<div class="card ptab"><table>'+head+'<tbody>'+Object.keys(yr).map(y=>row(y,yr[y])).join('')+'</tbody></table></div>'
-   +'<details style="margin-top:12px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="card ptab" style="margin-top:8px"><table>'+head+'<tbody>'+months.map(m=>row(m,by[m])).join('')+'</tbody></table></div></details>';
+   +'<details style="margin-top:12px"><summary class="pkt" style="cursor:pointer">See month by month, newest first</summary><div class="card ptab" style="margin-top:8px"><table>'+head+'<tbody>'+months.slice().reverse().map(m=>row(m,by[m])).join('')+'</tbody></table></div></details>';
 }
 const SRC=[
  ['Mumbai cab fare: ₹20.66 per km non-AC, ₹22.72 AC; apps told to follow it (MMRTA letter, 16 Sep 2025)','https://www.businesstoday.in/amp/india/story/ola-uber-rapido-app-based-cabs-asked-to-follow-base-fare-of-black-yellow-taxis-in-mumbai-494713-2025-09-19','Business Today'],
@@ -2167,12 +2221,13 @@ function cpkInsights(D){
 function cpkNewCar(D){
   const n=ncGet(),altis=D.find(x=>x.v.key==='altis');
   const fld=(id,l,v,st)=>'<label class="fld">'+l+'<input type="number" inputmode="decimal" id="nc_'+id+'" step="'+st+'" value="'+v+'"></label>';
-  return '<h3 style="margin:26px 0 4px;font-size:19px">If you bought a new car</h3><p class="pkt" style="margin:0 0 10px">Example numbers to start with, not yours. Change them to the car you are considering. They are kept on this device.</p>'
+  const Q=((STORE.ev||{}).q||[]),xt=((STORE.ev||{}).x||[]).reduce((a,x)=>a+x.amt,0),fin=x=>x.ex+x.tcs+x.ins+x.rto+(x.ew||0)-x.d;
+  return '<h3 id="o_nc" style="margin:26px 0 4px;font-size:19px">If you bought a new car</h3>'+(Q.length?'<div class="hm-chips" style="margin:0 0 10px;flex-wrap:wrap"><span class="pkt" style="align-self:center">Use an EV quote:</span>'+Q.map(x=>'<button class="btn alt sm" data-ncq="'+(fin(x)+xt)+'">'+qEsc(x.n)+'</button>').join('')+'</div>':'')+'<p class="pkt" style="margin:0 0 10px">Example numbers to start with, not yours. Change them to the car you are considering. They are kept on this device.</p>'
    +'<div class="card"><div class="flds">'+fld('price','Price on road (₹)',n.price,'10000')+fld('res','Resale when you sell (%)',n.res,'1')+fld('yrs','Years you would keep it',n.yrs,'1')+fld('km','Km a year',n.km,'500')+fld('fuel','Fuel (₹ a km)',n.fuel,'0.1')+fld('run','Insurance and service (₹ a year)',n.run,'1000')+'</div><div id="nc_out"></div></div><div id="kr_out"></div>';
 }
 function cpkNewCarCalc(D){
   const g=id=>{const x=parseFloat((document.getElementById('nc_'+id)||{}).value);return isFinite(x)&&x>=0?x:0};
-  const n={price:g('price'),res:g('res'),yrs:g('yrs')||1,km:g('km'),fuel:g('fuel'),run:g('run')};ncSet(n);
+  const n={price:g('price'),res:g('res'),yrs:g('yrs')||1,km:g('km'),fuel:g('fuel'),run:g('run')};ncSet(Object.assign({},ncGet(),n));
   const el=document.getElementById('nc_out');if(!el)return;
   if(!n.km){el.innerHTML='';return}
   const buy=n.price*(1-n.res/100)/n.yrs/n.km,runk=n.fuel+n.run/n.km,tot=buy+runk;
@@ -2243,6 +2298,7 @@ function cpkRender(){
   if(CPK.basis==='asit'&&CPK.lens!=='run'){const fn=document.getElementById('cpk_fn');if(fn)fn.textContent='Each period carries the purchase price and accessories paid so far, divided by the km covered so far, as it stood at the end of that period. So early periods look dear and later ones cheaper. Resale value is not deducted. Running and maintenance are what was spent in the period. * Not over yet. Estimated entries are included.'}
   wire('cpk_v','veh');wire('cpk_l','lens');wire('cpk_p','per');wire('cpk_b','basis');
   const mb=document.getElementById('cpk_more');if(mb)mb.addEventListener('click',()=>{CPK.more=!CPK.more;cpkRender()});
+  box.querySelectorAll('[data-ncq]').forEach(b=>b.addEventListener('click',()=>{evFill(+b.dataset.ncq);const y=scrollY;cpkRender();scrollTo(0,y)}));
   box.querySelectorAll('[id^=nc_]').forEach(i=>{if(i.tagName==='INPUT')i.addEventListener('input',()=>cpkNewCarCalc(all))});
   cpkNewCarCalc(all);
 }
@@ -2284,7 +2340,7 @@ function renderOpp(){
    +'<div class="flds">'+num('o_pt','Public transport (₹)',o.pt,'0.1')+num('o_cab','Uber or Ola cab (₹)',o.cab,'0.1')+num('o_bike','Bike taxi (₹)',o.bike,'0.1')+num('o_inf','Fares rise a year (%)',o.inf,'0.5')+'</div>'
    +'<p class="pkt" style="margin:10px 0 0">These are today’s rates. Older km are costed at lower fares, using the yearly rise above (my assumption, close to normal inflation).</p>'
    +'<h4 style="margin:20px 0 8px;font-size:15px">Approximate resale value today</h4><p class="pkt" style="margin:0 0 10px">Look up the same model, year and city on a used-vehicle site, and take off about 12%, because buyers offer less than the asking price. A real offer is better.</p>'
-   +'<div class="flds">'+Object.values(VEH).map(v=>num('o_rs_'+v.key,v.name+' (₹)',o.resale[v.key],'5000')).join('')+'</div></div></section>'
+   +'<div class="flds">'+Object.values(VEH).map(v=>num('o_rs_'+v.key,v.name+' (₹)',o.resale[v.key],'5000')).join('')+'</div><p class="pkt" style="margin:10px 0 0"><span id="o_rs_when">Last updated '+fmt(o.resAt)+'.</span> I will remind you on the home screen once a year. <button class="btn alt sm" id="o_rs_ok" style="margin-left:4px">Still about right</button></p></div></section>'
    +'<section id="o_alt"><h2>Travel while a vehicle was in the garage</h2><p class="lede">Money you actually spent getting around while a vehicle was being repaired: a borrowed car, a trip by cab or train. It is added to the public transport side of the comparison below, and it does not change that vehicle\u2019s own costs.</p><div id="altbox">'+altSection()+'</div></section>'
    +'<section id="o_res"><h2>Results</h2><p class="lede">Each payment grows from the day you made it, to today.</p><div id="oppres">'+oppResults()+'</div></section>'
    +'<section id="o_km"><h2>Km travelled</h2><p class="lede">Worked out from the odometer readings you entered, assuming steady use between them. It needs an odometer reading for today in your setup, or fill-ups and expenses with the odometer filled in.</p>'+kmTables()+'<p class="fn">Km after your last odometer reading are not counted. A car carries several people and one trip by cab is not always one trip you would have made, so read the public transport and Uber figures as a rough guide.</p></section>'
@@ -2296,7 +2352,8 @@ function renderOpp(){
   const rd=id=>{const x=parseFloat(document.getElementById(id).value);return isFinite(x)?x:null};
   [['o_pt','pt'],['o_cab','cab'],['o_bike','bike'],['o_inf','inf']].forEach(([id,k])=>document.getElementById(id).addEventListener('input',()=>{const x=rd(id);if(x==null||x<0)return;setOpp({[k]:x});upd()}));
   yrs.forEach(y=>document.getElementById('o_y'+y).addEventListener('input',()=>{const x=rd('o_y'+y);if(x==null)return;const r=getOpp().ret;r[y]=x;setOpp({ret:r});upd()}));
-  Object.keys(VEH).forEach(k=>document.getElementById('o_rs_'+k).addEventListener('input',()=>{const x=rd('o_rs_'+k);if(x==null||x<0)return;const r=getOpp().resale;r[k]=x;setOpp({resale:r});upd()}));
+  Object.keys(VEH).forEach(k=>document.getElementById('o_rs_'+k).addEventListener('input',()=>{const x=rd('o_rs_'+k);if(x==null||x<0)return;const r=getOpp().resale;r[k]=x;setOpp({resale:r,resAt:todayStr()});const e=document.getElementById('o_rs_when');if(e)e.textContent='Last updated '+fmt(todayStr())+'.';upd()}));
+  {const ok=document.getElementById('o_rs_ok');if(ok)ok.addEventListener('click',()=>{setOpp({resAt:todayStr()});document.getElementById('o_rs_when').textContent='Last updated '+fmt(todayStr())+'.';ok.textContent='Saved'})}
   view.querySelectorAll('[data-ret]').forEach(b=>b.addEventListener('click',()=>{const r={};yrs.forEach(y=>{r[y]=b.dataset.ret==='fd'?6.5:OPP_DEF.ret[y]});setOpp({ret:r});yrs.forEach(y=>document.getElementById('o_y'+y).value=r[y]);upd()}));
   wireAlt(upd);
 }
