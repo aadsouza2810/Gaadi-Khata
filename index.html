@@ -1681,6 +1681,7 @@ function todaySection(){
   const openQ=qOpenCount(),mk=cpkMonthsBack(0),now=new Date(),B=getSet().bud||{},bud=+B.all||0;
   const tot=vs.reduce((a,x)=>a+monthSpend(x,mk),0);
   const usual=(()=>{let a=0;for(let i=1;i<=12;i++){const m=cpkMonthsBack(i);vs.forEach(x=>a+=monthSpend(x,m))}return a/12})();
+  const life=lifeMonth(vs);
   const due=vs.map(intelFor).flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date<=dAdd(todayStr(),2)).sort((a,b)=>a.date<b.date?-1:1).slice(0,3);
   const mname=MON[now.getMonth()];
   const dayLine=now.toLocaleDateString('en-IN',{weekday:'long'})+' '+now.getDate()+' '+mname;
@@ -1703,7 +1704,8 @@ function todaySection(){
    +(up.length?'<h2>Coming up</h2><div class="hm-list">'+up.map(r=>'<details><summary>'+ic(icFor(r.title),'c2')+'<span class="t">'+r.title+'<small>'+inDays(dDiff(todayStr(),r.date))+' · '+dFmt(r.date)+(r.amt?' · about '+cr(r.amt):'')+'</small></span><span class="ch">›</span></summary><p>'+r.text+'</p></details>').join('')+'</div>':'')
    +'<h2>This month</h2><div class="hm-list"><div style="padding:14px">'
    +'<div class="hm-kv top"><span>Spent so far</span><b>'+cr(tot)+(bud?' of '+cr(bud):'')+'</b></div>'
-   +'<div class="hm-kv"><span>Your usual month</span><span>'+cr(usual)+'</span></div>'
+   +'<div class="hm-kv"><span>Your usual month<small style="display:block;font-size:12px;opacity:.7">Last 12 months</small></span><span>'+cr(usual)+'</span></div>'
+   +(life.n>12?'<div class="hm-kv"><span>Over all years<small style="display:block;font-size:12px;opacity:.7">Since '+ymName(life.from)+', '+life.n+' months</small></span><span>'+cr(life.avg)+'</span></div>':'')
    +due.map(r=>'<div class="hm-kv"><span>'+r.title+', '+(r.date<=todayStr()?'due now':dMon(r.date))+'</span><span>about '+cr(r.amt)+'</span></div>').join('')
    +'</div><button data-go="month">'+ic('cal','c2')+'<span class="t">'+(bud?'Budget and details':'Set a budget')+'</span><span class="ch">›</span></button></div>'
    +'<h2>Look things up</h2><div class="hm-list">'
@@ -1856,11 +1858,14 @@ function monthSpend(v,mk){
   (v.W||[]).concat(getFuel(v),bfMonths(v)).forEach(x=>{if(x.d&&x.d.slice(0,7)===mk&&x.d<=now)s+=x.t||0});
   return s;
 }
+const ymName=m=>MON[+m.slice(5)-1]+' '+m.slice(0,4);
+function lifeMonth(vs){let mn=null;vs.forEach(x=>allBills(x).concat(x.W||[],getFuel(x),bfMonths(x)).forEach(e=>{if(e&&e.d){const m=e.d.slice(0,7);if(!mn||m<mn)mn=m}}));const last=cpkMonthsBack(1);if(!mn||mn>last)return {avg:0,n:0,from:null};let n=0,a=0,m=mn;while(m<=last){vs.forEach(x=>a+=monthSpend(x,m));n++;let y=+m.slice(0,4),mo=+m.slice(5)+1;if(mo>12){mo=1;y++}m=y+'-'+String(mo).padStart(2,'0')}return {avg:a/n,n,from:mn}}
 function budgetSection(){
   const B=getSet().bud||{},vs=Object.values(VEH),mk=cpkMonthsBack(0),now=new Date();
   const dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),day=now.getDate(),left=dim-day;
   const sp={};vs.forEach(v=>sp[v.key]=monthSpend(v,mk));const tot=vs.reduce((a,v)=>a+sp[v.key],0);
   const usual=(()=>{let a=0;for(let i=1;i<=12;i++){const m=cpkMonthsBack(i);vs.forEach(v=>a+=monthSpend(v,m))}return a/12})();
+  const life=lifeMonth(vs);
   const ints=vs.map(intelFor),lim=dAdd(todayStr(),2);
   const due=ints.flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date<=dAdd(todayStr(),2)).sort((a,b)=>a.date<b.date?-1:1);
   const thisM=due.filter(r=>r.date.slice(0,7)===mk||r.date<todayStr());
@@ -1874,7 +1879,7 @@ function budgetSection(){
     if(rem>=0&&ahead&&ahead>rem)say+=' The bills due this month (about '+cr(ahead)+') would take you <b class="cpk-up">'+cr(ahead-rem)+' over</b>.';
     else if(rem>=0&&pace&&pace>total*1.1)say+=' At this month’s pace you’d end near '+cr(pace)+'.';
     head='<div class="cpk-res" style="border-top:0;margin:0;padding:0"><span>'+mname+': '+cr(tot)+' of '+cr(total)+'</span><b style="font-size:17px">'+Math.round(tot/total*100)+'%</b></div>'+bar(tot,total,'var(--blue)')+'<p class="pkt" style="margin:10px 0 0">'+say+'</p>';
-  }else head='<p class="pkt" style="margin:0">'+mname+' so far: <b>'+cr(tot)+'</b>. Your usual month over the last year is about '+cr(usual)+'. Set a budget and I’ll tell you how much is left and warn you before a big bill.</p>';
+  }else head='<p class="pkt" style="margin:0">'+mname+' so far: <b>'+cr(tot)+'</b>. Your usual month over the last year is about '+cr(usual)+'.'+(life.n>12?' Over all years since '+ymName(life.from)+' it is about '+cr(life.avg)+'.':'')+' Set a budget and I’ll tell you how much is left and warn you before a big bill.</p>';
   const per=vs.map(v=>{const b=+B[v.key]||0;return '<div style="margin-top:12px"><div class="cpk-res" style="border-top:0;margin:0;padding:0;font-size:14px"><span>'+v.name+'</span><span>'+cr(sp[v.key])+(b?' of '+cr(b):'')+'</span></div>'+(b?bar(sp[v.key],b,v.acc):'')+'</div>'}).join('');
   const up=due.length?'<h4 style="margin:18px 0 6px;font-size:15px">Bills coming in the next two months</h4>'+kv(due.slice(0,6).map(r=>[r.title+' <small style="color:var(--ink2)">'+(r.date<=todayStr()?'now':dMon(r.date))+'</small>','about '+cr(r.amt)])):'';
   const num=(id,l,v)=>'<label class="fld">'+l+'<input type="number" inputmode="numeric" id="'+id+'" step="500" value="'+(v||'')+'" placeholder="Not set"></label>';
