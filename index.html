@@ -910,9 +910,9 @@ function fuelReport(v){
    +'<div class="stats">'+stats.map(s=>'<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>').join('')+'</div>'+hint+premiumCard(v)
    +(bfEst(v)?(b=>'<div class="card" style="margin-top:12px"><b>Estimated fuel, '+fmt(b.d0)+' to '+fmt(b.d1)+'</b><p class="pkt" style="margin:6px 0 0">'+inr(b.km)+' km ('+inr(b.k0)+' to '+inr(b.k1)+') at '+b.kmpl+' km per litre is about '+inr(b.l)+' L. At ₹'+b.rate+' a litre that is ₹'+inr(b.t)+'. This is an estimate, counted in the cost per km, and kept out of the real mileage figures above. Each month\u2019s share follows the odometer readings on your bills, assuming steady riding between them.</p><details style="margin-top:10px"><summary class="pkt" style="cursor:pointer">See month by month</summary><div class="ptab"><table><thead><tr><th>Month</th><th>km</th><th>Litres</th><th>Fuel \u20b9</th></tr></thead><tbody>'+bfMonths(v).map(m=>'<tr><td>'+m.month+'</td><td>'+inr(m.km)+'</td><td>'+Math.round(m.l)+'</td><td>'+inr(m.t)+'</td></tr>').join('')+'</tbody></table></div></details>'+(bfExt(v)?(x=>'<p class="pkt" style="margin:10px 0 0"><b>Since your last fill-up:</b> '+inr(x.km)+' km ('+inr(x.k0)+' to '+inr(x.k1)+') with no fill-up logged yet, estimated at \u20b9'+inr(x.t)+' ('+Math.round(x.l*10)/10+' L at \u20b9'+x.rate+' a litre). It drops out as soon as you log your next fill-up.</p>')(bfExt(v)):'')+'</div>')(bfEst(v)):'')
    +(rows?'<div class="list" style="margin-top:12px;padding:6px 16px">'+rows+'</div>':'')
-   +'<div class="btnrow"><button class="btn" data-goadd="'+v.key+'">Add a fill-up or expense</button></div></section>';
+   +'<div class="btnrow"><button class="btn" data-goadd="'+v.key+'">Add a fill-up or expense</button><button class="btn alt" data-go="use:mileage">Compare all vehicles</button></div></section>';
 }
-function draw(k){if(k==='add')renderAdd();else if(k==='opp')renderOpp();else if(k==='intel')renderIntel();else if(k==='q')renderQ();else if(k==='both')renderBoth();else if(k==='home')renderHome();else if(k==='month')renderMonth();else if(k==='more')renderMore();else if(k==='ev')renderEV();else renderVeh(VEH[k])}
+function draw(k){if(k==='add')renderAdd();else if(k==='opp')renderOpp();else if(k==='use')renderUse();else if(k==='intel')renderIntel();else if(k==='q')renderQ();else if(k==='both')renderBoth();else if(k==='home')renderHome();else if(k==='month')renderMonth();else if(k==='more')renderMore();else if(k==='ev')renderEV();else renderVeh(VEH[k])}
 function refresh(){const y=scrollY;NOANIM=true;draw(state.veh);NOANIM=false;setShell(state.veh);qBadge();scrollTo(0,y)}
 let FLASH=null;
 const flash=(id,text,bad)=>{FLASH={id,text,bad:!!bad}};
@@ -1568,7 +1568,7 @@ function vhSplit(v){const c=costs(v),P=[['purchase','Purchase and accessories',c
 function fixInner(v){const L=(STORE.fix||[]).filter(x=>x.v===v.key).sort((a,b)=>(a.done-b.done)||(a.d||'').localeCompare(b.d||''));
   return '<div class="card" style="overflow:hidden;border-radius:20px">'+(L.length?L.map(x=>'<div class="fxr'+(x.done?' done':'')+'" role="button" tabindex="0" data-fxt="'+x.id+'" aria-pressed="'+x.done+'"><span class="chk">'+(x.done?'✓':'')+'</span><span class="t">'+qEsc(x.t)+(x.note?'<small style="display:block;font-size:13px;font-weight:500;color:var(--ink2)">'+qEsc(x.note)+'</small>':'')+'</span><button class="x" data-fxd="'+x.id+'" aria-label="Remove">Remove</button></div>').join(''):'<div class="fx-empty">Nothing logged. Add anything that needs the garage.</div>')+'</div>'
    +'<div class="fx-add"><input type="text" id="fx_t" placeholder="What is wrong, e.g. left window slow" autocomplete="off" aria-label="What is wrong"><button id="fx_go">Add</button></div>'}
-function fixSection(v){const n=(STORE.fix||[]).filter(x=>x.v===v.key&&!x.done).length;return '<section id="tofix"><h2>To fix'+(n?' <span class="hm-badge" style="vertical-align:middle">'+n+'</span>':'')+'</h2><div id="fxbox">'+fixInner(v)+'</div></section>'}
+function fixSection(v){const n=(STORE.fix||[]).filter(x=>x.v===v.key&&!x.done).length;return '<section id="tofix"><h2>My to-fix list'+(n?' <span class="hm-badge" style="vertical-align:middle">'+n+'</span>':'')+'</h2><div id="fxbox">'+fixInner(v)+'</div></section>'}
 function wireFix(v){const box=document.getElementById('fxbox');if(!box)return;
   const redo=()=>{saveStore();box.innerHTML=fixInner(v);wire();const h=document.querySelector('#tofix h2');const n=(STORE.fix||[]).filter(x=>x.v===v.key&&!x.done).length;h.innerHTML='To fix'+(n?' <span class="hm-badge" style="vertical-align:middle">'+n+'</span>':'')};
   const wire=()=>{
@@ -1580,7 +1580,7 @@ function wireFix(v){const box=document.getElementById('fxbox');if(!box)return;
 function renderVeh(v){
   const TOTAL=totalOf(v);
   view.style.setProperty('--acc',v.acc);
-  nav.innerHTML='<a href="#top">Overview</a><a href="#tofix">To fix</a><a href="#perkm">Cost per km</a><a href="#kmm">Km</a><a href="#fuel">Fuel</a><a href="#repeats">Repeated work</a>'+(v.cover?'<a href="#cover">Cover &amp; details</a>':'')+'<a href="#bills">All bills</a>';
+  nav.innerHTML='<a href="#top">Overview</a><a href="#tofix">My to-fix list</a><a href="#perkm">Cost per km</a><a href="#kmm">Km</a><a href="#fuel">Fuel</a><a href="#repeats">Repeated work</a>'+(v.cover?'<a href="#cover">Cover &amp; details</a>':'')+'<a href="#bills">All bills</a>';
   const sub=groupSub(v);
   const ws=winStats(v);
   const stats=[[pkf(ws.c.total/ws.km),'per km, all costs included'],[inr(ws.km),'km covered so far'],['₹'+inr(ws.c.total/ws.months),'per month, all costs included']];
@@ -1614,14 +1614,15 @@ function renderVeh(v){
   buildSeg();renderBills();
   initWhen();wireFix(v);
   view.querySelectorAll('[data-goadd]').forEach(b=>b.addEventListener('click',()=>goAdd(b.dataset.goadd)));
-  wireBanner();
+  view.querySelectorAll('a[data-go]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+  wireBanner();wireGo();
 }
 
 function renderBoth(){
   const vs=Object.values(VEH);
   const totals=vs.map(totalOf),TOTAL=totals.reduce((x,y)=>x+y,0);
   view.style.setProperty('--acc','var(--blue)');
-  nav.innerHTML='<a href="#ovw">Total</a><a href="#find">Search</a><a href="#split">By vehicle</a><a href="#perkm">Cost per km</a><a href="#bills">All bills</a>';
+  nav.innerHTML='<a href="#ovw">Total</a><a href="#split">By vehicle</a><a href="#find">Search</a><a href="#bills">All bills</a>';
   const nBills=vs.reduce((a,v)=>a+v.B.length,0);
   const allDates=vs.flatMap(v=>v.B.map(b=>b.d)).sort();
   const mm=s=>MON[+s.slice(5,7)-1]+' '+s.slice(0,4);
@@ -1630,11 +1631,10 @@ function renderBoth(){
   const legend=vs.map(v=>'<span><span class="dot" style="background:'+v.acc+';width:8px;height:8px"></span>'+v.name+'</span>').join('');
   view.innerHTML=BACK+bkBanner()+
    '<header class="hero" id="ovw"><h1>Every rupee across all your vehicles.</h1><p>'+nBills+' entries, '+allDates[0].slice(0,4)+' to '+mm(allDates[allDates.length-1])+'.</p><div class="total" id="total"><span>₹</span>0</div><div class="sub">'+vs.map((v,i)=>'₹'+inr(totals[i])+' '+v.name).join(' + ')+'</div><div class="chartbox"><svg id="hero" viewBox="0 0 800 260" role="img" aria-label="Cumulative spend over time"></svg><div class="tip" id="tip"></div></div></header>'
-   +'<section id="find"><h2>Search</h2><div class="card"><label class="fld"><span>Find a bill or payment</span><input type="search" id="q" placeholder="e.g. tyre, 4000, service, 2025" autocomplete="off" enterkeyhint="search"></label><p class="fn" id="qn" style="margin:10px 0 0"></p></div><div class="list" id="qres" hidden style="margin-top:12px"></div></section>'
-   +'<section id="split"><h2>By vehicle</h2><p class="lede">Share of the total: '+shares+'. All three include their purchase price. Tap a vehicle to open it.</p><div class="split">'+vs.map((v,i)=>card(v,totals[i])).join('')+'</div></section>'
-   +perKmTable()
-   +mileageTable()
+      +'<section id="split"><h2>By vehicle</h2><p class="lede">Share of the total: '+shares+'. All three include their purchase price. Tap a vehicle to open it.</p><div class="split">'+vs.map((v,i)=>card(v,totals[i])).join('')+'</div></section>'
+   +'<section><h2>Cost per km and mileage</h2><div class="hm-list"><button data-go="use:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>All vehicles or one at a time, by year or month</small></span><span class="ch">›</span></button><button data-go="use:mileage">'+ic('bars','c2')+'<span class="t">Mileage<small>Km per litre and fuel cost per km</small></span><span class="ch">›</span></button></div></section>'
    +'<section><h2>Year by year</h2><p class="lede">All vehicles together. Tap a year to filter the bills below.</p><div class="card"><div class="years" id="years"></div><div class="legend">'+legend+'</div></div><p class="fn">* Year to date</p></section>'
+   +'<section id="find"><h2>Search</h2><div class="card"><label class="fld"><span>Find a bill or payment</span><input type="search" id="q" placeholder="e.g. tyre, 4000, service, 2025" autocomplete="off" enterkeyhint="search"></label><p class="fn" id="qn" style="margin:10px 0 0"></p></div><div class="list" id="qres" hidden style="margin-top:12px"></div></section>'
    +billsSection;
   foot.textContent='Amounts are what you entered. Cost per km counts every cost from purchase to your latest odometer reading.';
   curKeys=vs.map(v=>v.key);YEARS=yearsOf(curKeys);
@@ -1644,7 +1644,7 @@ function renderBoth(){
   view.querySelectorAll('.vcard').forEach(c=>c.addEventListener('click',()=>switchTo(c.dataset.v)));
   buildSeg();renderBills();
   const qi=document.getElementById('q');if(qi){qi.addEventListener('input',runSearch);runSearch()}
-  wireBanner();wireBack();
+  wireBanner();wireBack();wireGo();
 }
 
 /* ================= HOME: QUICK FUEL + NEEDS DOING ================= */
@@ -1682,7 +1682,7 @@ function todaySection(){
   const tot=vs.reduce((a,x)=>a+monthSpend(x,mk),0);
   const usual=(()=>{let a=0;for(let i=1;i<=12;i++){const m=cpkMonthsBack(i);vs.forEach(x=>a+=monthSpend(x,m))}return a/12})();
   const life=lifeMonth(vs);
-  const due=vs.map(intelFor).flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date<=dAdd(todayStr(),2)).sort((a,b)=>a.date<b.date?-1:1).slice(0,3);
+  const upT=new Set(up.map(r=>r.title));const due=vs.map(intelFor).flatMap(x=>x.attn.concat(x.soon)).filter(r=>r.amt&&r.date&&r.date.slice(0,7)<=mk&&!upT.has(r.title)).sort((a,b)=>a.date<b.date?-1:1).slice(0,3);
   const mname=MON[now.getMonth()];
   const dayLine=now.toLocaleDateString('en-IN',{weekday:'long'})+' '+now.getDate()+' '+mname;
   return '<div class="hm" id="today"><div class="hm-head"><div class="hm-ttl"><small>'+dayLine+'</small><h1>Gaadi Khata</h1></div><div>'+mname+' so far<b>'+cr(tot)+'</b></div></div>'
@@ -1705,14 +1705,14 @@ function todaySection(){
    +'<h2>This month</h2><div class="hm-list"><div style="padding:14px">'
    +'<div class="hm-kv top"><span>Spent so far</span><b>'+cr(tot)+(bud?' of '+cr(bud):'')+'</b></div>'
    +'<div class="hm-kv"><span>Your usual month<small style="display:block;font-size:12px;opacity:.7">Last 12 months</small></span><span>'+cr(usual)+'</span></div>'
-   +(life.n>12?'<div class="hm-kv"><span>Over all years<small style="display:block;font-size:12px;opacity:.7">Since '+ymName(life.from)+', '+life.n+' months</small></span><span>'+cr(life.avg)+'</span></div>':'')
-   +due.map(r=>'<div class="hm-kv"><span>'+r.title+', '+(r.date<=todayStr()?'due now':dMon(r.date))+'</span><span>about '+cr(r.amt)+'</span></div>').join('')
+   +(life.n>12&&life.avg>0?'<div class="hm-kv"><span>Over all years<small style="display:block;font-size:12px;opacity:.7">Since '+ymName(life.from)+', '+life.n+' months</small></span><span>'+cr(life.avg)+'</span></div>':'')
+   +due.map(r=>'<div class="hm-kv"><span>'+(r.date<=todayStr()?(/ is (over)?due$/.test(r.title)?r.title:r.title+', due now'):r.title+', '+dMon(r.date))+'</span><span>about '+cr(r.amt)+'</span></div>').join('')
    +'</div><button data-go="month">'+ic('cal','c2')+'<span class="t">'+(bud?'Budget and details':'Set a budget')+'</span><span class="ch">›</span></button></div>'
    +'<h2>Look things up</h2><div class="hm-list">'
    +'<button data-go="both">'+ic('chart')+'<span class="t">All-time spending<small>Totals, charts and the split by vehicle</small></span><span class="ch">›</span></button>'
    +'<button data-go="both:find">'+ic('bill','c3')+'<span class="t">Bills and search<small>Every bill and payment on record</small></span><span class="ch">›</span></button>'
-   +'<button data-go="opp:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button>'
-   +'<button data-go="opp:o_km">'+ic('bars','c2')+'<span class="t">Kilometres travelled<small>By year and month, all vehicles together</small></span><span class="ch">›</span></button>'
+   +'<button data-go="use:o_cpk">'+ic('road','c4')+'<span class="t">Cost per km<small>Running, purchase, or everything</small></span><span class="ch">›</span></button>'
+   +'<button data-go="use:o_km">'+ic('bars','c2')+'<span class="t">Kilometres travelled<small>By year and month, all vehicles together</small></span><span class="ch">›</span></button>'
    +'<button data-go="ev">'+ic('bolt','c3')+'<span class="t">EV car<small>'+(evProg()[0]?evProg()[0]+' of '+evProg()[1]+' checks done':'Sierra or Harrier: decide, quote, inspect')+'</small></span><span class="ch">›</span></button></div></div>';
 }
 function wireGo(){view.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [k,a]=b.dataset.go.split(':');if(k==='bk'){goAdd(state.addVeh);setTimeout(()=>{const t=document.getElementById('a_bk');if(t)t.scrollIntoView()},60);return}switchTo(k);if(a)setTimeout(()=>{const t=document.getElementById(a);if(t)t.scrollIntoView()},60)}))}
@@ -1802,7 +1802,7 @@ function renderEV(){
     if(!n||!(ex>0)){g('evq_msg').textContent='Add the car name and the ex-showroom price.';return}
     if(!(tcs>=0))tcs=Math.round(ex*0.01);
     STORE.ev.q=(STORE.ev.q||[]).concat([{id:'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),n,ex:Math.round(ex),tcs:Math.round(tcs),ins:Math.round(ins),rto:Math.round(rto),ew:Math.round(ew),d:Math.round(d),note:g('evq_note').value.trim()}]);keep()});
-  view.querySelectorAll('[data-evcmp]').forEach(b=>b.addEventListener('click',()=>{evFill(+b.dataset.evcmp);switchTo('opp');setTimeout(()=>{const t=document.getElementById('o_nc');if(t)t.scrollIntoView()},80)}));
+  view.querySelectorAll('[data-evcmp]').forEach(b=>b.addEventListener('click',()=>{evFill(+b.dataset.evcmp);switchTo('use');setTimeout(()=>{const t=document.getElementById('o_nc');if(t)t.scrollIntoView()},80)}));
   view.querySelectorAll('[data-evq]').forEach(b=>b.addEventListener('click',()=>{const i=b.dataset.evq,j=+b.dataset.evo;if(STORE.ev.ans[i]===j)delete STORE.ev.ans[i];else STORE.ev.ans[i]=j;keep()}));
 }
 function renderMore(){
@@ -1810,11 +1810,11 @@ function renderMore(){
   const n=qOpenCount(),it=(go,t,sm,pill,i,c)=>'<button data-go="'+go+'">'+ic(i,c)+'<span class="t">'+t+'<small>'+sm+'</small></span>'+(pill?'<span class="hm-badge">'+pill+'</span>':'')+'<span class="ch">›</span></button>';
   view.innerHTML='<div class="hm"><div class="hm-head"><h1>More</h1></div><div class="hm-list">'
    +it('q','Questions','Things the ledger still needs from you',n?n:'','q')
-   +it('both','All-time spending','Totals, charts, search and every bill','','chart')
+   +it('both','All-time spending','Totals, charts, every bill and search','','chart')
    +it('month','This month and budget','Spending so far and bills coming up','','cal','c2')
    +it('opp','What if','Money tied up, resale value and other ways to travel','','swap','c5')
    +it('ev','EV car','Sierra or Harrier: decide, quote, inspection, delivery day','','bolt','c3')
-   +it('opp:o_cpk','Cost per km','Running, purchase, or everything','','road','c4')
+   +it('use','Usage','Cost per km, km travelled and mileage','','road','c4')
    +it('bk','Backup and restore','Keep a copy of your entries','','cloud','c6')+'</div></div>';
   wireGo();
 }
@@ -1879,7 +1879,7 @@ function budgetSection(){
     if(rem>=0&&ahead&&ahead>rem)say+=' The bills due this month (about '+cr(ahead)+') would take you <b class="cpk-up">'+cr(ahead-rem)+' over</b>.';
     else if(rem>=0&&pace&&pace>total*1.1)say+=' At this month’s pace you’d end near '+cr(pace)+'.';
     head='<div class="cpk-res" style="border-top:0;margin:0;padding:0"><span>'+mname+': '+cr(tot)+' of '+cr(total)+'</span><b style="font-size:17px">'+Math.round(tot/total*100)+'%</b></div>'+bar(tot,total,'var(--blue)')+'<p class="pkt" style="margin:10px 0 0">'+say+'</p>';
-  }else head='<p class="pkt" style="margin:0">'+mname+' so far: <b>'+cr(tot)+'</b>. Your usual month over the last year is about '+cr(usual)+'.'+(life.n>12?' Over all years since '+ymName(life.from)+' it is about '+cr(life.avg)+'.':'')+' Set a budget and I’ll tell you how much is left and warn you before a big bill.</p>';
+  }else head='<p class="pkt" style="margin:0">'+mname+' so far: <b>'+cr(tot)+'</b>. Your usual month over the last year is about '+cr(usual)+'.'+(life.n>12&&life.avg>0?' Over all years since '+ymName(life.from)+' it is about '+cr(life.avg)+'.':'')+' Set a budget and I’ll tell you how much is left and warn you before a big bill.</p>';
   const per=vs.map(v=>{const b=+B[v.key]||0;return '<div style="margin-top:12px"><div class="cpk-res" style="border-top:0;margin:0;padding:0;font-size:14px"><span>'+v.name+'</span><span>'+cr(sp[v.key])+(b?' of '+cr(b):'')+'</span></div>'+(b?bar(sp[v.key],b,v.acc):'')+'</div>'}).join('');
   const up=due.length?'<h4 style="margin:18px 0 6px;font-size:15px">Bills coming in the next two months</h4>'+kv(due.slice(0,6).map(r=>[r.title+' <small style="color:var(--ink2)">'+(r.date<=todayStr()?'now':dMon(r.date))+'</small>','about '+cr(r.amt)])):'';
   const num=(id,l,v)=>'<label class="fld">'+l+'<input type="number" inputmode="numeric" id="'+id+'" step="500" value="'+(v||'')+'" placeholder="Not set"></label>';
@@ -1988,7 +1988,7 @@ function kmCard(v){
   const st=[[inr(Math.round(avg)),'km a month, last '+full.length+' months'],[inr(ytd),'km in '+cy+' so far'],[inr(all),'km on record']];
   return '<section id="kmm"><h2>Kilometres by month</h2><p class="lede">From your odometer readings, spread evenly between them.'+(lr?' Your last reading is '+fmt(lr)+', so km after that are not counted yet.':'')+'</p>'
    +'<div class="stats" style="margin-top:0">'+st.map(x=>'<div class="stat"><div class="n">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>').join('')+'</div>'
-   +'<div class="card ptab" style="margin-top:12px">'+tbl(L.slice(0,12))+'</div>'
+   +'<div class="card ptab" style="margin-top:12px">'+tbl(L.slice(0,12))+'</div><p class="fn"><a href="#" data-go="use:o_km" class="tel">All vehicles together ›</a></p>'
    +(L.length>12?'<details style="margin-top:12px"><summary class="pkt" style="cursor:pointer">See every month</summary><div class="card ptab" style="margin-top:8px">'+tbl(L)+'</div></details>':'')
    +'<p class="fn">* Part month, up to your last reading. All vehicles together are in Insights, under Km travelled.</p></section>';
 }
@@ -2328,15 +2328,27 @@ function wireAlt(upd){
   });
   box.querySelectorAll('[data-aldel]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.aldel;STORE.alt=(STORE.alt||[]).filter(x=>x.id!==id);STORE.gone=(STORE.gone||[]).concat([id]);saveStore();redo()}));
 }
+function renderUse(){
+  view.style.setProperty('--acc','var(--blue)');
+  nav.innerHTML='<a href="#o_cpk">Cost per km</a><a href="#o_km">Km travelled</a><a href="#mileage">Mileage</a>';
+  view.innerHTML=bkBanner()+'<header class="hero" style="padding-bottom:0"><h1>How you use them.</h1><p>Cost per km, kilometres travelled and mileage, for all your vehicles together or one at a time. Worked out from your entries each time you open this page.</p></header>'
+   +'<section id="o_cpk" style="margin-top:28px"><h2>What your kilometres cost</h2><p class="lede">Total spent and the cost per km, for all vehicles together or one at a time. Worked out from your entries each time you open this page.</p><div id="cpkbox"></div></section>'
+   +'<section id="o_km"><h2>Km travelled</h2><p class="lede">Worked out from the odometer readings you entered, assuming steady use between them. It needs an odometer reading for today in your setup, or fill-ups and expenses with the odometer filled in.</p>'+kmTables()+'<p class="fn">Km after your last odometer reading are not counted. For one vehicle month by month: '+Object.values(VEH).map(v=>'<a href="#" data-go="'+v.key+':kmm" class="tel">'+v.name+'</a>').join(' · ')+'.</p></section>'
+   +mileageTable();
+  foot.textContent='Worked out from your bills, fill-ups and odometer readings.';
+  curKeys=Object.keys(VEH);
+  cpkRender();
+  view.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+  wireGo();wireBanner();
+}
 function renderOpp(){
   const o=getOpp();
   view.style.setProperty('--acc','var(--blue)');
-  nav.innerHTML='<a href="#o_cpk">Cost per km</a><a href="#o_set">Assumptions</a><a href="#o_res">Results</a><a href="#o_km">Km travelled</a><a href="#o_src">Sources</a>';
+  nav.innerHTML='<a href="#o_set">Assumptions</a><a href="#o_alt">Garage travel</a><a href="#o_res">Results</a><a href="#o_src">Sources</a>';
   const num=(id,label,val,step)=>'<label class="fld">'+label+'<input type="number" inputmode="decimal" id="'+id+'" step="'+step+'" value="'+val+'"></label>';
   const yrs=Object.keys(OPP_DEF.ret);
   view.innerHTML=
-   '<header class="hero" style="padding-bottom:0"><h1>What if.</h1><p>What your vehicles cost once you count the money they tied up, what you could sell them for, and what the same km would have cost by public transport or Uber. None of this changes your real costs on the other pages.</p></header>'
-   +'<section id="o_cpk" style="margin-top:28px"><h2>What your kilometres cost</h2><p class="lede">Total spent and the cost per km, for all vehicles together or one at a time. Worked out from your entries each time you open this page.</p><div id="cpkbox"></div></section>'
+   '<header class="hero" style="padding-bottom:0"><h1>What if.</h1><p>What your vehicles cost once you count the money they tied up, what you could sell them for, and what the same km would have cost by public transport or Uber. None of this changes your real costs on the other pages. For cost per km and km travelled, see Usage.</p></header>'
    +'<section id="o_set"><h2>Assumptions</h2><p class="lede">Starting numbers came from the sources at the bottom (October 2026). The fares are Mumbai’s, so change them to your city. Resale starts at 0 because it depends on your vehicle: enter what you could sell it for today.</p><div class="card">'
    +'<h4 style="margin:0 0 8px;font-size:15px">What the invested money earned each year (%)</h4><p class="pkt" style="margin:0 0 10px">2019 to 2024 are the actual Nifty 50 returns with dividends. I found no source I trust for 2025 and 2026 so far, so those two start at 7% and are yours to set.</p>'
    +'<div class="flds" style="grid-template-columns:1fr 1fr 1fr">'+yrs.map(y=>num('o_y'+y,y,o.ret[y],'0.1')).join('')+'</div>'
@@ -2348,12 +2360,10 @@ function renderOpp(){
    +'<div class="flds">'+Object.values(VEH).map(v=>num('o_rs_'+v.key,v.name+' (₹)',o.resale[v.key],'5000')).join('')+'</div><p class="pkt" style="margin:10px 0 0"><span id="o_rs_when">Last updated '+fmt(o.resAt)+'.</span> I will remind you on the home screen once a year. <button class="btn alt sm" id="o_rs_ok" style="margin-left:4px">Still about right</button></p></div></section>'
    +'<section id="o_alt"><h2>Travel while a vehicle was in the garage</h2><p class="lede">Money you actually spent getting around while a vehicle was being repaired: a borrowed car, a trip by cab or train. It is added to the public transport side of the comparison below, and it does not change that vehicle\u2019s own costs.</p><div id="altbox">'+altSection()+'</div></section>'
    +'<section id="o_res"><h2>Results</h2><p class="lede">Each payment grows from the day you made it, to today.</p><div id="oppres">'+oppResults()+'</div></section>'
-   +'<section id="o_km"><h2>Km travelled</h2><p class="lede">Worked out from the odometer readings you entered, assuming steady use between them. It needs an odometer reading for today in your setup, or fill-ups and expenses with the odometer filled in.</p>'+kmTables()+'<p class="fn">Km after your last odometer reading are not counted. A car carries several people and one trip by cab is not always one trip you would have made, so read the public transport and Uber figures as a rough guide.</p></section>'
    +'<section id="o_src"><h2>Sources</h2><p class="lede">Where the starting numbers came from.</p><div class="card">'+kl(SRC.map(s=>s[0]+' <a href="'+s[1]+'" target="_blank" rel="noopener">'+s[2]+'</a>'))+'</div></section>';
   foot.textContent='Rates and resale values are assumptions you can edit. They are saved on this device.';
   curKeys=Object.keys(VEH);
-  const upd=()=>{document.getElementById('oppres').innerHTML=oppResults();cpkRender()};
-  cpkRender();
+  const upd=()=>{document.getElementById('oppres').innerHTML=oppResults()};
   const rd=id=>{const x=parseFloat(document.getElementById(id).value);return isFinite(x)?x:null};
   [['o_pt','pt'],['o_cab','cab'],['o_bike','bike'],['o_inf','inf']].forEach(([id,k])=>document.getElementById(id).addEventListener('input',()=>{const x=rd(id);if(x==null||x<0)return;setOpp({[k]:x});upd()}));
   yrs.forEach(y=>document.getElementById('o_y'+y).addEventListener('input',()=>{const x=rd('o_y'+y);if(x==null)return;const r=getOpp().ret;r[y]=x;setOpp({ret:r});upd()}));
@@ -2367,11 +2377,11 @@ const vseg=document.getElementById('vseg'),bnav=document.getElementById('bnav');
 function setShell(key){
   let h='';
   if(VEH[key]){state.lastVeh=key;h=Object.values(VEH).map(v=>'<button data-v="'+v.key+'" aria-pressed="'+(v.key===key)+'">'+v.name+'</button>').join('')}
-  else if(key==='intel'||key==='opp')h='<button data-v="intel" aria-pressed="'+(key==='intel')+'">Needs doing</button><button data-v="opp" aria-pressed="'+(key==='opp')+'">What if and cost per km</button>';
+  else if(key==='intel'||key==='opp'||key==='use')h='<button data-v="intel" aria-pressed="'+(key==='intel')+'">Needs doing</button><button data-v="use" aria-pressed="'+(key==='use')+'">Usage</button><button data-v="opp" aria-pressed="'+(key==='opp')+'">What if</button>';
   if(h&&(VEH[key]||key==='ev'))h=h.replace(/(<button data-v="[^"]*" aria-pressed="(?:true|false)">[^<]*<\/button>)$/,'$1')+'<button data-v="ev" aria-pressed="'+(key==='ev')+'">EV car</button>';
   if(key==='ev'){h=Object.values(VEH).map(v=>'<button data-v="'+v.key+'" aria-pressed="false">'+v.name+'</button>').join('')+'<button data-v="ev" aria-pressed="true">EV car</button>'}
   vseg.innerHTML=h;vseg.hidden=!h;
-  const cur=VEH[key]||key==='ev'?'veh':key==='intel'||key==='opp'?'ins':key==='add'?'add':key==='more'||key==='q'?'more':'home';
+  const cur=VEH[key]||key==='ev'?'veh':key==='intel'||key==='opp'||key==='use'?'ins':key==='add'?'add':key==='more'||key==='q'?'more':'home';
   bnav.querySelectorAll('button').forEach(b=>{if(b.dataset.bn===cur)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
 }
 function switchTo(key,keepScroll){
